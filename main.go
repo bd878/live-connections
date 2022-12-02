@@ -6,14 +6,30 @@ import (
   "time"
   "log"
   "os"
+  "path/filepath"
   "os/signal"
   "context"
 )
 
 func main() {
+  mux := http.NewServeMux()
+
+  mux.Handle("/",
+    http.HandlerFunc(
+      func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, filepath.Join("public/", "index.html"))
+      },
+    ),
+  )
+  mux.Handle("/public/",
+    http.StripPrefix("/public/",
+      http.FileServer(http.Dir("public/")),
+    ),
+  )
+
   srv := &http.Server{
     Addr: ":8080",
-    Handler: EchoHandler(),
+    Handler: mux,
     IdleTimeout: 5 * time.Minute,
     ReadHeaderTimeout: time.Minute,
   }
@@ -32,7 +48,8 @@ func main() {
     close(done)
   }()
 
-  if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+  log.Println("Server is listening on :8080")
+  if err := srv.ListenAndServeTLS("server.crt", "server.key"); err != http.ErrServerClosed {
     log.Fatalf("HTTP server ListenAndServe: %v", err)
   }
 
