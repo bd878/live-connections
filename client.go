@@ -4,6 +4,7 @@ import (
 	"time"
 	"log"
 	"net/http"
+	"bytes"
 
 	"github.com/gorilla/websocket"
 )
@@ -62,15 +63,19 @@ func (c *Client) readLoop() {
 		c.hub.unregister <- c
 	}()
 
+	c.conn.SetReadLimit(maxRead)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		if _, _, err := c.conn.ReadMessage(); err != nil {
+		_, message, err := c.conn.ReadMessage()
+		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Println("err: %v\n", err)
-				break;
 			}
+			break;
 		}
+		message = bytes.TrimSpace(message)
+		c.hub.broadcast <- message
 	}
 }
 
