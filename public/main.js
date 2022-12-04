@@ -1,5 +1,3 @@
-const MAX_COUNT = 5;
-const DURATION_MS = 1000;
 
 function appendDiv(parentEl, textContent) {
   const el = document.createElement("div");
@@ -8,32 +6,11 @@ function appendDiv(parentEl, textContent) {
   parentEl.appendChild(el);
 }
 
-function startMessenging(rootEl, socket) {
-  const promises = [];
-  for (let i = 0; i < MAX_COUNT; i++) {
-    promises.push(new Promise(resolve => {setTimeout(() => {
-      socket.send(`count: ${i}`);
-      resolve(`${i}`);
-    }, DURATION_MS * i);}));
-  }
-  promises.push(new Promise(resolve => {setTimeout(() => {
-    socket.send("done");
-    resolve('done');
-  }, MAX_COUNT * DURATION_MS);}));
-
-  Promise.all(promises).then(() => {
-    appendDiv(rootEl, "Promises resolved");
-  }).catch(() => {
-    appendDiv(rootEl, 'failed');
-  });
-}
-
 function launchSocket(rootEl) {
-  const socket = new WebSocket("wss://127.0.0.1:8080/ws");
+  const socket = new WebSocket("wss://127.0.0.1:8080/join");
 
   socket.onopen = function () {
     appendDiv(rootEl, "Socket opened");
-    startMessenging(rootEl, socket);
   };
 
   socket.onmessage = function (event) {

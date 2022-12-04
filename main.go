@@ -14,6 +14,9 @@ import (
 func main() {
   mux := http.NewServeMux()
 
+  hub := GetHub()
+  go hub.run()
+
   mux.Handle("/",
     http.HandlerFunc(
       func(w http.ResponseWriter, r *http.Request) {

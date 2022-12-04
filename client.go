@@ -53,8 +53,25 @@ func NewClient(w http.ResponseWriter, r *http.Request) {
 	client := &Client{conn: conn, hub: hub, send: make(chan []byte, 256)}
 	hub.register <- client
 
-	// go client.readLoop()
+	go client.readLoop()
 	go client.writeLoop()
+}
+
+func (c *Client) readLoop() {
+	defer func() {
+		c.hub.unregister <- c
+	}()
+
+	c.conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	for {
+		if _, _, err := c.conn.ReadMessage(); err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
+				log.Println("err: %v\n", err)
+				break;
+			}
+		}
+	}
 }
 
 func (c *Client) writeLoop() {
@@ -63,7 +80,6 @@ func (c *Client) writeLoop() {
 	defer func() {
 		c.conn.Close()
 		ticker.Stop()
-		c.hub.unregister <- c
 	}()
 
 	for {
