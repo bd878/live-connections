@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package disk;
+
+option go_package = "github.com/teralion/live-connections/proto/v1";
+
+service AreaManager {
+  rpc Create(CreateAreaRequest) returns (CreateAreaResponse);
+  rpc Destroy(DestroyAreaRequest) returns (DestroyAreaResponse);
+}
+
+message Area {
+  string name = 1;
+  uint32 id = 2;
+}
+
+message CreateAreaRequest {}
+
+message CreateAreaResponse {}
+
+message DestroyAreaRequest {}
+
+message DestroyAreaResponse {}
+
+service UserManager {
+  rpc Add(AddUserRequest) returns (AddUserResponse);
+  rpc Remove(RemoveUserRequest) returns (RemoveUserResponse);
+}
+
+message User {
+  string name = 1;
+  uint32 id = 2;
+}
+
+message AddUserRequest {}
+
+message AddUserResponse {}
+
+message RemoveUserRequest {}
+
+message RemoveUserResponse {}
+
+service SquareManager {
+  rpc Move(MoveSquareRequest) returns (MoveSquareResponse);
+}
+
+message Square {
+  int32 xPos = 1;
+  int32 yPos = 2;
+}
+
+message MoveSquareRequest {}
+
+message MoveSquareResponse {}
