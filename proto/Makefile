@@ -1,7 +1,7 @@
 compile:
-	protoc ./v1/*proto \
-		--go_out=./v1/ \
-		--go-grpc_out=./v1/ \
+	protoc *proto \
+		--go_out=. \
+		--go-grpc_out=. \
 		--go_opt=paths=source_relative \
 		--go-grpc_opt=paths=source_relative \
-		--proto_path=./v1/
+		--proto_path=.

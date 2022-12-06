@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"google.golang.org/grpc"
-	pb "github.com/teralion/live-connections/proto/v1"
+	pb "github.com/teralion/live-connections/proto"
 )
 
 const (
