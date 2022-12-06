@@ -9,8 +9,6 @@ import (
   "path/filepath"
   "os/signal"
   "context"
-
-  "google.golang.org/grpc"
 )
 
 func main() {

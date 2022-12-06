@@ -40,15 +40,15 @@ message RemoveUserRequest {}
 
 message RemoveUserResponse {}
 
-service SquareManager {
-  rpc Move(MoveSquareRequest) returns (MoveSquareResponse);
+service ShapeManager {
+  rpc Move(MoveShapeRequest) returns (MoveShapeResponse);
 }
 
-message Square {
+message Shape {
   int32 xPos = 1;
   int32 yPos = 2;
 }
 
-message MoveSquareRequest {}
+message MoveShapeRequest {}
 
-message MoveSquareResponse {}
+message MoveShapeResponse {}
