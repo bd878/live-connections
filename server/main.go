@@ -6,13 +6,32 @@ import (
   "time"
   "log"
   "os"
+  "fmt"
   "path/filepath"
   "os/signal"
   "context"
+
+  "google.golang.org/grpc"
+
+  pb "github.com/teralion/live-connections/server/proto"
+)
+
+const (
+  serverAddr = "localhost:50051"
+  areaRequestTimeout = 10*time.Second
 )
 
 func main() {
   mux := http.NewServeMux()
+
+  opts := []grpc.DialOption{grpc.WithInsecure()}
+
+  conn, err := grpc.Dial(serverAddr, opts...)
+  if err != nil {
+    log.Fatalf("failed to dial: %v\n", err)
+  }
+  defer conn.Close()
+  areaClient := pb.NewAreaManagerClient(conn)
 
   hub := GetHub()
   go hub.run()
@@ -20,19 +39,64 @@ func main() {
   mux.Handle("/",
     http.HandlerFunc(
       func(w http.ResponseWriter, r *http.Request) {
-        http.ServeFile(w, r, filepath.Join("public/", "index.html"))
+        http.ServeFile(w, r, filepath.Join("../", "public/", "index.html"))
       },
+    ),
+  )
+  mux.Handle("/area/new",
+    http.HandlerFunc(
+      func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+          http.Error(w,
+            fmt.Sprintf("method %v not allowed\n", r.Method),
+            http.StatusMethodNotAllowed,
+          )
+          return
+        }
+        ctx, cancel := context.WithTimeout(context.Background(), areaRequestTimeout)
+        defer cancel()
+        _, err := areaClient.Create(ctx, &pb.CreateAreaRequest{})
+        if err != nil {
+          log.Fatalf("areaClient.Create failed: %v", err)
+        }
+        fmt.Fprintf(w, "ok\n")
+      },
+    ),
+  )
+  mux.Handle("/area/",
+    http.StripPrefix("/area/",
+      http.HandlerFunc(
+        func(w http.ResponseWriter, r *http.Request) {
+          if r.Method != http.MethodGet {
+            http.Error(w,
+              fmt.Sprintf("method %v not allowed\n", r.Method),
+              http.StatusMethodNotAllowed,
+            )
+            return
+          }
+          p := r.URL.Path;
+          fmt.Printf("area path: %v\n", p)
+
+          ctx, cancel := context.WithTimeout(context.Background(), areaRequestTimeout)
+          defer cancel()
+          response, err := areaClient.ListUsers(ctx, &pb.ListAreaUsersRequest{})
+          if err != nil {
+            log.Fatalf("areaClient.ListUsers failed: %v", err)
+          }
+          fmt.Fprintf(w, "%v\n", response)
+        },
+      ),
     ),
   )
   mux.Handle("/public/",
     http.StripPrefix("/public/",
-      http.FileServer(http.Dir("public/")),
+      http.FileServer(http.Dir("../public/")),
     ),
   )
   mux.Handle("/join", http.HandlerFunc(NewClient))
 
   srv := &http.Server{
-    Addr: ":8080",
+    Addr: "localhost:8080",
     Handler: mux,
     IdleTimeout: 5 * time.Minute,
     ReadHeaderTimeout: time.Minute,
