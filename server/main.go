@@ -19,6 +19,7 @@ import (
 const (
   serverAddr = "localhost:50051"
   areaRequestTimeout = 10*time.Second
+  publicPath = filepath.Join("../", "public")
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
   mux.Handle("/",
     http.HandlerFunc(
       func(w http.ResponseWriter, r *http.Request) {
-        http.ServeFile(w, r, filepath.Join("../", "public/", "index.html"))
+        http.ServeFile(w, r, filepath.Join(publicPath, "index.html"))
       },
     ),
   )
@@ -90,7 +91,7 @@ func main() {
   )
   mux.Handle("/public/",
     http.StripPrefix("/public/",
-      http.FileServer(http.Dir("../public/")),
+      http.FileServer(http.Dir(publicPath)),
     ),
   )
   mux.Handle("/join", http.HandlerFunc(NewClient))
