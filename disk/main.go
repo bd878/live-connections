@@ -2,33 +2,25 @@ package main
 
 import (
   "net"
-  "time"
   "context"
+  "path/filepath"
   "fmt"
   "log"
-  "math/rand"
-  "strings"
+  "errors"
   "os"
 
   "google.golang.org/grpc"
+  utils "github.com/teralion/live-connections/disk/utils"
   pb "github.com/teralion/live-connections/disk/proto"
 )
 
 const (
   port = 50051
-  charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   dirLength = 10
-  baseDir = filepath.Join("../files")
+  allEntries = -1
 )
 
-func randomString(n int) string {
-  b := strings.Builder{}
-  b.Grow(n)
-  for i := 0; i < n; i++ {
-    b.WriteByte(charset[rand.Intn(len(charset))])
-  }
-  return b.String()
-}
+var baseDir = filepath.Join("../", "files")
 
 type areaManagerServer struct {
   pb.UnimplementedAreaManagerServer
@@ -43,20 +35,32 @@ type shapeManagerServer struct {
 }
 
 func (s *areaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
-  rand.Seed(time.Now().UnixNano())
-  dirName := randomString(nameLength)
+  dirName := utils.RandomString(dirLength)
 
   if err := os.MkdirAll(filepath.Join(baseDir, dirName), 0750); err != nil {
     log.Printf("error creating area: %v\n", err)
     return nil, err
   }
 
-  return &pb.CreateAreaResponse{name: dirName}, nil
+  return &pb.CreateAreaResponse{Name: dirName}, nil
 }
 
 func (s *areaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaUsersRequest) (*pb.ListAreaUsersResponse, error) {
-  log.Println("Received list users request")
-  return &pb.ListAreaUsersResponse{}, nil
+  dir, err := os.Open(filepath.Join(baseDir, request.Name))
+  if err != nil {
+    if os.IsNotExist(err) {
+      return &pb.ListAreaUsersResponse{Users: []string{}}, os.ErrNotExist
+    } else {
+      return &pb.ListAreaUsersResponse{Users: []string{}}, errors.New("read dir error")
+    }
+  }
+
+  names, err := dir.Readdirnames(allEntries)
+  if err != nil {
+    return &pb.ListAreaUsersResponse{Users: names}, errors.New("read entries error")
+  }
+
+  return &pb.ListAreaUsersResponse{Users: names}, nil
 }
 
 func (s *areaManagerServer) Destroy(ctx context.Context, request *pb.DestroyAreaRequest) (*pb.DestroyAreaResponse, error) {

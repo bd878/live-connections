@@ -19,8 +19,9 @@ import (
 const (
   serverAddr = "localhost:50051"
   areaRequestTimeout = 10*time.Second
-  publicPath = filepath.Join("../", "public")
 )
+
+var publicPath = filepath.Join("../", "public")
 
 func main() {
   mux := http.NewServeMux()

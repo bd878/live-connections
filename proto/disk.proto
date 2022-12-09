@@ -17,15 +17,21 @@ message Area {
 
 message CreateAreaRequest {}
 
-message CreateAreaResponse {}
+message CreateAreaResponse {
+  string name = 1;
+}
 
 message DestroyAreaRequest {}
 
 message DestroyAreaResponse {}
 
-message ListAreaUsersRequest {}
+message ListAreaUsersRequest {
+  string name = 1;
+}
 
-message ListAreaUsersResponse {}
+message ListAreaUsersResponse {
+  repeated string users = 1;
+}
 
 service UserManager {
   rpc Add(AddUserRequest) returns (AddUserResponse);
