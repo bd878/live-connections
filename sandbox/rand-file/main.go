@@ -59,6 +59,7 @@ func main() {
 
   f := &UserFile{File: file, buf: bufio.NewWriter(file)}
   payload := make([]byte, 1<<8) // 1 byte
+  rand.Seed(time.Now().UnixNano())
   if _, err := rand.Read(payload); err != nil {
     log.Fatal(err)
   }
