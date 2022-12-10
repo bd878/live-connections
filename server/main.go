@@ -10,6 +10,7 @@ import (
   "path/filepath"
   "os/signal"
   "context"
+  "strings"
 
   "google.golang.org/grpc"
 
@@ -18,7 +19,7 @@ import (
 
 const (
   serverAddr = "localhost:50051"
-  areaRequestTimeout = 10*time.Second
+  diskRequestTimeout = 10*time.Second
 )
 
 var publicPath = filepath.Join("../", "public")
@@ -34,6 +35,7 @@ func main() {
   }
   defer conn.Close()
   areaClient := pb.NewAreaManagerClient(conn)
+  userClient := pb.NewUserManagerClient(conn)
 
   hub := GetHub()
   go hub.run()
@@ -45,7 +47,7 @@ func main() {
       },
     ),
   )
-  mux.Handle("/area/new",
+  mux.Handle("/join",
     http.HandlerFunc(
       func(w http.ResponseWriter, r *http.Request) {
         if r.Method != http.MethodPost {
@@ -55,13 +57,43 @@ func main() {
           )
           return
         }
-        ctx, cancel := context.WithTimeout(context.Background(), areaRequestTimeout)
+        ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
         defer cancel()
-        _, err := areaClient.Create(ctx, &pb.CreateAreaRequest{})
+        body, err := io.ReadAll(r.Body)
+        if err != nil {
+          http.Error(w,
+            fmt.Sprint("cannot read body"),
+            http.StatusBadRequest,
+          )
+        }
+        var areaName strings.Builder
+        areaName.Write(body)
+
+        resp, err := userClient.Add(ctx, &pb.AddUserRequest{Area: areaName.String()})
+        if err != nil {
+          log.Fatalf("userClient.Add failed: %v", err)
+        }
+        fmt.Fprintf(w, "%v\n", resp.Name)
+      },
+    ),
+  )
+  mux.Handle("/area/new",
+    http.HandlerFunc(
+      func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodGet {
+          http.Error(w,
+            fmt.Sprintf("method %v not allowed\n", r.Method),
+            http.StatusMethodNotAllowed,
+          )
+          return
+        }
+        ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+        defer cancel()
+        resp, err := areaClient.Create(ctx, &pb.CreateAreaRequest{})
         if err != nil {
           log.Fatalf("areaClient.Create failed: %v", err)
         }
-        fmt.Fprintf(w, "ok\n")
+        fmt.Fprintln(w, resp.Name)
       },
     ),
   )
@@ -79,13 +111,14 @@ func main() {
           p := r.URL.Path;
           fmt.Printf("area path: %v\n", p)
 
-          ctx, cancel := context.WithTimeout(context.Background(), areaRequestTimeout)
+          ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
           defer cancel()
-          response, err := areaClient.ListUsers(ctx, &pb.ListAreaUsersRequest{})
+          resp, err := areaClient.ListUsers(ctx, &pb.ListAreaUsersRequest{Name: p})
           if err != nil {
             log.Fatalf("areaClient.ListUsers failed: %v", err)
           }
-          fmt.Fprintf(w, "%v\n", response)
+          fmt.Printf("% v\n", resp.GetUsers())
+          fmt.Fprintf(w, "%v\n", resp.GetUsers())
         },
       ),
     ),
@@ -95,7 +128,6 @@ func main() {
       http.FileServer(http.Dir(publicPath)),
     ),
   )
-  mux.Handle("/join", http.HandlerFunc(NewClient))
 
   srv := &http.Server{
     Addr: "localhost:8080",

@@ -18,7 +18,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AreaManagerClient interface {
 	Create(ctx context.Context, in *CreateAreaRequest, opts ...grpc.CallOption) (*CreateAreaResponse, error)
-	Destroy(ctx context.Context, in *DestroyAreaRequest, opts ...grpc.CallOption) (*DestroyAreaResponse, error)
 	ListUsers(ctx context.Context, in *ListAreaUsersRequest, opts ...grpc.CallOption) (*ListAreaUsersResponse, error)
 }
 
@@ -39,15 +38,6 @@ func (c *areaManagerClient) Create(ctx context.Context, in *CreateAreaRequest, o
 	return out, nil
 }
 
-func (c *areaManagerClient) Destroy(ctx context.Context, in *DestroyAreaRequest, opts ...grpc.CallOption) (*DestroyAreaResponse, error) {
-	out := new(DestroyAreaResponse)
-	err := c.cc.Invoke(ctx, "/proto.AreaManager/Destroy", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *areaManagerClient) ListUsers(ctx context.Context, in *ListAreaUsersRequest, opts ...grpc.CallOption) (*ListAreaUsersResponse, error) {
 	out := new(ListAreaUsersResponse)
 	err := c.cc.Invoke(ctx, "/proto.AreaManager/ListUsers", in, out, opts...)
@@ -62,7 +52,6 @@ func (c *areaManagerClient) ListUsers(ctx context.Context, in *ListAreaUsersRequ
 // for forward compatibility
 type AreaManagerServer interface {
 	Create(context.Context, *CreateAreaRequest) (*CreateAreaResponse, error)
-	Destroy(context.Context, *DestroyAreaRequest) (*DestroyAreaResponse, error)
 	ListUsers(context.Context, *ListAreaUsersRequest) (*ListAreaUsersResponse, error)
 	mustEmbedUnimplementedAreaManagerServer()
 }
@@ -73,9 +62,6 @@ type UnimplementedAreaManagerServer struct {
 
 func (UnimplementedAreaManagerServer) Create(context.Context, *CreateAreaRequest) (*CreateAreaResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
-}
-func (UnimplementedAreaManagerServer) Destroy(context.Context, *DestroyAreaRequest) (*DestroyAreaResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Destroy not implemented")
 }
 func (UnimplementedAreaManagerServer) ListUsers(context.Context, *ListAreaUsersRequest) (*ListAreaUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
@@ -111,24 +97,6 @@ func _AreaManager_Create_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AreaManager_Destroy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DestroyAreaRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AreaManagerServer).Destroy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.AreaManager/Destroy",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AreaManagerServer).Destroy(ctx, req.(*DestroyAreaRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AreaManager_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListAreaUsersRequest)
 	if err := dec(in); err != nil {
@@ -156,10 +124,6 @@ var _AreaManager_serviceDesc = grpc.ServiceDesc{
 			Handler:    _AreaManager_Create_Handler,
 		},
 		{
-			MethodName: "Destroy",
-			Handler:    _AreaManager_Destroy_Handler,
-		},
-		{
 			MethodName: "ListUsers",
 			Handler:    _AreaManager_ListUsers_Handler,
 		},
@@ -173,7 +137,6 @@ var _AreaManager_serviceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserManagerClient interface {
 	Add(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
-	Remove(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error)
 }
 
 type userManagerClient struct {
@@ -193,21 +156,11 @@ func (c *userManagerClient) Add(ctx context.Context, in *AddUserRequest, opts ..
 	return out, nil
 }
 
-func (c *userManagerClient) Remove(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error) {
-	out := new(RemoveUserResponse)
-	err := c.cc.Invoke(ctx, "/proto.UserManager/Remove", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserManagerServer is the server API for UserManager service.
 // All implementations must embed UnimplementedUserManagerServer
 // for forward compatibility
 type UserManagerServer interface {
 	Add(context.Context, *AddUserRequest) (*AddUserResponse, error)
-	Remove(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error)
 	mustEmbedUnimplementedUserManagerServer()
 }
 
@@ -217,9 +170,6 @@ type UnimplementedUserManagerServer struct {
 
 func (UnimplementedUserManagerServer) Add(context.Context, *AddUserRequest) (*AddUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
-}
-func (UnimplementedUserManagerServer) Remove(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
 }
 func (UnimplementedUserManagerServer) mustEmbedUnimplementedUserManagerServer() {}
 
@@ -252,24 +202,6 @@ func _UserManager_Add_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManager_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserManagerServer).Remove(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.UserManager/Remove",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagerServer).Remove(ctx, req.(*RemoveUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _UserManager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "proto.UserManager",
 	HandlerType: (*UserManagerServer)(nil),
@@ -277,10 +209,6 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Add",
 			Handler:    _UserManager_Add_Handler,
-		},
-		{
-			MethodName: "Remove",
-			Handler:    _UserManager_Remove_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

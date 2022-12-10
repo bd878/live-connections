@@ -16,7 +16,8 @@ import (
 
 const (
   port = 50051
-  dirLength = 10
+  areaNameLength = 10
+  userNameLength = 10
   allEntries = -1
 )
 
@@ -35,17 +36,27 @@ type shapeManagerServer struct {
 }
 
 func (s *areaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
-  dirName := utils.RandomString(dirLength)
+  areaName := utils.RandomString(areaNameLength)
 
-  if err := os.MkdirAll(filepath.Join(baseDir, dirName), 0750); err != nil {
+  if !utils.IsNameSafe(areaName) {
+    log.Printf("not safe name", areaName)
+    return nil, errors.New("not safe")
+  }
+
+  if err := os.MkdirAll(filepath.Join(baseDir, areaName), 0750); err != nil {
     log.Printf("error creating area: %v\n", err)
     return nil, err
   }
 
-  return &pb.CreateAreaResponse{Name: dirName}, nil
+  return &pb.CreateAreaResponse{Name: areaName}, nil
 }
 
 func (s *areaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaUsersRequest) (*pb.ListAreaUsersResponse, error) {
+  if !utils.IsNameSafe(request.Name) {
+    log.Printf("not safe name", request.Name)
+    return nil, errors.New("not safe")
+  }
+
   dir, err := os.Open(filepath.Join(baseDir, request.Name))
   if err != nil {
     if os.IsNotExist(err) {
@@ -60,12 +71,25 @@ func (s *areaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaU
     return &pb.ListAreaUsersResponse{Users: names}, errors.New("read entries error")
   }
 
+  log.Printf("% v\n", names)
   return &pb.ListAreaUsersResponse{Users: names}, nil
 }
 
-func (s *areaManagerServer) Destroy(ctx context.Context, request *pb.DestroyAreaRequest) (*pb.DestroyAreaResponse, error) {
-  log.Println("Received destroy request")
-  return &pb.DestroyAreaResponse{}, nil
+func (s *userManagerServer) Add(ctx context.Context, request *pb.AddUserRequest) (*pb.AddUserResponse, error) {
+  areaName := request.Area
+
+  if !utils.IsNameSafe(areaName) {
+    log.Printf("not safe name", areaName)
+    return nil, errors.New("not safe")
+  }
+
+  userName := utils.RandomString(userNameLength)
+  if err := os.Mkdir(filepath.Join(baseDir, areaName,  userName), 0750); err != nil {
+    log.Printf("error creating user: %v\n", err)
+    return nil, err
+  }
+
+  return &pb.AddUserResponse{Name: userName}, nil
 }
 
 func main() {

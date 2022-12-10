@@ -6,13 +6,11 @@ package proto;
 
 service AreaManager {
   rpc Create(CreateAreaRequest) returns (CreateAreaResponse);
-  rpc Destroy(DestroyAreaRequest) returns (DestroyAreaResponse);
   rpc ListUsers(ListAreaUsersRequest) returns (ListAreaUsersResponse);
 }
 
 message Area {
   string name = 1;
-  uint32 id = 2;
 }
 
 message CreateAreaRequest {}
@@ -20,10 +18,6 @@ message CreateAreaRequest {}
 message CreateAreaResponse {
   string name = 1;
 }
-
-message DestroyAreaRequest {}
-
-message DestroyAreaResponse {}
 
 message ListAreaUsersRequest {
   string name = 1;
@@ -35,21 +29,19 @@ message ListAreaUsersResponse {
 
 service UserManager {
   rpc Add(AddUserRequest) returns (AddUserResponse);
-  rpc Remove(RemoveUserRequest) returns (RemoveUserResponse);
 }
 
 message User {
   string name = 1;
-  uint32 id = 2;
 }
 
-message AddUserRequest {}
+message AddUserRequest {
+  string area = 1;
+}
 
-message AddUserResponse {}
-
-message RemoveUserRequest {}
-
-message RemoveUserResponse {}
+message AddUserResponse {
+  string name = 1;
+}
 
 service ShapeManager {
   rpc Move(MoveShapeRequest) returns (MoveShapeResponse);
