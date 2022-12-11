@@ -16,12 +16,12 @@ import (
 
 const (
   diskRequestTimeout = 10*time.Second
-  serverAddr = "localhost:50051"
+  serverAddr = "127.0.0.1:50051"
 )
 
 type liveConnections struct {
-  AreaClient disk.AreaManagerClient
-  UserClient disk.UserManagerClient
+  areaClient disk.AreaManagerClient
+  userClient disk.UserManagerClient
 }
 
 func NewLiveConnections() *liveConnections {
@@ -31,14 +31,13 @@ func NewLiveConnections() *liveConnections {
   if err != nil {
     log.Fatalf("failed to dial: %v\n", err)
   }
-  defer conn.Close()
 
   areaClient := disk.NewAreaManagerClient(conn)
   userClient := disk.NewUserManagerClient(conn)
 
   return &liveConnections{
-    AreaClient: areaClient,
-    UserClient: userClient,
+    areaClient: areaClient,
+    userClient: userClient,
   }
 }
 
@@ -56,7 +55,7 @@ func (s *liveConnections) handleJoin(w http.ResponseWriter, r *http.Request) {
   var areaName strings.Builder
   areaName.Write(body)
 
-  resp, err := s.UserClient.Add(ctx, &disk.AddUserRequest{Area: areaName.String()})
+  resp, err := s.userClient.Add(ctx, &disk.AddUserRequest{Area: areaName.String()})
   if err != nil {
     log.Fatalf("userClient.Add failed: %v", err)
   }
@@ -66,7 +65,7 @@ func (s *liveConnections) handleJoin(w http.ResponseWriter, r *http.Request) {
 func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) {
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
-  resp, err := s.AreaClient.Create(ctx, &disk.CreateAreaRequest{})
+  resp, err := s.areaClient.Create(ctx, &disk.CreateAreaRequest{})
   if err != nil {
     log.Fatalf("areaClient.Create failed: %v", err)
   }
@@ -79,7 +78,7 @@ func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request
 
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
-  resp, err := s.AreaClient.ListUsers(ctx, &disk.ListAreaUsersRequest{Name: p})
+  resp, err := s.areaClient.ListUsers(ctx, &disk.ListAreaUsersRequest{Name: p})
   if err != nil {
     log.Fatalf("areaClient.ListUsers failed: %v", err)
   }
