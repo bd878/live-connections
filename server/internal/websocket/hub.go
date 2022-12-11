@@ -1,4 +1,4 @@
-package main
+package websocket
 
 type Hub struct {
   clients map[*Client]bool
@@ -10,15 +10,13 @@ type Hub struct {
   broadcast chan []byte
 }
 
-var hub = Hub{
-  clients: make(map[*Client]bool),
-  register: make(chan *Client),
-  unregister: make(chan *Client),
-  broadcast: make(chan []byte, 256),
-}
-
-func GetHub() *Hub {
-  return &hub
+func NewHub() *Hub {
+  return &Hub{
+    clients: make(map[*Client]bool),
+    register: make(chan *Client),
+    unregister: make(chan *Client),
+    broadcast: make(chan []byte, 256),
+  }
 }
 
 func (h *Hub) run() {

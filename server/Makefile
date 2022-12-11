@@ -1,7 +1,7 @@
 proto-compile:
 	protoc ../proto/*proto \
-		--go_out=./proto/ \
-		--go-grpc_out=./proto/ \
+		--go_out=./proto/disk/ \
+		--go-grpc_out=./proto/disk/ \
 		--go_opt=paths=source_relative \
 		--go-grpc_opt=paths=source_relative \
 		--proto_path=../proto/
