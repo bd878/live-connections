@@ -10,6 +10,7 @@ import (
   "strings"
 
   "google.golang.org/grpc"
+  "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
 )
@@ -73,7 +74,8 @@ func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) 
 }
 
 func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request) {
-  p := r.URL.Path
+  vars := mux.Vars(r)
+  p := vars["id"]
   fmt.Printf("area path: %v\n", p)
 
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)

@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
   "context"
@@ -16,11 +16,11 @@ const (
   allEntries = -1
 )
 
-type areaManagerServer struct {
+type AreaManagerServer struct {
   pb.UnimplementedAreaManagerServer
 }
 
-func (s *areaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
+func (s *AreaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
   areaName := utils.RandomString(areaNameLength)
 
   if !utils.IsNameSafe(areaName) {
@@ -36,7 +36,7 @@ func (s *areaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRe
   return &pb.CreateAreaResponse{Name: areaName}, nil
 }
 
-func (s *areaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaUsersRequest) (*pb.ListAreaUsersResponse, error) {
+func (s *AreaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaUsersRequest) (*pb.ListAreaUsersResponse, error) {
   if !utils.IsNameSafe(request.Name) {
     log.Printf("not safe name", request.Name)
     return nil, errors.New("not safe")

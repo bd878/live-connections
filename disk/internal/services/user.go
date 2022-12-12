@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
   "context"
@@ -13,11 +13,11 @@ import (
 
 const userNameLength = 10
 
-type userManagerServer struct {
+type UserManagerServer struct {
   pb.UnimplementedUserManagerServer
 }
 
-func (s *userManagerServer) Add(ctx context.Context, request *pb.AddUserRequest) (*pb.AddUserResponse, error) {
+func (s *UserManagerServer) Add(ctx context.Context, request *pb.AddUserRequest) (*pb.AddUserResponse, error) {
   areaName := request.Area
 
   if !utils.IsNameSafe(areaName) {

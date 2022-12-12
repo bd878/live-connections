@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
   "net"
@@ -7,13 +7,10 @@ import (
   "os/signal"
 
   "google.golang.org/grpc"
+
+  services "github.com/teralion/live-connections/disk/internal/services"
   pb "github.com/teralion/live-connections/disk/api/v1"
 )
-
-type GRPCServer struct {
-  server *grpc.Server
-  listener net.Listener
-}
 
 func NewGRPCServer(addr string) *GRPCServer {
   listener, err := net.Listen("tcp", addr)
@@ -23,8 +20,8 @@ func NewGRPCServer(addr string) *GRPCServer {
 
   grpcServer := grpc.NewServer()
 
-  pb.RegisterAreaManagerServer(grpcServer, &areaManagerServer{})
-  pb.RegisterUserManagerServer(grpcServer, &userManagerServer{})
+  pb.RegisterAreaManagerServer(grpcServer, &services.AreaManagerServer{})
+  pb.RegisterUserManagerServer(grpcServer, &services.UserManagerServer{})
 
   return &GRPCServer{listener: listener, server: grpcServer}
 }
@@ -47,4 +44,8 @@ func (s *GRPCServer) Serve() error {
   <-done
 
   return err
+}
+
+func (s *GRPCServer) Stop() {
+  s.server.Stop()
 }
