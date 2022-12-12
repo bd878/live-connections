@@ -4,14 +4,15 @@ import (
   "testing"
   "time"
 
-  "github.com/teralion/live-connections/disk/pkg/api"
+  api "github.com/teralion/live-connections/disk/pkg/api"
 )
 
-func TestGRPCConnection(t *testing.T) {
-  grpcServer := api.NewGRPCServer("localhost:50051")
-  go grpcServer.Serve()
-  defer grpcServer.Stop()
-  t.Log("server is running")
+func TestServer(t *testing.T) {
+  server := api.NewGRPCServer("localhost:50051")
+  go server.Serve()
+  defer server.Stop()
 
-  time.Sleep(2 * time.Second)
+  t.Log("serving...\n")
+  time.Sleep(2*time.Second)
+  t.Log("stopped")
 }
