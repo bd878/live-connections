@@ -13,6 +13,7 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
+  ws "github.com/teralion/live-connections/server/internal/websocket"
 )
 
 const (
@@ -21,6 +22,7 @@ const (
 )
 
 type liveConnections struct {
+  hub *ws.Hub
   areaClient disk.AreaManagerClient
   userClient disk.UserManagerClient
 }
@@ -36,7 +38,11 @@ func NewLiveConnections() *liveConnections {
   areaClient := disk.NewAreaManagerClient(conn)
   userClient := disk.NewUserManagerClient(conn)
 
+  hub := ws.NewHub()
+  go hub.Run()
+
   return &liveConnections{
+    hub: hub,
     areaClient: areaClient,
     userClient: userClient,
   }
@@ -86,4 +92,8 @@ func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request
   }
   fmt.Printf("% v\n", resp.GetUsers())
   fmt.Fprintf(w, "%v\n", resp.GetUsers())
+}
+
+func (s *liveConnections) handleWS(w http.ResponseWriter, r *http.Request) {
+  ws.NewClient(w, r, s.hub)
 }

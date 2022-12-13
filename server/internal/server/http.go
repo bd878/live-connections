@@ -8,7 +8,6 @@ import (
   "os/signal"
   "log"
   "path/filepath"
-  "strings"
 
   "github.com/gorilla/mux"
 )
@@ -20,10 +19,11 @@ func NewHTTPServer(addr string, done chan struct{}) *http.Server {
   router := mux.NewRouter()
 
   router.HandleFunc("/", serveIndexFile).Methods("GET")
+  router.HandleFunc("/ws", liveConn.handleWS).Methods("GET")
   router.HandleFunc("/join", liveConn.handleJoin).Methods("POST")
   router.HandleFunc("/area/new", liveConn.handleNewArea).Methods("POST")
   router.HandleFunc("/area/{id}", liveConn.handleAreaUsers).Methods("GET")
-  router.HandleFunc("/public/", servePublic).Methods("GET")
+  router.HandleFunc("/public/{resource}", servePublic).Methods("GET")
 
   srv := &http.Server{
     Addr: addr,
@@ -53,6 +53,8 @@ func serveIndexFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func servePublic(w http.ResponseWriter, r *http.Request) {
-  p := strings.TrimPrefix(r.URL.Path, "/public/")
-  http.ServeFile(w, r, filepath.Join(publicPath, p))
+  vars := mux.Vars(r)
+  resource := vars["resource"]
+
+  http.ServeFile(w, r, filepath.Join(publicPath, resource))
 }

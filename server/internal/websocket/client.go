@@ -35,18 +35,12 @@ type Client struct {
   send chan []byte
 }
 
-func NewClient(w http.ResponseWriter, r *http.Request) {
+func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
   conn, err := upgrader.Upgrade(w, r, nil)
 
   if err != nil {
     log.Println("failed to upgrade connection to WebSocket: ", err)
     return;
-  }
-
-  hub := GetHub()
-  if err != nil {
-    log.Printf("error obtaining hub: %v\n", err)
-    return
   }
 
   client := &Client{conn: conn, hub: hub, send: make(chan []byte, 256)}
@@ -73,6 +67,7 @@ func (c *Client) readLoop() {
       break;
     }
     message = bytes.TrimSpace(message)
+    log.Printf("message = %v\n", message)
     c.hub.broadcast <- message
   }
 }
