@@ -8,6 +8,17 @@ import (
 )
 
 func TestServer(t *testing.T) {
+  for series, fn := range map[string]func(
+
+  ) {
+
+  } {}
+}
+
+func setupTest(t *testing.T) (
+  client net.Http,
+  teardown func(),
+) {
   server := api.NewGRPCServer("localhost:50051")
   go server.Serve()
   defer server.Stop()

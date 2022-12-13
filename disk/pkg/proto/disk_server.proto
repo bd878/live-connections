@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option go_package = "github.com/teralion/live-connections/disk/pkg/proto";
+
+package disk_server;
+
+service AreaManager {
+  rpc Create(CreateAreaRequest) returns (CreateAreaResponse);
+  rpc ListUsers(ListAreaUsersRequest) returns (ListAreaUsersResponse);
+}
+
+message Area {
+  string name = 1;
+}
+
+message CreateAreaRequest {}
+
+message CreateAreaResponse {
+  string name = 1;
+}
+
+message ListAreaUsersRequest {
+  string name = 1;
+}
+
+message ListAreaUsersResponse {
+  repeated string users = 1;
+}
+
+service UserManager {
+  rpc Add(AddUserRequest) returns (AddUserResponse);
+}
+
+message User {
+  string name = 1;
+}
+
+message AddUserRequest {
+  string area = 1;
+}
+
+message AddUserResponse {
+  string name = 1;
+}
+
+service ShapeManager {
+  rpc Move(MoveShapeRequest) returns (MoveShapeResponse);
+}
+
+message Shape {
+  int32 xPos = 1;
+  int32 yPos = 2;
+}
+
+message MoveShapeRequest {}
+
+message MoveShapeResponse {}

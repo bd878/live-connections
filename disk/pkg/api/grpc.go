@@ -5,11 +5,12 @@ import (
   "log"
   "os"
   "os/signal"
+  "path/filepath"
 
   "google.golang.org/grpc"
 
   services "github.com/teralion/live-connections/disk/internal/services"
-  pb "github.com/teralion/live-connections/disk/api/v1"
+  pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
 func NewGRPCServer(addr string) *GRPCServer {
@@ -19,9 +20,10 @@ func NewGRPCServer(addr string) *GRPCServer {
   }
 
   grpcServer := grpc.NewServer()
+  baseDir := filepath.Join("../", "files")
 
-  pb.RegisterAreaManagerServer(grpcServer, &services.AreaManagerServer{})
-  pb.RegisterUserManagerServer(grpcServer, &services.UserManagerServer{})
+  pb.RegisterAreaManagerServer(grpcServer, &services.AreaManagerServer{Dir: baseDir, NameLen: 10})
+  pb.RegisterUserManagerServer(grpcServer, &services.UserManagerServer{Dir: baseDir, NameLen: 10})
 
   return &GRPCServer{listener: listener, server: grpcServer}
 }
