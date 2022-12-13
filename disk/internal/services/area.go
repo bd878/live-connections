@@ -12,9 +12,7 @@ import (
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
-const (
-  allEntries = -1
-)
+const allEntries = -1
 
 type AreaManagerServer struct {
   pb.UnimplementedAreaManagerServer

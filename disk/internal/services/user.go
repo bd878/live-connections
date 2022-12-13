@@ -10,8 +10,6 @@ import (
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
-const userNameLength = 10
-
 type UserManagerServer struct {
   pb.UnimplementedUserManagerServer
   Dir string

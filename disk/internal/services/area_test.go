@@ -5,6 +5,7 @@ import (
   "context"
   "reflect"
   "fmt"
+  "path/filepath"
   "os"
 
   pb "github.com/teralion/live-connections/disk/pkg/proto"
@@ -20,13 +21,13 @@ func TestArea(t *testing.T) {
     "test create": testCreate,
   } {
     t.Run(scenario, func(t *testing.T) {
-      area := setupTest(t)
+      area := setupTestArea(t)
       fn(t, area)
     })
   }
 }
 
-func setupTest(t *testing.T) *AreaManagerServer {
+func setupTestArea(t *testing.T) *AreaManagerServer {
   t.Helper()
 
   dir := os.TempDir()
@@ -47,5 +48,9 @@ func testCreate(t *testing.T, area *AreaManagerServer) {
 
   if len(resp.Name) != areaNameLen {
     fmt.Errorf("name length != required length : %d != %d", len(resp.Name), areaNameLen)
+  }
+
+  if _, err := os.Open(filepath.Join(area.Dir, resp.Name)); err != nil {
+    t.Fatal(err)
   }
 }

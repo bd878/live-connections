@@ -7,7 +7,7 @@ import (
 )
 
 const (
-  charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  charset = "0123456789ABCDEF"
 )
 
 func RandomString(n int) string {
