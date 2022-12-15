@@ -3,8 +3,8 @@ package websocket
 import (
   "time"
   "log"
+  "encoding/binary"
   "net/http"
-  "bytes"
 
   ws "github.com/gorilla/websocket"
 )
@@ -14,17 +14,17 @@ const (
 
   pongWait = 60 * time.Second
 
-  maxRead = 512 // bytes
-
   pingPeriod = (pongWait * 9) / 10 // a bit less than pongWait
 )
+
+var enc = binary.LittleEndian
 
 var newline = []byte{'\n'}
 
 var upgrader = ws.Upgrader{
   HandshakeTimeout: 10 * time.Second,
-  ReadBufferSize: 1024,
-  WriteBufferSize: 1024,
+  ReadBufferSize: 512,
+  WriteBufferSize: 512,
 }
 
 type Client struct {
@@ -55,20 +55,37 @@ func (c *Client) readLoop() {
     c.hub.unregister <- c
   }()
 
-  c.conn.SetReadLimit(maxRead)
+  c.conn.SetReadLimit(MaxPayloadSize)
   c.conn.SetReadDeadline(time.Now().Add(pongWait))
   c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
   for {
-    _, message, err := c.conn.ReadMessage()
+    p, r, err := c.conn.NextReader()
+    if err != nil {
+      log.Printf("NextReader err: %v\n", err)
+      break
+    }
+
+    var messageType int8
+    if err = binary.Read(r, enc, &messageType); err != nil {
+      log.Printf("reader.Read err: %v\n", err)
+      break
+    }
+
+    coords := make([]float32, 2)
+    if err := binary.Read(r, enc, &coords); err != nil {
+      log.Printf("binary.Read failed: %v\n", err)
+      break
+    }
+
+    log.Printf("%v, %v : %v\n", p, messageType, coords)
+
     if err != nil {
       if ws.IsUnexpectedCloseError(err, ws.CloseGoingAway) {
-        log.Println("err: %v\n", err)
+        log.Printf("err: %v\n", err)
       }
       break;
     }
-    message = bytes.TrimSpace(message)
-    log.Printf("message = %v\n", message)
-    c.hub.broadcast <- message
+    c.hub.broadcast <- make([]byte, 0)
   }
 }
 

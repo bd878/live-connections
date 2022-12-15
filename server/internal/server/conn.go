@@ -82,7 +82,6 @@ func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) 
 func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   p := vars["id"]
-  fmt.Printf("area path: %v\n", p)
 
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()

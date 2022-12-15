@@ -19,6 +19,21 @@ function appendDiv(parentEl, textContent) {
   parentEl.appendChild(el);
 }
 
+// messages
+const MOUSE_MOVE_TYPE = 2;
+const LITTLE_ENDIANNE = 1;
+
+function genMouseMoveMessage(x, y) {
+  const buffer = new ArrayBuffer(9)
+  const dv = new DataView(buffer)
+  dv.setInt8(0, MOUSE_MOVE_TYPE, LITTLE_ENDIANNE);
+  dv.setFloat32(1, x, LITTLE_ENDIANNE);
+  dv.setFloat32(5, y, LITTLE_ENDIANNE);
+
+  console.log(`(${x}, ${y})`);
+  return buffer;
+}
+
 // state
 let rootEl = null;
 let socket = null;
@@ -80,7 +95,7 @@ class Socket {
 }
 
 function handleMouseMove(event) {
-  socket.send(`${event.clientX} ${event.clientY}`);
+  socket.send(genMouseMoveMessage(event.clientX, event.clientY));
 }
 
 function main() {
@@ -107,7 +122,7 @@ async function init() {
   }
 
   socket = new Socket();
-  await socket.create("127.0.0.1:8080/join");
+  await socket.create("localhost:8080/ws");
 
   if (socket.isReady()) {
     main();
