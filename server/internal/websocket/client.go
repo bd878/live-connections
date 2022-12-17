@@ -19,6 +19,8 @@ const (
 
 var enc = binary.LittleEndian
 
+var lenWidth = 2
+
 var newline = []byte{'\n'}
 
 var upgrader = ws.Upgrader{
@@ -59,33 +61,27 @@ func (c *Client) readLoop() {
   c.conn.SetReadDeadline(time.Now().Add(pongWait))
   c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
   for {
-    p, r, err := c.conn.NextReader()
+    _, r, err := c.conn.NextReader()
     if err != nil {
-      log.Printf("NextReader err: %v\n", err)
+      log.Println("NextReader err =", err)
       break
     }
 
-    var messageType int8
-    if err = binary.Read(r, enc, &messageType); err != nil {
-      log.Printf("reader.Read err: %v\n", err)
+    var size uint16
+    if err = binary.Read(r, enc, &size); err != nil {
+      log.Println("binary.Read size err =", err)
       break
     }
 
-    coords := make([]float32, 2)
-    if err := binary.Read(r, enc, &coords); err != nil {
-      log.Printf("binary.Read failed: %v\n", err)
+    log.Println("size =", size)
+    message := make([]byte, size)
+    if err = binary.Read(r, enc, message); err != nil {
+      log.Println("binary.Read message err =", err)
       break
     }
+    log.Println("message =", message)
 
-    log.Printf("%v, %v : %v\n", p, messageType, coords)
-
-    if err != nil {
-      if ws.IsUnexpectedCloseError(err, ws.CloseGoingAway) {
-        log.Printf("err: %v\n", err)
-      }
-      break;
-    }
-    c.hub.broadcast <- make([]byte, 0)
+    c.hub.broadcast <- message
   }
 }
 
@@ -99,24 +95,20 @@ func (c *Client) writeLoop() {
 
   for {
     select {
-    case message, ok := <-c.send:
+    case message := <-c.send:
       c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-      if !ok {
-        c.conn.WriteMessage(ws.CloseMessage, []byte{})
-        return
-      }
 
-      writer, err := c.conn.NextWriter(ws.TextMessage)
+      writer, err := c.conn.NextWriter(ws.BinaryMessage)
       if err != nil {
-        log.Printf("obtaining next writer err: %v\n", err)
+        log.Println("obtaining next writer err =", err)
         return
       }
       writer.Write(message)
 
       n := len(c.send)
       for i := 0; i < n; i++ {
-        writer.Write(newline)
-        writer.Write(<-c.send)
+        message = <-c.send
+        writer.Write(message)
       }
 
       if err := writer.Close(); err != nil {

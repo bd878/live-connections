@@ -20,15 +20,19 @@ function appendDiv(parentEl, textContent) {
 }
 
 // messages
+const SIZE_PREFIX_SIZE = 2;
+const MOUSE_MOVE_MESSAGE_SIZE = 9;
 const MOUSE_MOVE_TYPE = 2;
 const LITTLE_ENDIANNE = 1;
+const ENDIANNE = LITTLE_ENDIANNE;
 
 function genMouseMoveMessage(x, y) {
-  const buffer = new ArrayBuffer(9)
+  const buffer = new ArrayBuffer(SIZE_PREFIX_SIZE + MOUSE_MOVE_MESSAGE_SIZE)
   const dv = new DataView(buffer)
-  dv.setInt8(0, MOUSE_MOVE_TYPE, LITTLE_ENDIANNE);
-  dv.setFloat32(1, x, LITTLE_ENDIANNE);
-  dv.setFloat32(5, y, LITTLE_ENDIANNE);
+  dv.setUint16(0, MOUSE_MOVE_MESSAGE_SIZE, ENDIANNE) // +2
+  dv.setInt8(SIZE_PREFIX_SIZE, MOUSE_MOVE_TYPE, ENDIANNE); // +1
+  dv.setFloat32(3, x, ENDIANNE); // +4
+  dv.setFloat32(7, y, ENDIANNE); // +4
 
   console.log(`(${x}, ${y})`);
   return buffer;
@@ -100,7 +104,7 @@ function handleMouseMove(event) {
 
 function main() {
   socket.onOpen(() => appendDiv(rootEl, "Socket opened"));
-  socket.onMessage((event) => appendDiv(rootEl, event.data));
+  socket.onMessage((event) => { console.log('receive message: ', event.data)});
   socket.onClose((event) => event.wasClean
     ? appendDiv(rootEl, `Closed cleanly: code=${event.code} reason=${event.reason}`)
     : appendDiv(rootEl, "Connection died")
