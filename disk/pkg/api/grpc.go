@@ -22,8 +22,8 @@ func NewGRPCServer(addr string) *GRPCServer {
   grpcServer := grpc.NewServer()
   baseDir := filepath.Join("../", "files")
 
-  pb.RegisterAreaManagerServer(grpcServer, &services.AreaManagerServer{Dir: baseDir, NameLen: 10})
-  pb.RegisterUserManagerServer(grpcServer, &services.UserManagerServer{Dir: baseDir, NameLen: 10})
+  pb.RegisterAreaManagerServer(grpcServer, services.NewAreaManagerServer(baseDir))
+  pb.RegisterUserManagerServer(grpcServer, services.NewUserManagerServer(baseDir))
 
   return &GRPCServer{listener: listener, server: grpcServer}
 }

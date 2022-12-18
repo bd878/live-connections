@@ -1,7 +1,7 @@
 proto-compile:
-	cp ../proto/disk.proto ./proto/disk/disk_client.proto
-	sed -r -i 's/^option go_package.*/option go_package = "github.com\/teralion\/live-connections\/server\/proto\/disk";/g' ./proto/disk/disk_client.proto
-	sed -r -i 's/^package .*/package disk_client;/g' ./proto/disk/disk_client.proto
+	cp ../proto/disk.proto ./proto/disk/disk.proto
+	sed -r -i 's/^option go_package.*/option go_package = "github.com\/teralion\/live-connections\/server\/proto\/disk";/g' ./proto/disk/disk.proto
+	sed -r -i 's/^package .*/package disk;/g' ./proto/disk/disk.proto
 
 	protoc ./proto/disk/*.proto \
 		--go_out=./proto/disk/ \

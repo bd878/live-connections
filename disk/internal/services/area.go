@@ -20,6 +20,10 @@ type AreaManagerServer struct {
   NameLen int
 }
 
+func NewAreaManagerServer(baseDir string) *AreaManagerServer {
+  return &AreaManagerServer{Dir: baseDir, NameLen: 10}
+}
+
 func (s *AreaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
   areaName := utils.RandomString(s.NameLen)
 

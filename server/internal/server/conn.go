@@ -18,7 +18,7 @@ import (
 
 const (
   diskRequestTimeout = 10*time.Second
-  serverAddr = "127.0.0.1:50051"
+  serverAddr = "localhost:50051"
 )
 
 type liveConnections struct {

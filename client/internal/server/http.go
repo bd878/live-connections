@@ -17,8 +17,9 @@ var publicPath = filepath.Join("../", "public")
 func NewHTTPServer(addr string, done chan struct{}) *http.Server {
   router := mux.NewRouter()
 
-  router.HandleFunc("/", serveIndexFile).Methods("GET")
   router.HandleFunc("/public/{resource}", servePublic).Methods("GET")
+  router.PathPrefix("/{area}").HandlerFunc(serveIndexFile).Methods("GET")
+  router.PathPrefix("/").HandlerFunc(serveIndexFile).Methods("GET")
 
   srv := &http.Server{
     Addr: addr,

@@ -1,4 +1,8 @@
 
+// constants
+const BACKEND_URL = "https://localhost:8080";
+
+// utils
 function debounce(func, limit = 0) {
   let last = undefined;
   return (args) => {
@@ -17,6 +21,25 @@ function appendDiv(parentEl, textContent) {
   el.textContent = textContent;
 
   parentEl.appendChild(el);
+}
+
+function takeAreaName(path) {
+  if (!path) {
+    return "";
+  }
+  const parts = path.split("/");
+  if (parts.length < 2) {
+    return "";
+  }
+  return parts[1];
+}
+
+function tryFindUserName(areaName) {
+  if (!areaName) {
+    return undefined;
+  }
+
+  return localStorage.getItem(areaName);
 }
 
 // messages
@@ -128,10 +151,38 @@ async function runSocket() {
   }
 }
 
-function main() {
-  // const user = new User()
+async function proceedNewArea() {
+  const response = await fetch(BACKEND_URL + "/area/new", { mode: "no-cors" });
+  if (!response.ok) {
+    throw new Error("[proceedNewArea]: failed to create new area");
+  }
 
-  // runSocket();
+  const areaName = await response.text();
+  console.log("areaName:", areaName);
+}
+
+function proceedNewUser(areaName) {
+  console.log("new user with area name:", areaName);
+}
+
+function restoreSession(areaName, userName) {
+  console.log('restore session for area and user:', areaName, userName);
+}
+
+function main() {
+  const areaName = takeAreaName(window.location.pathname);
+  if (!areaName) {
+    proceedNewArea();
+    return;
+  }
+
+  const userName = tryFindUserName(areaName);
+  if (!userName) {
+    proceedNewUser(areaName);
+    return;
+  }
+
+  restoreSession(areaName, userName);
 }
 
 async function init() {

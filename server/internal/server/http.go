@@ -18,12 +18,10 @@ func NewHTTPServer(addr string, done chan struct{}) *http.Server {
   liveConn := NewLiveConnections()
   router := mux.NewRouter()
 
-  router.HandleFunc("/", serveIndexFile).Methods("GET")
   router.HandleFunc("/ws", liveConn.handleWS).Methods("GET")
   router.HandleFunc("/join", liveConn.handleJoin).Methods("POST")
-  router.HandleFunc("/area/new", liveConn.handleNewArea).Methods("POST")
+  router.HandleFunc("/area/new", liveConn.handleNewArea).Methods("GET")
   router.HandleFunc("/area/{id}", liveConn.handleAreaUsers).Methods("GET")
-  router.HandleFunc("/public/{resource}", servePublic).Methods("GET")
 
   srv := &http.Server{
     Addr: addr,
@@ -46,15 +44,4 @@ func NewHTTPServer(addr string, done chan struct{}) *http.Server {
   }()
 
   return srv
-}
-
-func serveIndexFile(w http.ResponseWriter, r *http.Request) {
-  http.ServeFile(w, r, filepath.Join(publicPath, "index.html"))
-}
-
-func servePublic(w http.ResponseWriter, r *http.Request) {
-  vars := mux.Vars(r)
-  resource := vars["resource"]
-
-  http.ServeFile(w, r, filepath.Join(publicPath, resource))
 }

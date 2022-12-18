@@ -35,6 +35,10 @@ type Client struct {
   hub *Hub
 
   send chan []byte
+
+  area string
+
+  name string
 }
 
 func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
@@ -52,6 +56,10 @@ func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
   go client.writeLoop()
 }
 
+func (c *Client) isAuthenticated() bool {
+  return c.area != "" && c.name != ""
+}
+
 func (c *Client) readLoop() {
   defer func() {
     c.hub.unregister <- c
@@ -67,21 +75,25 @@ func (c *Client) readLoop() {
       break
     }
 
-    var size uint16
-    if err = binary.Read(r, enc, &size); err != nil {
-      log.Println("binary.Read size err =", err)
-      break
-    }
+    if !c.isAuthenticated() {
+      // wait for auth message
+    } else {
+      var size uint16
+      if err = binary.Read(r, enc, &size); err != nil {
+        log.Println("binary.Read size err =", err)
+        break
+      }
 
-    log.Println("size =", size)
-    message := make([]byte, size)
-    if err = binary.Read(r, enc, message); err != nil {
-      log.Println("binary.Read message err =", err)
-      break
-    }
-    log.Println("message =", message)
+      log.Println("size =", size)
+      message := make([]byte, size)
+      if err = binary.Read(r, enc, message); err != nil {
+        log.Println("binary.Read message err =", err)
+        break
+      }
+      log.Println("message =", message)
 
-    c.hub.broadcast <- message
+      c.hub.broadcast <- message
+    }
   }
 }
 

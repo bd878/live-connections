@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-option go_package = "github.com/teralion/live-connections/disk/pkg/proto";
+option go_package = "github.com/teralion/live-connections/server/proto/disk";
 
-package disk_server;
+package disk;
 
 service AreaManager {
   rpc Create(CreateAreaRequest) returns (CreateAreaResponse);
@@ -29,10 +29,44 @@ message ListAreaUsersResponse {
 
 service UserManager {
   rpc Add(AddUserRequest) returns (AddUserResponse);
+  rpc Write(WriteUserRequest) returns (WriteUserResponse);
+  rpc Read(ReadUserRequest) returns (ReadUserResponse);
 }
 
 message User {
   string name = 1;
+}
+
+message MouseMoveCoords {
+  float xPos = 1;
+  float yPos = 2;
+}
+
+message TextInput {
+  string value = 1;
+}
+
+message WriteUserRequest {
+  string area = 1;
+  string name = 2;
+  bytes message = 3;
+}
+
+message WriteUserResponse {}
+
+enum MessageType {
+  MOUSE_MOUVE = 0;
+  TEXT_INPUT = 1;
+}
+
+message ReadUserRequest {
+  string area = 1;
+  string name = 2;
+  MessageType messageType = 3;
+}
+
+message ReadUserResponse {
+  bytes message = 1;
 }
 
 message AddUserRequest {
