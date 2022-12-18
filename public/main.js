@@ -98,20 +98,40 @@ class Socket {
   }
 }
 
+class User {
+  constructor() {
+    this.area = null;
+    this.name = null;
+  }
+}
+
 function handleMouseMove(event) {
   socket.send(genMouseMoveMessage(event.clientX, event.clientY));
 }
 
-function main() {
-  socket.onOpen(() => appendDiv(rootEl, "Socket opened"));
-  socket.onMessage((event) => { console.log('receive message: ', event.data)});
-  socket.onClose((event) => event.wasClean
-    ? appendDiv(rootEl, `Closed cleanly: code=${event.code} reason=${event.reason}`)
-    : appendDiv(rootEl, "Connection died")
-  );
-  socket.onError(() => appendDiv(rootEl, "Error"));
+async function runSocket() {
+  socket = new Socket();
+  await socket.create("localhost:8080/ws");
 
-  document.addEventListener('mousemove', debounce(handleMouseMove, 300));
+  if (socket.isReady()) {
+    socket.onOpen(() => appendDiv(rootEl, "Socket opened"));
+    socket.onMessage((event) => { console.log('receive message: ', event.data)});
+    socket.onClose((event) => event.wasClean
+      ? appendDiv(rootEl, `Closed cleanly: code=${event.code} reason=${event.reason}`)
+      : appendDiv(rootEl, "Connection died")
+    );
+    socket.onError(() => appendDiv(rootEl, "Error"));
+
+    document.addEventListener('mousemove', debounce(handleMouseMove, 300));
+  } else {
+    throw Error("[init]: failed to open socket");
+  }
+}
+
+function main() {
+  // const user = new User()
+
+  // runSocket();
 }
 
 async function init() {
@@ -125,14 +145,7 @@ async function init() {
     return;
   }
 
-  socket = new Socket();
-  await socket.create("localhost:8080/ws");
-
-  if (socket.isReady()) {
-    main();
-  } else {
-    throw Error("[init]: failed to open socket");
-  }
+  main();
 }
 
 if (document.readyState === "loading") {
