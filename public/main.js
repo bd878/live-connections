@@ -152,13 +152,18 @@ async function runSocket() {
 }
 
 async function proceedNewArea() {
-  const response = await fetch(BACKEND_URL + "/area/new", { mode: "no-cors" });
+  const response = await fetch(BACKEND_URL + "/area/new");
   if (!response.ok) {
     throw new Error("[proceedNewArea]: failed to create new area");
   }
 
-  const areaName = await response.text();
-  console.log("areaName:", areaName);
+  try {
+    const areaName = await response.text();
+    console.log("areaName:", areaName);
+  } catch (e) {
+    console.log("error occured while retrieving response body text");
+    console.error(e);
+  }
 }
 
 function proceedNewUser(areaName) {

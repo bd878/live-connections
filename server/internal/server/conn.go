@@ -76,6 +76,8 @@ func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) 
   if err != nil {
     log.Fatalf("areaClient.Create failed: %v", err)
   }
+  w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+  w.Header().Set("Access-Control-Allow-Origin", "*")
   fmt.Fprintln(w, resp.Name)
 }
 
