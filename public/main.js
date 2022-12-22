@@ -23,6 +23,18 @@ function appendDiv(parentEl, textContent) {
   parentEl.appendChild(el);
 }
 
+function setUrl(url) {
+  if (!url) {
+    throw new Error(`[setUrl]: url arg is not defined: ${url}`);
+  }
+
+  window.history.pushState(
+    {}, // non-used
+    "", // legacy History API
+    url
+  )
+}
+
 function takeAreaName(path) {
   if (!path) {
     return "";
@@ -34,12 +46,16 @@ function takeAreaName(path) {
   return parts[1];
 }
 
-function tryFindUserName(areaName) {
+function findUserName(areaName) {
   if (!areaName) {
     return undefined;
   }
 
   return localStorage.getItem(areaName);
+}
+
+function bindUserToArea(area, user) {
+  return localStorage.setItem(area, user);
 }
 
 // messages
@@ -159,15 +175,45 @@ async function proceedNewArea() {
 
   try {
     const areaName = await response.text();
-    console.log("areaName:", areaName);
+    if (!areaName) {
+      throw new Error("[proceedNewArea]: empty area name");
+    }
+
+    console.log('areaName:', areaName); // DEBUG
+    setUrl(`/${areaName}`);
+
+    await proceedNewUser(areaName);
   } catch (e) {
     console.log("error occured while retrieving response body text");
     console.error(e);
   }
 }
 
-function proceedNewUser(areaName) {
-  console.log("new user with area name:", areaName);
+async function proceedNewUser(areaName) {
+  const response = await fetch(BACKEND_URL + "/join", {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8"
+    },
+    body: areaName
+  });
+  if (!response.ok) {
+    debugger
+    throw new Error("[proceedNewUser]: failed to create new user");
+  }
+
+  try {
+    const userName = await response.text();
+    if (!userName) {
+      throw new Error("[proceedNewUser]: empty user name");
+    }
+
+    console.log("userName:", userName); // DEBUG
+    bindUserToArea(areaName, userName);
+  } catch (e) {
+    console.log("error occured while retrieving response body text");
+    console.error(e);
+  }
 }
 
 function restoreSession(areaName, userName) {
@@ -181,7 +227,7 @@ function main() {
     return;
   }
 
-  const userName = tryFindUserName(areaName);
+  const userName = findUserName(areaName);
   if (!userName) {
     proceedNewUser(areaName);
     return;

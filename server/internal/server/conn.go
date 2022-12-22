@@ -66,7 +66,9 @@ func (s *liveConnections) handleJoin(w http.ResponseWriter, r *http.Request) {
   if err != nil {
     log.Fatalf("userClient.Add failed: %v", err)
   }
-  fmt.Fprintf(w, "%v\n", resp.Name)
+  w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  fmt.Fprint(w, resp.Name)
 }
 
 func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +80,7 @@ func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) 
   }
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
   w.Header().Set("Access-Control-Allow-Origin", "*")
-  fmt.Fprintln(w, resp.Name)
+  fmt.Fprint(w, resp.Name)
 }
 
 func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request) {
