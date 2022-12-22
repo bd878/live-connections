@@ -93,8 +93,9 @@ func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request
   if err != nil {
     log.Fatalf("areaClient.ListUsers failed: %v", err)
   }
-  fmt.Printf("% v\n", resp.GetUsers())
-  fmt.Fprintf(w, "%v\n", resp.GetUsers())
+  w.Header().Set("Access-Control-Allow-Origin", "*")
+  w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+  fmt.Fprint(w, resp.GetUsers())
 }
 
 func (s *liveConnections) handleWS(w http.ResponseWriter, r *http.Request) {

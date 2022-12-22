@@ -1,6 +1,8 @@
 
 // constants
-const BACKEND_URL = "https://localhost:8080";
+const PROTOCOL = "https://";
+const BACKEND_URL = "localhost:8080";
+const SOCKET_PATH = "/ws";
 
 // utils
 function debounce(func, limit = 0) {
@@ -81,6 +83,7 @@ function genMouseMoveMessage(x, y) {
 let rootEl = null;
 let socket = null;
 
+// socket
 class Socket {
   static CONNECTING = 0;
 
@@ -137,22 +140,17 @@ class Socket {
   }
 }
 
-class User {
-  constructor() {
-    this.area = null;
-    this.name = null;
-  }
-}
-
 function handleMouseMove(event) {
   socket.send(genMouseMoveMessage(event.clientX, event.clientY));
 }
 
 async function runSocket() {
   socket = new Socket();
-  await socket.create("localhost:8080/ws");
+  await socket.create(BACKEND_URL + SOCKET_PATH);
 
   if (socket.isReady()) {
+    console.log("socket is running...");
+
     socket.onOpen(() => appendDiv(rootEl, "Socket opened"));
     socket.onMessage((event) => { console.log('receive message: ', event.data)});
     socket.onClose((event) => event.wasClean
@@ -167,8 +165,9 @@ async function runSocket() {
   }
 }
 
+// requests
 async function proceedNewArea() {
-  const response = await fetch(BACKEND_URL + "/area/new");
+  const response = await fetch(PROTOCOL + BACKEND_URL + "/area/new");
   if (!response.ok) {
     throw new Error("[proceedNewArea]: failed to create new area");
   }
@@ -182,7 +181,7 @@ async function proceedNewArea() {
     console.log('areaName:', areaName); // DEBUG
     setUrl(`/${areaName}`);
 
-    await proceedNewUser(areaName);
+    return areaName;
   } catch (e) {
     console.log("error occured while retrieving response body text");
     console.error(e);
@@ -190,7 +189,7 @@ async function proceedNewArea() {
 }
 
 async function proceedNewUser(areaName) {
-  const response = await fetch(BACKEND_URL + "/join", {
+  const response = await fetch(PROTOCOL + BACKEND_URL + "/join", {
     method: "POST",
     headers: {
       "Content-Type": "text/plain; charset=utf-8"
@@ -198,7 +197,6 @@ async function proceedNewUser(areaName) {
     body: areaName
   });
   if (!response.ok) {
-    debugger
     throw new Error("[proceedNewUser]: failed to create new user");
   }
 
@@ -210,30 +208,63 @@ async function proceedNewUser(areaName) {
 
     console.log("userName:", userName); // DEBUG
     bindUserToArea(areaName, userName);
+
+    return userName;
   } catch (e) {
     console.log("error occured while retrieving response body text");
-    console.error(e);
+    throw new Error(e);
   }
 }
 
-function restoreSession(areaName, userName) {
-  console.log('restore session for area and user:', areaName, userName);
+async function listUsers(areaName) {
+  const response = await fetch(PROTOCOL + BACKEND_URL + `/area/${areaName}`);
+  if (!response.ok) {
+    throw new Error("[restoreSession]: failed to list users");
+  }
+
+  try {
+    const users = await response.text();
+    console.log("users: ", users);
+  } catch (e) {
+    throw new Error(e);
+  }
 }
 
-function main() {
-  const areaName = takeAreaName(window.location.pathname);
+async function restoreSession(areaName, userName) {
+  console.log("areaName, userName", areaName, userName); // DEBUG
+  await new Promise(resolve => resolve());
+}
+
+async function main() {
+  let userName;
+  let areaName = takeAreaName(window.location.pathname);
   if (!areaName) {
-    proceedNewArea();
+    console.log("proceed new area"); // DEBUG
+    areaName = await proceedNewArea();
+    userName = await proceedNewUser(areaName);
+
+    console.log("areaName, userName: ", areaName, userName); // DEBUG
+
+    await runSocket();
+
     return;
   }
 
-  const userName = findUserName(areaName);
+  userName = findUserName(areaName);
   if (!userName) {
-    proceedNewUser(areaName);
+    console.log("proceed new user"); // DEBUG
+    userName = await proceedNewUser(areaName)
+    console.log("areaName, userName: ", areaName, userName); // DEBUG
+    await listUsers(areaName);
+    await runSocket();
+
     return;
   }
 
-  restoreSession(areaName, userName);
+  console.log("restore session"); // DEBUG
+  await restoreSession(areaName, userName);
+  await listUsers(areaName);
+  await runSocket();
 }
 
 async function init() {

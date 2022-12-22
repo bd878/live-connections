@@ -5,6 +5,7 @@ import (
   "log"
   "encoding/binary"
   "net/http"
+  "strings"
 
   ws "github.com/gorilla/websocket"
 )
@@ -27,6 +28,7 @@ var upgrader = ws.Upgrader{
   HandshakeTimeout: 10 * time.Second,
   ReadBufferSize: 512,
   WriteBufferSize: 512,
+  CheckOrigin: checkClientOrigin,
 }
 
 type Client struct {
@@ -39,6 +41,11 @@ type Client struct {
   area string
 
   name string
+}
+
+func checkClientOrigin(r *http.Request) bool {
+  origin := r.Host
+  return strings.Contains(origin, "localhost")
 }
 
 func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {

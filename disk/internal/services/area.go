@@ -53,6 +53,5 @@ func (s *AreaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaU
     return &pb.ListAreaUsersResponse{Users: names}, errors.New("read entries error")
   }
 
-  log.Printf("% v\n", names)
   return &pb.ListAreaUsersResponse{Users: names}, nil
 }
