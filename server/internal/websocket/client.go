@@ -82,23 +82,23 @@ func (c *Client) readLoop() {
       break
     }
 
+    var size uint16
+    if err = binary.Read(r, enc, &size); err != nil {
+      log.Println("binary.Read size err =", err)
+      break
+    }
+
+    log.Println("size =", size)
+    message := make([]byte, size)
+    if err = binary.Read(r, enc, message); err != nil {
+      log.Println("binary.Read message err =", err)
+      break
+    }
+    log.Println("message =", message)
+
     if !c.isAuthenticated() {
-      // wait for auth message
+      log.Println("auth not implemented")
     } else {
-      var size uint16
-      if err = binary.Read(r, enc, &size); err != nil {
-        log.Println("binary.Read size err =", err)
-        break
-      }
-
-      log.Println("size =", size)
-      message := make([]byte, size)
-      if err = binary.Read(r, enc, message); err != nil {
-        log.Println("binary.Read message err =", err)
-        break
-      }
-      log.Println("message =", message)
-
       c.hub.broadcast <- message
     }
   }

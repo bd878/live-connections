@@ -60,16 +60,24 @@ function bindUserToArea(area, user) {
   return localStorage.setItem(area, user);
 }
 
+function check(checkFn, trueFn, falseFn = (() => {})) {
+  return (args) => checkFn() ? fn(args) : falseFn();
+}
+
 // messages
-const SIZE_PREFIX_SIZE = 2;
-const MOUSE_MOVE_MESSAGE_SIZE = 9;
-const MOUSE_MOVE_TYPE = 2;
 const LITTLE_ENDIANNE = 1;
 const ENDIANNE = LITTLE_ENDIANNE;
+const SIZE_PREFIX_SIZE = 2;
+const TYPE_SIZE = 1;
 
-function genMouseMoveMessage(x, y) {
-  const buffer = new ArrayBuffer(SIZE_PREFIX_SIZE + MOUSE_MOVE_MESSAGE_SIZE)
-  const dv = new DataView(buffer)
+const MOUSE_MOVE_TYPE = 2;
+const MOUSE_MOVE_MESSAGE_SIZE = 8;
+
+const AUTH_USER_TYPE = 1;
+
+function makeMouseMoveMessage(x, y) {
+  const buffer = new ArrayBuffer(SIZE_PREFIX_SIZE + TYPE_SIZE + MOUSE_MOVE_MESSAGE_SIZE);
+  const dv = new DataView(buffer);
   dv.setUint16(0, MOUSE_MOVE_MESSAGE_SIZE, ENDIANNE) // +2
   dv.setInt8(SIZE_PREFIX_SIZE, MOUSE_MOVE_TYPE, ENDIANNE); // +1
   dv.setFloat32(3, x, ENDIANNE); // +4
@@ -79,9 +87,65 @@ function genMouseMoveMessage(x, y) {
   return buffer;
 }
 
+async function makeAuthUserMessage(area, user) {
+  const areaEncoded = new Blob([area], { type: "text/plain"});
+  const userEncoded = new Blob([user], { type: "text/plain"});
+
+  const areaArrayBuffer = await areaEncoded.arrayBuffer();
+  const userArrayBuffer = await userEncoded.arrayBuffer();
+
+  const typedArea = new Uint8Array(areaArrayBuffer);
+  const typedUser = new Uint8Array(userArrayBuffer);
+
+  const messageSize = (
+    TYPE_SIZE        + // type
+    SIZE_PREFIX_SIZE + // area size
+    areaEncoded.size + // area bytes
+    SIZE_PREFIX_SIZE + // user size
+    userEncoded.size   // user bytes
+  );
+
+  const buffer = new ArrayBuffer(
+    SIZE_PREFIX_SIZE + // total size
+    messageSize
+  );
+  const dv = new DataView(buffer);
+
+  // message
+  let offset = 0;
+  dv.setUint16(offset, messageSize, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  console.log("offset:", offset);
+  dv.setInt8(offset, AUTH_USER_TYPE, ENDIANNE);
+  offset += TYPE_SIZE;
+
+  console.log("offset:", offset);
+  // area
+  dv.setUint16(offset, areaEncoded.size, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  console.log("offset:", offset);
+  for (let i = 0; i < typedArea.length; i++, offset++) {
+    dv.setUint8(offset, typedArea[i], ENDIANNE);
+  }
+
+  console.log("offset:", offset);
+  // user
+  dv.setUint16(offset, userEncoded.size, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  console.log("offset:", offset);
+  for (let i = 0; i < typedUser.length; i++, offset++) {
+    dv.setUint8(offset, typedUser[i], ENDIANNE);
+  }
+
+  console.log("offset:", offset);
+  return buffer;
+}
+
 // state
 let rootEl = null;
-let socket = null;
 
 // socket
 class Socket {
@@ -95,16 +159,8 @@ class Socket {
     this.conn = null;
   }
 
-  async create(addr) {
+  create(addr) {
     this.conn = new WebSocket("wss://" + addr);
-
-    for (
-      let i = 0;
-      i < (Socket.TIMEOUT_OPEN / 5) && this.conn.readyState !== Socket.OPEN;
-      i++
-    ) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
   }
 
   isReady() {
@@ -124,34 +180,71 @@ class Socket {
   }
 
   onOpen(callback) {
-    this.conn.addEventListener('open', callback);
+    if (this.conn) {
+      this.conn.addEventListener('open', callback);
+    } else {
+      throw new Error("[onOpen]: conn is null");
+    }
   }
 
   onMessage(callback) {
-    this.conn.addEventListener('message', callback);
+    if (this.conn) {
+      this.conn.addEventListener('message', callback);
+    } else {
+      throw new Error("[onOpen]: conn is null");
+    }
   }
 
   onClose(callback) {
-    this.conn.addEventListener('close', callback);
+    if (this.conn) {
+      this.conn.addEventListener('close', callback);
+    } else {
+      throw new Error("[onOpen]: conn is null");
+    }
   }
 
   onError(callback) {
-    this.conn.addEventListener('error', callback);
+    if (this.conn) {
+      this.conn.addEventListener('error', callback);
+    } else {
+      throw new Error("[onOpen]: conn is null");
+    }
   }
 }
 
-function handleMouseMove(event) {
-  socket.send(genMouseMoveMessage(event.clientX, event.clientY));
+class User {
+  constructor(areaName = '', userName = '') {
+    this.area = areaName;
+    this.name = userName
+    this.token = null;
+
+    this.isAuthed = this.isAuthed.bind(this);
+  }
+
+  isAuthed() {
+    return !!(this.area && this.user && this.token);
+  }
 }
 
-async function runSocket() {
-  socket = new Socket();
-  await socket.create(BACKEND_URL + SOCKET_PATH);
+async function authUser(socket, user) {
+  console.log('auth user');
+  const authMessage = await makeAuthUserMessage(user.area, user.name);
+  console.log("auth message:", authMessage);
+
+  socket.send(authMessage);
+  socket.onMessage((event) => console.log("on auth event:", event));
+}
+
+async function runUser(areaName, userName) {
+  const socket = new Socket();
+  const user = new User(areaName, userName);
+
+  socket.create(BACKEND_URL + SOCKET_PATH);
+  socket.onOpen(() => authUser(socket, user));
 
   if (socket.isReady()) {
     console.log("socket is running...");
 
-    socket.onOpen(() => appendDiv(rootEl, "Socket opened"));
     socket.onMessage((event) => { console.log('receive message: ', event.data)});
     socket.onClose((event) => event.wasClean
       ? appendDiv(rootEl, `Closed cleanly: code=${event.code} reason=${event.reason}`)
@@ -159,9 +252,19 @@ async function runSocket() {
     );
     socket.onError(() => appendDiv(rootEl, "Error"));
 
-    document.addEventListener('mousemove', debounce(handleMouseMove, 300));
+    document.addEventListener(
+      'mousemove',
+      debounce(
+        check(
+          user.isAuthed,
+          (event) => { socket.send(makeMouseMoveMessage(event.clientX, event.clientY)); },
+          () => { console.log("not authed"); }
+        ), 300
+      ),
+    );
   } else {
-    throw Error("[init]: failed to open socket");
+    console.warn("socket is not ready");
+    // throw new Error("[init]: failed to open socket");
   }
 }
 
@@ -216,7 +319,7 @@ async function proceedNewUser(areaName) {
   }
 }
 
-async function listUsers(areaName) {
+async function listUsersOnline(areaName) {
   const response = await fetch(PROTOCOL + BACKEND_URL + `/area/${areaName}`);
   if (!response.ok) {
     throw new Error("[restoreSession]: failed to list users");
@@ -245,7 +348,7 @@ async function main() {
 
     console.log("areaName, userName: ", areaName, userName); // DEBUG
 
-    await runSocket();
+    await runUser(areaName, userName);
 
     return;
   }
@@ -255,16 +358,14 @@ async function main() {
     console.log("proceed new user"); // DEBUG
     userName = await proceedNewUser(areaName)
     console.log("areaName, userName: ", areaName, userName); // DEBUG
-    await listUsers(areaName);
-    await runSocket();
+    await runUser(areaName, userName);
 
     return;
   }
 
   console.log("restore session"); // DEBUG
   await restoreSession(areaName, userName);
-  await listUsers(areaName);
-  await runSocket();
+  await runUser(areaName, userName);
 }
 
 async function init() {

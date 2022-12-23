@@ -3,7 +3,6 @@ package services
 import (
   "context"
   "os"
-  "log"
   "fmt"
   "path/filepath"
   "errors"
@@ -26,8 +25,9 @@ func NewAreaManagerServer(baseDir string) *AreaManagerServer {
 
 func (s *AreaManagerServer) Create(ctx context.Context, request *pb.CreateAreaRequest) (*pb.CreateAreaResponse, error) {
   areaName := utils.RandomString(s.NameLen)
+  areaPath := filepath.Join(s.Dir, areaName)
 
-  if err := os.MkdirAll(filepath.Join(s.Dir, areaName), 0750); err != nil {
+  if err := os.MkdirAll(areaPath, 0750); err != nil {
     return nil, errors.New("failed to make dir")
   }
 
