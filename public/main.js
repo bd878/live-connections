@@ -18,13 +18,6 @@ function debounce(func, limit = 0) {
   }
 }
 
-function appendDiv(parentEl, textContent) {
-  const el = document.createElement("div");
-  el.textContent = textContent;
-
-  parentEl.appendChild(el);
-}
-
 function setUrl(url) {
   if (!url) {
     throw new Error(`[setUrl]: url arg is not defined: ${url}`);
@@ -71,19 +64,33 @@ const SIZE_PREFIX_SIZE = 2;
 const TYPE_SIZE = 1;
 
 const MOUSE_MOVE_TYPE = 2;
-const MOUSE_MOVE_MESSAGE_SIZE = 8;
+const COORD_SIZE = 4;
 
 const AUTH_USER_TYPE = 1;
 
 function makeMouseMoveMessage(x, y) {
-  const buffer = new ArrayBuffer(SIZE_PREFIX_SIZE + TYPE_SIZE + MOUSE_MOVE_MESSAGE_SIZE);
-  const dv = new DataView(buffer);
-  dv.setUint16(0, MOUSE_MOVE_MESSAGE_SIZE, ENDIANNE) // +2
-  dv.setInt8(SIZE_PREFIX_SIZE, MOUSE_MOVE_TYPE, ENDIANNE); // +1
-  dv.setFloat32(3, x, ENDIANNE); // +4
-  dv.setFloat32(7, y, ENDIANNE); // +4
+  const messageSize = (
+    TYPE_SIZE +  // type
+    COORD_SIZE + // x-coord
+    COORD_SIZE   // y-coord
+  );
 
-  console.log(`(${x}, ${y})`);
+  const buffer = new ArrayBuffer(SIZE_PREFIX_SIZE + messageSize);
+  const dv = new DataView(buffer);
+
+  let offset = 0;
+  dv.setUint16(offset, messageSize, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  dv.setInt8(offset, MOUSE_MOVE_TYPE, ENDIANNE);
+  offset += TYPE_SIZE;
+
+  dv.setFloat32(offset, x, ENDIANNE);
+  offset += COORD_SIZE;
+
+  dv.setFloat32(offset, y, ENDIANNE);
+  offset += COORD_SIZE;
+
   return buffer;
 }
 
@@ -116,36 +123,33 @@ async function makeAuthUserMessage(area, user) {
   dv.setUint16(offset, messageSize, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   dv.setInt8(offset, AUTH_USER_TYPE, ENDIANNE);
   offset += TYPE_SIZE;
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   // area
   dv.setUint16(offset, areaEncoded.size, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   for (let i = 0; i < typedArea.length; i++, offset++) {
     dv.setUint8(offset, typedArea[i], ENDIANNE);
   }
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   // user
   dv.setUint16(offset, userEncoded.size, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   for (let i = 0; i < typedUser.length; i++, offset++) {
     dv.setUint8(offset, typedUser[i], ENDIANNE);
   }
 
-  console.log("offset:", offset);
+  console.log("offset:", offset); // DEBUG
   return buffer;
 }
-
-// state
-let rootEl = null;
 
 // socket
 class Socket {
@@ -179,11 +183,35 @@ class Socket {
     }
   }
 
+  waitOpen() {
+    if (this.conn) {
+      return new Promise(resolve => (
+        this.conn.addEventListener('open', resolve)
+      ));
+    } else {
+      return Promise.reject();
+    }
+  }
+
   onOpen(callback) {
     if (this.conn) {
       this.conn.addEventListener('open', callback);
     } else {
       throw new Error("[onOpen]: conn is null");
+    }
+  }
+
+  waitMessage() {
+    if (this.conn) {
+      return new Promise(resolve => {
+        const onMessage = (event) => {
+          this.conn.removeEventListener('message', onMessage);
+          resolve(event);
+        }
+        this.conn.addEventListener('message', onMessage);
+      });
+    } else {
+      return Promise.reject();
     }
   }
 
@@ -224,15 +252,20 @@ class User {
   isAuthed() {
     return !!(this.area && this.user && this.token);
   }
+
+  setToken(token) {
+    this.token = token;
+  }
 }
 
 async function authUser(socket, user) {
-  console.log('auth user');
   const authMessage = await makeAuthUserMessage(user.area, user.name);
-  console.log("auth message:", authMessage);
 
   socket.send(authMessage);
-  socket.onMessage((event) => console.log("on auth event:", event));
+  const event = await socket.waitMessage();
+  if (event && event.data) {
+    ;(event.data === 'ok' && user.setToken("test")); // test
+  }
 }
 
 async function runUser(areaName, userName) {
@@ -242,15 +275,17 @@ async function runUser(areaName, userName) {
   socket.create(BACKEND_URL + SOCKET_PATH);
   socket.onOpen(() => authUser(socket, user));
 
+  await socket.waitOpen();
+
   if (socket.isReady()) {
     console.log("socket is running...");
 
-    socket.onMessage((event) => { console.log('receive message: ', event.data)});
+    socket.onMessage((event) => { console.log('receive message: ', event.data); });
     socket.onClose((event) => event.wasClean
-      ? appendDiv(rootEl, `Closed cleanly: code=${event.code} reason=${event.reason}`)
-      : appendDiv(rootEl, "Connection died")
+      ? console.log(`Closed cleanly: code=${event.code} reason=${event.reason}`)
+      : console.log("Connection died")
     );
-    socket.onError(() => appendDiv(rootEl, "Error"));
+    socket.onError(() => console.log("Error"));
 
     document.addEventListener(
       'mousemove',
@@ -263,8 +298,7 @@ async function runUser(areaName, userName) {
       ),
     );
   } else {
-    console.warn("socket is not ready");
-    // throw new Error("[init]: failed to open socket");
+    throw new Error("[init]: failed to open socket");
   }
 }
 
@@ -364,18 +398,18 @@ async function main() {
   }
 
   console.log("restore session"); // DEBUG
-  await restoreSession(areaName, userName);
   await runUser(areaName, userName);
+  await restoreSession(areaName, userName);
 }
 
 async function init() {
-  rootEl = document.getElementById("root");
+  const rootEl = document.getElementById("root");
   if (!rootEl) {
     throw ReferenceError("[init]: no #root");
   }
 
   if (!window['WebSocket']) {
-    appendDiv("[init]: browser does not support WebSockets");
+    console.error("[init]: browser does not support WebSockets");
     return;
   }
 

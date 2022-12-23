@@ -4,6 +4,7 @@ import (
   "time"
   "log"
   "encoding/binary"
+  "bytes"
   "net/http"
   "strings"
 
@@ -21,6 +22,8 @@ const (
 var enc = binary.LittleEndian
 
 var lenWidth = 2
+
+const authMessageType = 1
 
 var newline = []byte{'\n'}
 
@@ -97,7 +100,49 @@ func (c *Client) readLoop() {
     log.Println("message =", message)
 
     if !c.isAuthenticated() {
-      log.Println("auth not implemented")
+      if size != uint16(len(message)) {
+        log.Println("size != message size = ", size, len(message))
+      } else {
+        mr := bytes.NewReader(message)
+        var messageType int8
+        if err = binary.Read(mr, enc, &messageType); err != nil {
+          log.Println("failed to read message type")
+          break
+        }
+
+        if messageType != authMessageType {
+          log.Println("message is not auth message, got =", messageType)
+          break;
+        }
+
+        var areaSize uint16
+        if err = binary.Read(mr, enc, &areaSize); err != nil {
+          log.Println("binary.Read areaSize err =", err)
+          break
+        }
+        log.Println("area size =", areaSize)
+
+        areaBytes := make([]byte, areaSize)
+        if err = binary.Read(mr, enc, &areaBytes); err != nil {
+          log.Println("binary.Read areaBytes err =", err)
+          break
+        }
+        log.Println("area =", string(areaBytes))
+
+        var userSize uint16
+        if err = binary.Read(mr, enc, &userSize); err != nil {
+          log.Println("binary.Read userSize err =", err)
+          break
+        }
+        log.Println("area size =", userSize)
+
+        userBytes := make([]byte, userSize)
+        if err = binary.Read(mr, enc, &userBytes); err != nil {
+          log.Println("binary.Read userBytes err =", err)
+          break
+        }
+        log.Println("user =", string(userBytes))
+      }
     } else {
       c.hub.broadcast <- message
     }
