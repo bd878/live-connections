@@ -25,9 +25,15 @@ var enc = binary.LittleEndian
 
 var lenWidth = 2
 
-const authMessageType int8 = 1
+const (
+  authMessageType int8 = 1
 
-const listClientsOnlineMessageType int8 = 2
+  mouseMoveMessageType int8 = 2
+
+  listClientsOnlineMessageType int8 = 3
+
+  authOkMessageType int8 = 4
+)
 
 var newline = []byte{'\n'}
 
@@ -162,12 +168,14 @@ func (c *Client) readLoop() {
         break;
       }
 
-      c.send <- []byte("ok") // TODO: token
+      c.send <- doTextMessage("ok", authOkMessageType) // TODO: token
       c.hub.register <- c
 
       defer func() {
         c.hub.unregister <- c
       }()
+    case mouseMoveMessageType:
+      c.send <- doTextMessage("mouse move", mouseMoveMessageType) // TODO: coords
     default:
       log.Println("unknown message type =", messageType)
       break
@@ -218,4 +226,77 @@ func (c *Client) writeLoop() {
       }
     }
   }
+}
+
+func (h *Hub) ListClientsOnline() []string {
+  var names []string
+  for client := range h.clients {
+    names = append(names, client.name)
+  }
+  return names
+}
+
+func DoClientsOnlineMessage(users []string) []byte {
+  var err error
+
+  typeBytes := new(bytes.Buffer)
+  if err = binary.Write(typeBytes, enc, listClientsOnlineMessageType); err != nil {
+    log.Println("error writing message type =", err)
+    return []byte{}
+  }
+
+  usersBytes := new(bytes.Buffer)
+  for _, user := range users {
+    var size uint16 = uint16(len(user))
+    if err = binary.Write(usersBytes, enc, size); err != nil {
+      log.Println("error writing user name size =", err)
+      return []byte{}
+    }
+
+    if err = binary.Write(usersBytes, enc, []byte(user)); err != nil {
+      log.Println("error writing user name size =", err)
+      return []byte{}
+    }
+  }
+
+  size := typeBytes.Len() + usersBytes.Len()
+  sizeBytes := new(bytes.Buffer)
+  if err = binary.Write(sizeBytes, enc, uint16(size)); err != nil {
+    log.Println("error writing total size =", err)
+    return []byte{}
+  }
+
+  return bytes.Join(
+    [][]byte{
+      sizeBytes.Bytes(),
+      typeBytes.Bytes(),
+      usersBytes.Bytes(),
+    },
+    []byte{},
+  )
+}
+
+func doTextMessage(text string, messageType int8) []byte {
+  var err error
+  message := []byte(text)
+
+  result := new(bytes.Buffer)
+  var size uint16 = uint16(len(message))
+  if err = binary.Write(result, enc, size); err != nil {
+    log.Println("error writing text message size =", err)
+    return []byte{}
+  }
+
+  if err = binary.Write(result, enc, messageType); err != nil {
+    log.Println("error writing text message type =", err)
+    return []byte{}
+  }
+
+  if err = binary.Write(result, enc, message); err != nil {
+    log.Println("error writing text message =", err)
+    return []byte{}
+  }
+
+  res := result.Bytes()
+  return res
 }

@@ -68,6 +68,10 @@ const COORD_SIZE = 4;
 
 const AUTH_USER_TYPE = 1;
 
+const USERS_ONLINE_TYPE = 3;
+
+const AUTH_OK_TYPE = 4;
+
 function makeMouseMoveMessage(x, y) {
   const messageSize = (
     TYPE_SIZE +  // type
@@ -161,6 +165,7 @@ class Socket {
 
   constructor() {
     this.conn = null;
+    this.sendGuards = []
   }
 
   create(addr) {
@@ -179,7 +184,17 @@ class Socket {
     if (this.conn.readyState === Socket.CONNECTING) {
       console.log('[Socket send]: still in connecting state');
     } else {
-      this.conn.send(message);
+      const c = fn => fn();
+
+      if (!this.sendGuards.find(c)) {
+        this.conn.send(message);
+      }
+    }
+  }
+
+  pushSendGuard(fn) {
+    if (typeof fn === 'function') {
+      this.sendGuards.push(fn);
     }
   }
 
@@ -258,13 +273,55 @@ class User {
   }
 }
 
+async function messageHandler(event) /* event value */ {
+  const buffer = await event.data.arrayBuffer();
+  const dv = new DataView(buffer);
+
+  let offset = 0;
+  const size = dv.getUint16(0, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  const type = dv.getInt8(offset, ENDIANNE);
+  offset += TYPE_SIZE;
+
+  switch (type) {
+    case AUTH_OK_TYPE:
+      const resultSlice = buffer.slice(offset);
+      console.log("resultSlice = ", resultSlice);
+      const message = new Blob([resultSlice]);
+      const text = await message.text();
+      console.log("text =", text);
+      break;
+    case USERS_ONLINE_TYPE:
+      console.log("unsupported message type =", type);
+      break;
+    default:
+      console.log("[messageHandler]: unknown type =", type);
+      break;
+  }
+
+  await new Promise(resolve => resolve()); // temp
+  return "";
+}
+
+function closeHandler(event) {
+  ;(event.wasClean
+    ? console.log(`Closed cleanly: code=${event.code} reason=${event.reason}`)
+    : console.log("Connection died")
+  );
+}
+
+function errorHandler(event) {
+  console.log("error =", event);
+}
+
 async function authUser(socket, user) {
   const authMessage = await makeAuthUserMessage(user.area, user.name);
 
   socket.send(authMessage);
   const event = await socket.waitMessage();
   if (event && event.data) {
-    const text = await event.data.text()
+    const text = await messageHandler(event);
     ;(text === "ok" && user.setToken("test")); // DEBUG
   }
 }
@@ -279,28 +336,27 @@ async function establishConnection(areaName, userName) {
   await socket.waitOpen();
 
   if (socket.isReady()) {
-    console.log("socket is running...");
+    console.log("socket is running..."); // DEBUG
 
-    socket.onMessage((event) => { console.log('receive message: ', event.data); });
-    socket.onClose((event) => event.wasClean
-      ? console.log(`Closed cleanly: code=${event.code} reason=${event.reason}`)
-      : console.log("Connection died")
-    );
-    socket.onError(() => console.log("Error"));
+    socket.pushSendGuard(user.isAuthed)
 
-    document.addEventListener(
-      'mousemove',
-      debounce(
-        check(
-          user.isAuthed,
-          (event) => { socket.send(makeMouseMoveMessage(event.clientX, event.clientY)); },
-          () => { console.log("not authed"); }
-        ), 300
-      ),
-    );
+    socket.onMessage(messageHandler);
+    socket.onClose(closeHandler);
+    socket.onError(errorHandler);
+
+    trackMouseEvents(socket)
   } else {
     throw new Error("[init]: failed to open socket");
   }
+}
+
+function trackMouseEvents(s /* socket */) {
+  document.addEventListener(
+    'mousemove',
+    debounce((event) => {
+      s.send(makeMouseMoveMessage(event.clientX, event.clientY));
+    }),
+  );
 }
 
 // requests
