@@ -1,0 +1,1 @@
+Allocates files on disk per user, keeps websocket connections
