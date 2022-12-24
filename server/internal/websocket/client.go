@@ -7,7 +7,9 @@ import (
   "bytes"
   "net/http"
   "strings"
+  "errors"
 
+  lc "github.com/teralion/live-connections/server/internal/conn"
   ws "github.com/gorilla/websocket"
 )
 
@@ -37,6 +39,8 @@ var upgrader = ws.Upgrader{
 type Client struct {
   conn *ws.Conn
 
+  lc *lc.LiveConnections
+
   hub *Hub
 
   send chan []byte
@@ -51,7 +55,7 @@ func checkClientOrigin(r *http.Request) bool {
   return strings.Contains(origin, "localhost")
 }
 
-func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
+func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub, liveConn *lc.LiveConnections) {
   conn, err := upgrader.Upgrade(w, r, nil)
 
   if err != nil {
@@ -59,7 +63,7 @@ func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
     return;
   }
 
-  client := &Client{conn: conn, hub: hub, send: make(chan []byte, 256)}
+  client := &Client{conn: conn, lc: liveConn, hub: hub, send: make(chan []byte, 256)}
   hub.register <- client
 
   go client.readLoop()
@@ -68,6 +72,54 @@ func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub) {
 
 func (c *Client) isAuthenticated() bool {
   return c.area != "" && c.name != ""
+}
+
+func (c *Client) takeAuthMessage(message *[]byte) error {
+  var err error
+
+  mr := bytes.NewReader(*message)
+  var messageType int8
+  if err = binary.Read(mr, enc, &messageType); err != nil {
+    return err
+  }
+
+  if messageType != authMessageType {
+    return errors.New("message type is not auth message")
+  }
+
+  var areaSize uint16
+  if err = binary.Read(mr, enc, &areaSize); err != nil {
+    return err
+  }
+
+  areaBytes := make([]byte, areaSize)
+  if err = binary.Read(mr, enc, &areaBytes); err != nil {
+    return err
+  }
+
+  var userSize uint16
+  if err = binary.Read(mr, enc, &userSize); err != nil {
+    return err
+  }
+
+  userBytes := make([]byte, userSize)
+  if err = binary.Read(mr, enc, &userBytes); err != nil {
+    return err
+  }
+
+  area := string(areaBytes)
+  user := string(userBytes)
+
+  userExists := c.lc.HasUser(area, user)
+
+  if !userExists {
+    return errors.New("no user")
+  }
+
+  c.area = area
+  c.name = user
+
+  return nil
 }
 
 func (c *Client) readLoop() {
@@ -103,45 +155,12 @@ func (c *Client) readLoop() {
       if size != uint16(len(message)) {
         log.Println("size != message size = ", size, len(message))
       } else {
-        mr := bytes.NewReader(message)
-        var messageType int8
-        if err = binary.Read(mr, enc, &messageType); err != nil {
-          log.Println("failed to read message type")
-          break
-        }
-
-        if messageType != authMessageType {
-          log.Println("message is not auth message, got =", messageType)
+        if err = c.takeAuthMessage(&message); err != nil {
+          log.Println("failed to parse auth message =", err)
           break;
         }
 
-        var areaSize uint16
-        if err = binary.Read(mr, enc, &areaSize); err != nil {
-          log.Println("binary.Read areaSize err =", err)
-          break
-        }
-        log.Println("area size =", areaSize)
-
-        areaBytes := make([]byte, areaSize)
-        if err = binary.Read(mr, enc, &areaBytes); err != nil {
-          log.Println("binary.Read areaBytes err =", err)
-          break
-        }
-        log.Println("area =", string(areaBytes))
-
-        var userSize uint16
-        if err = binary.Read(mr, enc, &userSize); err != nil {
-          log.Println("binary.Read userSize err =", err)
-          break
-        }
-        log.Println("area size =", userSize)
-
-        userBytes := make([]byte, userSize)
-        if err = binary.Read(mr, enc, &userBytes); err != nil {
-          log.Println("binary.Read userBytes err =", err)
-          break
-        }
-        log.Println("user =", string(userBytes))
+        c.send <- []byte("ok")
       }
     } else {
       c.hub.broadcast <- message

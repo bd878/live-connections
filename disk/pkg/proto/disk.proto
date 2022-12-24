@@ -7,6 +7,7 @@ package disk;
 service AreaManager {
   rpc Create(CreateAreaRequest) returns (CreateAreaResponse);
   rpc ListUsers(ListAreaUsersRequest) returns (ListAreaUsersResponse);
+  rpc HasUser(HasUserRequest) returns (HasUserResponse);
 }
 
 message Area {
@@ -25,6 +26,15 @@ message ListAreaUsersRequest {
 
 message ListAreaUsersResponse {
   repeated string users = 1;
+}
+
+message HasUserRequest {
+  string area = 1;
+  string user = 2;
+}
+
+message HasUserResponse {
+  bool result = 1;
 }
 
 service UserManager {

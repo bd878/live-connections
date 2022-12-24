@@ -1,4 +1,4 @@
-package server
+package conn
 
 import (
   "net/http"
@@ -13,7 +13,6 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
-  ws "github.com/teralion/live-connections/server/internal/websocket"
 )
 
 const (
@@ -21,13 +20,12 @@ const (
   serverAddr = "localhost:50051"
 )
 
-type liveConnections struct {
-  hub *ws.Hub
+type LiveConnections struct {
   areaClient disk.AreaManagerClient
   userClient disk.UserManagerClient
 }
 
-func NewLiveConnections() *liveConnections {
+func NewLiveConnections() *LiveConnections {
   opts := []grpc.DialOption{grpc.WithInsecure()}
 
   conn, err := grpc.Dial(serverAddr, opts...)
@@ -38,17 +36,13 @@ func NewLiveConnections() *liveConnections {
   areaClient := disk.NewAreaManagerClient(conn)
   userClient := disk.NewUserManagerClient(conn)
 
-  hub := ws.NewHub()
-  go hub.Run()
-
-  return &liveConnections{
-    hub: hub,
+  return &LiveConnections{
     areaClient: areaClient,
     userClient: userClient,
   }
 }
 
-func (s *liveConnections) handleJoin(w http.ResponseWriter, r *http.Request) {
+func (s *LiveConnections) HandleJoin(w http.ResponseWriter, r *http.Request) {
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
 
@@ -71,7 +65,7 @@ func (s *liveConnections) handleJoin(w http.ResponseWriter, r *http.Request) {
   fmt.Fprint(w, resp.Name)
 }
 
-func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) {
+func (s *LiveConnections) HandleNewArea(w http.ResponseWriter, r *http.Request) {
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
   resp, err := s.areaClient.Create(ctx, &disk.CreateAreaRequest{})
@@ -83,7 +77,7 @@ func (s *liveConnections) handleNewArea(w http.ResponseWriter, r *http.Request) 
   fmt.Fprint(w, resp.Name)
 }
 
-func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request) {
+func (s *LiveConnections) HandleAreaUsers(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   p := vars["id"]
 
@@ -98,6 +92,12 @@ func (s *liveConnections) handleAreaUsers(w http.ResponseWriter, r *http.Request
   fmt.Fprint(w, resp.GetUsers())
 }
 
-func (s *liveConnections) handleWS(w http.ResponseWriter, r *http.Request) {
-  ws.NewClient(w, r, s.hub)
+func (s *LiveConnections) HasUser(area string, user string) bool {
+  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  defer cancel()
+  resp, err := s.areaClient.HasUser(ctx, &disk.HasUserRequest{Area: area, User: user})
+  if err != nil {
+    log.Fatalf("areaClient.HasUser failed: %v", err)
+  }
+  return resp.Result
 }

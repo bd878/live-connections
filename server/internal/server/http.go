@@ -10,18 +10,27 @@ import (
   "path/filepath"
 
   "github.com/gorilla/mux"
+  "github.com/teralion/live-connections/server/internal/conn"
+  ws "github.com/teralion/live-connections/server/internal/websocket"
 )
 
 var publicPath = filepath.Join("../", "public")
 
 func NewHTTPServer(addr string, done chan struct{}) *http.Server {
-  liveConn := NewLiveConnections()
+  liveConn := conn.NewLiveConnections()
   router := mux.NewRouter()
 
-  router.HandleFunc("/ws", liveConn.handleWS).Methods("GET")
-  router.HandleFunc("/join", liveConn.handleJoin).Methods("POST")
-  router.HandleFunc("/area/new", liveConn.handleNewArea).Methods("GET")
-  router.HandleFunc("/area/{id}", liveConn.handleAreaUsers).Methods("GET")
+  hub := ws.NewHub()
+  go hub.Run()
+
+  handleWS := func(w http.ResponseWriter, r *http.Request) {
+    ws.NewClient(w, r, hub, liveConn)
+  }
+
+  router.HandleFunc("/ws", handleWS).Methods("GET")
+  router.HandleFunc("/join", liveConn.HandleJoin).Methods("POST")
+  router.HandleFunc("/area/new", liveConn.HandleNewArea).Methods("GET")
+  router.HandleFunc("/area/{id}", liveConn.HandleAreaUsers).Methods("GET")
 
   srv := &http.Server{
     Addr: addr,

@@ -264,6 +264,7 @@ async function authUser(socket, user) {
   socket.send(authMessage);
   const event = await socket.waitMessage();
   if (event && event.data) {
+    const text = await event.data.text()
     ;(event.data === 'ok' && user.setToken("test")); // test
   }
 }

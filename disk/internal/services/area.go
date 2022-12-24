@@ -55,3 +55,19 @@ func (s *AreaManagerServer) ListUsers(ctx context.Context, request *pb.ListAreaU
 
   return &pb.ListAreaUsersResponse{Users: names}, nil
 }
+
+func (s *AreaManagerServer) HasUser(ctx context.Context, request *pb.HasUserRequest) (*pb.HasUserResponse, error) {
+  if !utils.IsNameSafe(request.Area) {
+    return nil, fmt.Errorf("area %v is not safe", request.Area)
+  }
+
+  if !utils.IsNameSafe(request.User) {
+    return nil, fmt.Errorf("user %v is not safe", request.User)
+  }
+
+  if _, err := os.Stat(filepath.Join(s.Dir, request.Area, request.User)); err != nil {
+    return nil, errors.New("no file")
+  }
+
+  return &pb.HasUserResponse{Result: true}, nil
+}

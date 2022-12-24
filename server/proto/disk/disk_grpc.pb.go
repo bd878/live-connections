@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type AreaManagerClient interface {
 	Create(ctx context.Context, in *CreateAreaRequest, opts ...grpc.CallOption) (*CreateAreaResponse, error)
 	ListUsers(ctx context.Context, in *ListAreaUsersRequest, opts ...grpc.CallOption) (*ListAreaUsersResponse, error)
+	HasUser(ctx context.Context, in *HasUserRequest, opts ...grpc.CallOption) (*HasUserResponse, error)
 }
 
 type areaManagerClient struct {
@@ -47,12 +48,22 @@ func (c *areaManagerClient) ListUsers(ctx context.Context, in *ListAreaUsersRequ
 	return out, nil
 }
 
+func (c *areaManagerClient) HasUser(ctx context.Context, in *HasUserRequest, opts ...grpc.CallOption) (*HasUserResponse, error) {
+	out := new(HasUserResponse)
+	err := c.cc.Invoke(ctx, "/disk.AreaManager/HasUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AreaManagerServer is the server API for AreaManager service.
 // All implementations must embed UnimplementedAreaManagerServer
 // for forward compatibility
 type AreaManagerServer interface {
 	Create(context.Context, *CreateAreaRequest) (*CreateAreaResponse, error)
 	ListUsers(context.Context, *ListAreaUsersRequest) (*ListAreaUsersResponse, error)
+	HasUser(context.Context, *HasUserRequest) (*HasUserResponse, error)
 	mustEmbedUnimplementedAreaManagerServer()
 }
 
@@ -65,6 +76,9 @@ func (UnimplementedAreaManagerServer) Create(context.Context, *CreateAreaRequest
 }
 func (UnimplementedAreaManagerServer) ListUsers(context.Context, *ListAreaUsersRequest) (*ListAreaUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+}
+func (UnimplementedAreaManagerServer) HasUser(context.Context, *HasUserRequest) (*HasUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HasUser not implemented")
 }
 func (UnimplementedAreaManagerServer) mustEmbedUnimplementedAreaManagerServer() {}
 
@@ -115,6 +129,24 @@ func _AreaManager_ListUsers_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AreaManager_HasUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HasUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AreaManagerServer).HasUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.AreaManager/HasUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AreaManagerServer).HasUser(ctx, req.(*HasUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AreaManager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "disk.AreaManager",
 	HandlerType: (*AreaManagerServer)(nil),
@@ -126,6 +158,10 @@ var _AreaManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUsers",
 			Handler:    _AreaManager_ListUsers_Handler,
+		},
+		{
+			MethodName: "HasUser",
+			Handler:    _AreaManager_HasUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
