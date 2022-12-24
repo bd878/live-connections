@@ -25,7 +25,9 @@ var enc = binary.LittleEndian
 
 var lenWidth = 2
 
-const authMessageType = 1
+const authMessageType int8 = 1
+
+const listClientsOnlineMessageType int8 = 2
 
 var newline = []byte{'\n'}
 
@@ -64,7 +66,6 @@ func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub, liveConn *lc.Li
   }
 
   client := &Client{conn: conn, lc: liveConn, hub: hub, send: make(chan []byte, 256)}
-  hub.register <- client
 
   go client.readLoop()
   go client.writeLoop()
@@ -74,21 +75,11 @@ func (c *Client) isAuthenticated() bool {
   return c.area != "" && c.name != ""
 }
 
-func (c *Client) takeAuthMessage(message *[]byte) error {
+func (c *Client) takeAuthMessage(mr *bytes.Reader) error {
   var err error
 
-  mr := bytes.NewReader(*message)
-  var messageType int8
-  if err = binary.Read(mr, enc, &messageType); err != nil {
-    return err
-  }
-
-  if messageType != authMessageType {
-    return errors.New("message type is not auth message")
-  }
-
   var areaSize uint16
-  if err = binary.Read(mr, enc, &areaSize); err != nil {
+  if err := binary.Read(mr, enc, &areaSize); err != nil {
     return err
   }
 
@@ -123,10 +114,6 @@ func (c *Client) takeAuthMessage(message *[]byte) error {
 }
 
 func (c *Client) readLoop() {
-  defer func() {
-    c.hub.unregister <- c
-  }()
-
   c.conn.SetReadLimit(MaxPayloadSize)
   c.conn.SetReadDeadline(time.Now().Add(pongWait))
   c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
@@ -151,19 +138,39 @@ func (c *Client) readLoop() {
     }
     log.Println("message =", message)
 
-    if !c.isAuthenticated() {
-      if size != uint16(len(message)) {
-        log.Println("size != message size = ", size, len(message))
-      } else {
-        if err = c.takeAuthMessage(&message); err != nil {
-          log.Println("failed to parse auth message =", err)
-          break;
-        }
+    if size != uint16(len(message)) {
+      log.Println("size != message size = ", size, len(message))
+      break
+    }
 
-        c.send <- []byte("ok")
+    mr := bytes.NewReader(message)
+    var messageType int8
+    if err = binary.Read(mr, enc, &messageType); err != nil {
+      log.Println("failed to read message type")
+      break
+    }
+
+    if !c.isAuthenticated() && (messageType != authMessageType) {
+      log.Println("message type is not auth message")
+      break
+    }
+
+    switch messageType {
+    case authMessageType:
+      if err = c.takeAuthMessage(mr); err != nil {
+        log.Println("failed to parse auth message =", err)
+        break;
       }
-    } else {
-      c.hub.broadcast <- message
+
+      c.send <- []byte("ok") // TODO: token
+      c.hub.register <- c
+
+      defer func() {
+        c.hub.unregister <- c
+      }()
+    default:
+      log.Println("unknown message type =", messageType)
+      break
     }
   }
 }
@@ -179,6 +186,11 @@ func (c *Client) writeLoop() {
   for {
     select {
     case message := <-c.send:
+      if !c.isAuthenticated() {
+        log.Println("not authenticated")
+        continue
+      }
+
       c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
       writer, err := c.conn.NextWriter(ws.BinaryMessage)

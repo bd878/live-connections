@@ -54,7 +54,7 @@ function bindUserToArea(area, user) {
 }
 
 function check(checkFn, trueFn, falseFn = (() => {})) {
-  return (args) => checkFn() ? fn(args) : falseFn();
+  return (args) => checkFn() ? trueFn(args) : falseFn();
 }
 
 // messages
@@ -250,7 +250,7 @@ class User {
   }
 
   isAuthed() {
-    return !!(this.area && this.user && this.token);
+    return !!(this.area && this.name && this.token);
   }
 
   setToken(token) {
@@ -265,11 +265,11 @@ async function authUser(socket, user) {
   const event = await socket.waitMessage();
   if (event && event.data) {
     const text = await event.data.text()
-    ;(event.data === 'ok' && user.setToken("test")); // test
+    ;(text === "ok" && user.setToken("test")); // DEBUG
   }
 }
 
-async function runUser(areaName, userName) {
+async function establishConnection(areaName, userName) {
   const socket = new Socket();
   const user = new User(areaName, userName);
 
@@ -383,7 +383,7 @@ async function main() {
 
     console.log("areaName, userName: ", areaName, userName); // DEBUG
 
-    await runUser(areaName, userName);
+    await establishConnection(areaName, userName);
 
     return;
   }
@@ -393,13 +393,13 @@ async function main() {
     console.log("proceed new user"); // DEBUG
     userName = await proceedNewUser(areaName)
     console.log("areaName, userName: ", areaName, userName); // DEBUG
-    await runUser(areaName, userName);
+    await establishConnection(areaName, userName);
 
     return;
   }
 
   console.log("restore session"); // DEBUG
-  await runUser(areaName, userName);
+  await establishConnection(areaName, userName);
   await restoreSession(areaName, userName);
 }
 
