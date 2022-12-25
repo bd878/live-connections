@@ -256,7 +256,7 @@ class Socket {
 }
 
 class User {
-  constructor(areaName = '', userName = '') {
+  constructor(areaName = '', userName = '', token = '') {
     this.area = areaName;
     this.name = userName
     this.token = null;
@@ -271,37 +271,79 @@ class User {
   setToken(token) {
     this.token = token;
   }
+
+  define(areaName, userName) {
+    ;(!this.area && this.area = areaName);
+    ;(!this.user && this.name = userName);
+  }
 }
 
-async function messageHandler(event) /* event value */ {
-  const buffer = await event.data.arrayBuffer();
+const MouseCoords = {
+  x: 0,
+  y: 0,
+  userName: '',
+};
+
+async function messageLoop(hs, event /* another set of bytes have come... */ ) {
+  let buffer = await event.data.arrayBuffer();
   const dv = new DataView(buffer);
 
   let offset = 0;
-  const size = dv.getUint16(0, ENDIANNE);
-  offset += SIZE_PREFIX_SIZE;
+  let size = 0;
 
-  const type = dv.getInt8(offset, ENDIANNE);
-  offset += TYPE_SIZE;
+  while (offset <= size) {
+    size = dv.getUint16(offset, ENDIANNE);
+    offset += SIZE_PREFIX_SIZE;
 
-  switch (type) {
-    case AUTH_OK_TYPE:
-      const resultSlice = buffer.slice(offset);
-      console.log("resultSlice = ", resultSlice);
-      const message = new Blob([resultSlice]);
-      const text = await message.text();
-      console.log("text =", text);
-      break;
-    case USERS_ONLINE_TYPE:
-      console.log("unsupported message type =", type);
-      break;
-    default:
-      console.log("[messageHandler]: unknown type =", type);
-      break;
+    if (size === 0) {
+      throw new Error('[messageLoop]: size is 0 =', size);
+    }
+
+    const type = dv.getInt8(offset, ENDIANNE);
+    offset += TYPE_SIZE;
+
+    switch (type) {
+      case MOUSE_MOVE_TYPE:
+        setTimeout(() => handleMouseMoveMessage(hs.onMouseMove, buffer.slice(offset)), 0); /* throw it in loop */
+        offset += size;
+        break;
+      case AUTH_OK_TYPE:
+        const message = new Blob([buffer.slice(offset)]);
+        setTimeout(() => handleAuthOkMessage(hs.onAuthOk, message), 0); /* throw it in a loop */
+        offset += size;
+        break;
+      case USERS_ONLINE_TYPE:
+        setTimeout(() => handleUsersOnlineMessage(hs.onUsersOnline, buffer.slice(offset)), 0); /* throw it in a loop */
+        offset += size;
+        break;
+      default:
+        console.log("[messageLoop]: unknown type =", type);
+        return;
+    }
   }
+}
 
-  await new Promise(resolve => resolve()); // temp
-  return "";
+function handleMouseMoveMessage(fn, buffer /* ArrayBuffer */) {
+  console.log("handle mouse move message");
+
+  const x, y, user;
+  const c = Object.create(coords);
+  c.x = x;
+  c.y = y;
+  c.user = user;
+
+  fn(c);
+}
+
+async function handleAuthOkMessage(fn, message /* Blob */) {
+  const text = await message.text();
+  fn(text);
+}
+
+function handleUsersOnlineMessage(fn, buffer /* ArrayBuffer */) {
+  console.log("handle users online message");
+  const users = [];
+  fn(users)
 }
 
 function closeHandler(event) {
@@ -315,32 +357,32 @@ function errorHandler(event) {
   console.log("error =", event);
 }
 
-async function authUser(socket, user) {
-  const authMessage = await makeAuthUserMessage(user.area, user.name);
-
+async function authUser(socket, areaName, userName) {
+  const authMessage = await makeAuthUserMessage(areaName, userName);
   socket.send(authMessage);
-  const event = await socket.waitMessage();
-  if (event && event.data) {
-    const text = await messageHandler(event);
-    ;(text === "ok" && user.setToken("test")); // DEBUG
-  }
 }
 
-async function establishConnection(areaName, userName) {
-  const socket = new Socket();
-  const user = new User(areaName, userName);
-
+/*
+ * Defines protocol rules
+ * TODO: convert to class Connection
+ */
+async function establishProtocol(socket, user) {
   socket.create(BACKEND_URL + SOCKET_PATH);
-  socket.onOpen(() => authUser(socket, user));
+  socket.onOpen(() => authUser(socket, user.area, user.name));
 
   await socket.waitOpen();
 
   if (socket.isReady()) {
     console.log("socket is running..."); // DEBUG
 
-    socket.pushSendGuard(user.isAuthed)
+    const handlers = {
+      onAuthOk: (text) => { ;(text === "ok" && user.setToken("test")); },
+      onMouseMove: (coords) => { console.log("coords =", coords); },
+      onUsersOnline: (users) => { console.log("users =", users); },
+    };
 
-    socket.onMessage(messageHandler);
+    socket.pushSendGuard(user.isAuthed)
+    socket.onMessage((event) => messageLoop(handlers, event));
     socket.onClose(closeHandler);
     socket.onError(errorHandler);
 
@@ -430,32 +472,37 @@ async function restoreSession(areaName, userName) {
 }
 
 async function main() {
+  const socket = new Socket();
+  const user = new User();
+
   let userName;
+
   let areaName = takeAreaName(window.location.pathname);
   if (!areaName) {
-    console.log("proceed new area"); // DEBUG
     areaName = await proceedNewArea();
     userName = await proceedNewUser(areaName);
 
-    console.log("areaName, userName: ", areaName, userName); // DEBUG
+    user.define(areaName, userName);
 
-    await establishConnection(areaName, userName);
+    await establishProtocol(socket, user);
 
     return;
   }
 
   userName = findUserName(areaName);
   if (!userName) {
-    console.log("proceed new user"); // DEBUG
     userName = await proceedNewUser(areaName)
-    console.log("areaName, userName: ", areaName, userName); // DEBUG
-    await establishConnection(areaName, userName);
+
+    user.define(areaName, userName);
+
+    await establishProtocol(socket, user);
 
     return;
   }
 
-  console.log("restore session"); // DEBUG
-  await establishConnection(areaName, userName);
+  user.define(areaName, userName);
+
+  await establishProtocol(socket, user);
   await restoreSession(areaName, userName);
 }
 
