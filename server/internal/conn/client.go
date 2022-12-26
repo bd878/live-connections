@@ -23,6 +23,7 @@ const (
 type LiveConnections struct {
   areaClient disk.AreaManagerClient
   userClient disk.UserManagerClient
+  cursorClient disk.CursorManagerClient
 }
 
 func NewLiveConnections() *LiveConnections {
@@ -35,10 +36,12 @@ func NewLiveConnections() *LiveConnections {
 
   areaClient := disk.NewAreaManagerClient(conn)
   userClient := disk.NewUserManagerClient(conn)
+  cursorClient := disk.NewCursorManagerClient(conn)
 
   return &LiveConnections{
     areaClient: areaClient,
     userClient: userClient,
+    cursorClient: cursorClient,
   }
 }
 
@@ -100,4 +103,13 @@ func (s *LiveConnections) HasUser(area string, user string) bool {
     log.Fatalf("areaClient.HasUser failed: %v", err)
   }
   return resp.Result
+}
+
+func (s *LiveConnections) WriteMouseCoords(area string, user string, xPos float32, yPos float32) {
+  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  defer cancel()
+  _, err := s.cursorClient.Write(ctx, &disk.WriteCursorRequest{Area: area, Name: user, XPos: xPos, YPos: yPos})
+  if err != nil {
+    log.Fatalf("cursorClient.Write failed: %v", err)
+  }
 }

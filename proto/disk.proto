@@ -87,15 +87,27 @@ message AddUserResponse {
   string name = 1;
 }
 
-service ShapeManager {
-  rpc Move(MoveShapeRequest) returns (MoveShapeResponse);
+service CursorManager {
+  rpc Write(WriteCursorRequest) returns (WriteCursorResponse);
+  rpc Read(ReadCursorRequest) returns (ReadCursorResponse);
 }
 
-message Shape {
-  int32 xPos = 1;
-  int32 yPos = 2;
+message WriteCursorRequest {
+  string area = 1;
+  string name = 2;
+
+  float xPos = 3;
+  float yPos = 4;
 }
 
-message MoveShapeRequest {}
+message WriteCursorResponse {}
 
-message MoveShapeResponse {}
+message ReadCursorRequest {
+  string area = 1;
+  string name = 2;
+}
+
+message ReadCursorResponse {
+  float xPos = 1;
+  float yPos = 2;
+}

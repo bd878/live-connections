@@ -24,6 +24,7 @@ func NewGRPCServer(addr string) *GRPCServer {
 
   pb.RegisterAreaManagerServer(grpcServer, services.NewAreaManagerServer(baseDir))
   pb.RegisterUserManagerServer(grpcServer, services.NewUserManagerServer(baseDir))
+  pb.RegisterCursorManagerServer(grpcServer, services.NewCursorManagerServer(baseDir))
 
   return &GRPCServer{listener: listener, server: grpcServer}
 }

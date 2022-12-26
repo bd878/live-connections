@@ -323,83 +323,119 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 	Metadata: "disk.proto",
 }
 
-// ShapeManagerClient is the client API for ShapeManager service.
+// CursorManagerClient is the client API for CursorManager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ShapeManagerClient interface {
-	Move(ctx context.Context, in *MoveShapeRequest, opts ...grpc.CallOption) (*MoveShapeResponse, error)
+type CursorManagerClient interface {
+	Write(ctx context.Context, in *WriteCursorRequest, opts ...grpc.CallOption) (*WriteCursorResponse, error)
+	Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*ReadCursorResponse, error)
 }
 
-type shapeManagerClient struct {
+type cursorManagerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewShapeManagerClient(cc grpc.ClientConnInterface) ShapeManagerClient {
-	return &shapeManagerClient{cc}
+func NewCursorManagerClient(cc grpc.ClientConnInterface) CursorManagerClient {
+	return &cursorManagerClient{cc}
 }
 
-func (c *shapeManagerClient) Move(ctx context.Context, in *MoveShapeRequest, opts ...grpc.CallOption) (*MoveShapeResponse, error) {
-	out := new(MoveShapeResponse)
-	err := c.cc.Invoke(ctx, "/disk.ShapeManager/Move", in, out, opts...)
+func (c *cursorManagerClient) Write(ctx context.Context, in *WriteCursorRequest, opts ...grpc.CallOption) (*WriteCursorResponse, error) {
+	out := new(WriteCursorResponse)
+	err := c.cc.Invoke(ctx, "/disk.CursorManager/Write", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ShapeManagerServer is the server API for ShapeManager service.
-// All implementations must embed UnimplementedShapeManagerServer
+func (c *cursorManagerClient) Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*ReadCursorResponse, error) {
+	out := new(ReadCursorResponse)
+	err := c.cc.Invoke(ctx, "/disk.CursorManager/Read", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CursorManagerServer is the server API for CursorManager service.
+// All implementations must embed UnimplementedCursorManagerServer
 // for forward compatibility
-type ShapeManagerServer interface {
-	Move(context.Context, *MoveShapeRequest) (*MoveShapeResponse, error)
-	mustEmbedUnimplementedShapeManagerServer()
+type CursorManagerServer interface {
+	Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error)
+	Read(context.Context, *ReadCursorRequest) (*ReadCursorResponse, error)
+	mustEmbedUnimplementedCursorManagerServer()
 }
 
-// UnimplementedShapeManagerServer must be embedded to have forward compatible implementations.
-type UnimplementedShapeManagerServer struct {
+// UnimplementedCursorManagerServer must be embedded to have forward compatible implementations.
+type UnimplementedCursorManagerServer struct {
 }
 
-func (UnimplementedShapeManagerServer) Move(context.Context, *MoveShapeRequest) (*MoveShapeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Move not implemented")
+func (UnimplementedCursorManagerServer) Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedShapeManagerServer) mustEmbedUnimplementedShapeManagerServer() {}
+func (UnimplementedCursorManagerServer) Read(context.Context, *ReadCursorRequest) (*ReadCursorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedCursorManagerServer) mustEmbedUnimplementedCursorManagerServer() {}
 
-// UnsafeShapeManagerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ShapeManagerServer will
+// UnsafeCursorManagerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CursorManagerServer will
 // result in compilation errors.
-type UnsafeShapeManagerServer interface {
-	mustEmbedUnimplementedShapeManagerServer()
+type UnsafeCursorManagerServer interface {
+	mustEmbedUnimplementedCursorManagerServer()
 }
 
-func RegisterShapeManagerServer(s *grpc.Server, srv ShapeManagerServer) {
-	s.RegisterService(&_ShapeManager_serviceDesc, srv)
+func RegisterCursorManagerServer(s *grpc.Server, srv CursorManagerServer) {
+	s.RegisterService(&_CursorManager_serviceDesc, srv)
 }
 
-func _ShapeManager_Move_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MoveShapeRequest)
+func _CursorManager_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WriteCursorRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ShapeManagerServer).Move(ctx, in)
+		return srv.(CursorManagerServer).Write(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.ShapeManager/Move",
+		FullMethod: "/disk.CursorManager/Write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ShapeManagerServer).Move(ctx, req.(*MoveShapeRequest))
+		return srv.(CursorManagerServer).Write(ctx, req.(*WriteCursorRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _ShapeManager_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "disk.ShapeManager",
-	HandlerType: (*ShapeManagerServer)(nil),
+func _CursorManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadCursorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CursorManagerServer).Read(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.CursorManager/Read",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CursorManagerServer).Read(ctx, req.(*ReadCursorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _CursorManager_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "disk.CursorManager",
+	HandlerType: (*CursorManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Move",
-			Handler:    _ShapeManager_Move_Handler,
+			MethodName: "Write",
+			Handler:    _CursorManager_Write_Handler,
+		},
+		{
+			MethodName: "Read",
+			Handler:    _CursorManager_Read_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

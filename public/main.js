@@ -73,6 +73,8 @@ const USERS_ONLINE_TYPE = 3;
 const AUTH_OK_TYPE = 4;
 
 function makeMouseMoveMessage(x, y) {
+  console.log("x, y:", x, y);
+
   const messageSize = (
     TYPE_SIZE +  // type
     COORD_SIZE + // x-coord
@@ -186,7 +188,7 @@ class Socket {
     } else {
       const c = fn => fn();
 
-      if (!this.sendGuards.find(c)) {
+      if (!this.sendGuards.some(c)) {
         this.conn.send(message);
       }
     }
@@ -200,6 +202,10 @@ class Socket {
 
   waitOpen() {
     if (this.conn) {
+      if (this.conn.readyState === Socket.OPEN) {
+        return Promise.resolve();
+      }
+
       return new Promise(resolve => (
         this.conn.addEventListener('open', resolve)
       ));
@@ -262,10 +268,15 @@ class User {
     this.token = null;
 
     this.isAuthed = this.isAuthed.bind(this);
+    this.isNotAuthed = this.isNotAuthed.bind(this);
   }
 
   isAuthed() {
     return !!(this.area && this.name && this.token);
+  }
+
+  isNotAuthed() {
+    return !this.isAuthed();
   }
 
   setToken(token) {
@@ -273,8 +284,8 @@ class User {
   }
 
   define(areaName, userName) {
-    ;(!this.area && this.area = areaName);
-    ;(!this.user && this.name = userName);
+    ;(!this.area && (this.area = areaName));
+    ;(!this.user && (this.name = userName));
   }
 }
 
@@ -323,16 +334,10 @@ async function messageLoop(hs, event /* another set of bytes have come... */ ) {
   }
 }
 
-function handleMouseMoveMessage(fn, buffer /* ArrayBuffer */) {
-  console.log("handle mouse move message");
+async function handleMouseMoveMessage(fn, buffer /* ArrayBuffer */) {
+  const bytes = new Blob([buffer])
 
-  const x, y, user;
-  const c = Object.create(coords);
-  c.x = x;
-  c.y = y;
-  c.user = user;
-
-  fn(c);
+  fn(bytes);
 }
 
 async function handleAuthOkMessage(fn, message /* Blob */) {
@@ -357,8 +362,8 @@ function errorHandler(event) {
   console.log("error =", event);
 }
 
-async function authUser(socket, areaName, userName) {
-  const authMessage = await makeAuthUserMessage(areaName, userName);
+async function authUser(socket, user) {
+  const authMessage = await makeAuthUserMessage(user.area, user.name);
   socket.send(authMessage);
 }
 
@@ -367,26 +372,29 @@ async function authUser(socket, areaName, userName) {
  * TODO: convert to class Connection
  */
 async function establishProtocol(socket, user) {
+  // establish
   socket.create(BACKEND_URL + SOCKET_PATH);
-  socket.onOpen(() => authUser(socket, user.area, user.name));
 
   await socket.waitOpen();
+  await authUser(socket, user);
 
+  socket.pushSendGuard(user.isNotAuthed)
+
+  // run
   if (socket.isReady()) {
     console.log("socket is running..."); // DEBUG
 
     const handlers = {
-      onAuthOk: (text) => { ;(text === "ok" && user.setToken("test")); },
-      onMouseMove: (coords) => { console.log("coords =", coords); },
-      onUsersOnline: (users) => { console.log("users =", users); },
+      onAuthOk: (text) => { ;(text === "ok" && user.setToken(text)); },
+      onMouseMove: (coords) => { console.log("[onMouseMove]: coords =", coords); },
+      onUsersOnline: (users) => { console.log("[onUsersOnline]: users =", users); },
     };
 
-    socket.pushSendGuard(user.isAuthed)
     socket.onMessage((event) => messageLoop(handlers, event));
     socket.onClose(closeHandler);
     socket.onError(errorHandler);
 
-    trackMouseEvents(socket)
+    trackMouseEvents(socket);
   } else {
     throw new Error("[init]: failed to open socket");
   }

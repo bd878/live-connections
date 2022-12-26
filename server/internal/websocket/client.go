@@ -44,6 +44,12 @@ var upgrader = ws.Upgrader{
   CheckOrigin: checkClientOrigin,
 }
 
+type Coords struct {
+  xPos float32
+
+  yPos float32
+}
+
 type Client struct {
   conn *ws.Conn
 
@@ -56,6 +62,8 @@ type Client struct {
   area string
 
   name string
+
+  coords Coords
 }
 
 func checkClientOrigin(r *http.Request) bool {
@@ -119,6 +127,28 @@ func (c *Client) takeAuthMessage(mr *bytes.Reader) error {
   return nil
 }
 
+func (c *Client) takeMouseMoveMessage(mr *bytes.Reader) error {
+  var err error
+
+  var xPos float32
+  if err = binary.Read(mr, enc, &xPos); err != nil {
+    log.Println("failed to read xPos =",  err)
+    return err
+  }
+
+  var yPos float32
+  if err = binary.Read(mr, enc, &yPos); err != nil {
+    log.Println("failed to read YPos =",  err)
+    return err
+  }
+
+  // rewrite each time new coords received
+  c.coords = Coords{xPos: xPos, yPos: yPos}
+
+  log.Println("take coords =", xPos, yPos)
+  return nil
+}
+
 func (c *Client) readLoop() {
   c.conn.SetReadLimit(MaxPayloadSize)
   c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -163,9 +193,10 @@ func (c *Client) readLoop() {
 
     switch messageType {
     case authMessageType:
+      log.Println("auth message")
       if err = c.takeAuthMessage(mr); err != nil {
         log.Println("failed to parse auth message =", err)
-        break;
+        break
       }
 
       c.send <- doTextMessage("ok", authOkMessageType) // TODO: token
@@ -175,7 +206,15 @@ func (c *Client) readLoop() {
         c.hub.unregister <- c
       }()
     case mouseMoveMessageType:
-      c.send <- doTextMessage("mouse move", mouseMoveMessageType) // TODO: coords
+      log.Println("mouse move message")
+      if err = c.takeMouseMoveMessage(mr); err != nil {
+        log.Println("failed to parse mouse move message =", err)
+        break
+      }
+
+      var mouseMoveMessage []byte = c.doMouseMoveMessage()
+      log.Println("mouse move response message =", mouseMoveMessage)
+      c.send <- mouseMoveMessage // broadcast
     default:
       log.Println("unknown message type =", messageType)
       break
@@ -299,4 +338,56 @@ func doTextMessage(text string, messageType int8) []byte {
 
   res := result.Bytes()
   return res
+}
+
+func (c *Client) doMouseMoveMessage() []byte {
+  var err error
+
+  // TODO: pack to struct
+  typeBytes := new(bytes.Buffer)
+  if err = binary.Write(typeBytes, enc, mouseMoveMessageType); err != nil {
+    log.Println("error writing mouse move type =", err)
+    return []byte{}
+  }
+
+  userBytes := new(bytes.Buffer)
+  if err = binary.Write(userBytes, enc, []byte(c.name)); err != nil {
+    log.Println("error writing user name bytes =", err)
+    return []byte{}
+  }
+
+  userSizeBytes := new(bytes.Buffer)
+  if err = binary.Write(userSizeBytes, enc, uint16(userBytes.Len())); err != nil {
+    log.Println("error writing user name bytes size =", err)
+    return []byte{}
+  }
+
+  coordsBytes := new(bytes.Buffer)
+  if err = binary.Write(coordsBytes, enc, c.coords.xPos); err != nil {
+    log.Println("error writing user x coord =", err)
+    return []byte{}
+  }
+
+  if err = binary.Write(coordsBytes, enc, c.coords.yPos); err != nil {
+    log.Println("error writing user y coord =", err)
+    return []byte{}
+  }
+
+  size := typeBytes.Len() + userSizeBytes.Len() + userBytes.Len() + coordsBytes.Len()
+  sizeBytes := new(bytes.Buffer)
+  if err = binary.Write(sizeBytes, enc, uint16(size)); err != nil {
+    log.Println("error writing total size =", err)
+    return []byte{}
+  }
+
+  return bytes.Join(
+    [][]byte{
+      sizeBytes.Bytes(),
+      typeBytes.Bytes(),
+      userSizeBytes.Bytes(),
+      userBytes.Bytes(),
+      coordsBytes.Bytes(),
+    },
+    []byte{},
+  )
 }
