@@ -9,7 +9,7 @@ function debounce(func, limit = 0) {
   let last = undefined;
   return (args) => {
     if (last && (Date.now() - last) < limit) {
-      console.log('[debounce]: skip');
+      log.Print('[debounce]: skip');
       return;
     }
 
@@ -57,6 +57,21 @@ function check(checkFn, trueFn, falseFn = (() => {})) {
   return (args) => checkFn() ? trueFn(args) : falseFn();
 }
 
+const log = {
+  mode: 'silent', // 'warn' | 'debug'
+
+  _isDebug() { return this.mode === 'debug'; },
+  _isSilent() { return this.mode === 'silent'; },
+  _isWarn() { return this.mode === 'warn'; },
+
+  Print(message, ...args) {
+    ;(
+      (this._isDebug() || this._isWarn()) &&
+      (console.log(message, ...args))
+    );
+  }
+}
+
 // messages
 const LITTLE_ENDIANNE = 1;
 const ENDIANNE = LITTLE_ENDIANNE;
@@ -73,7 +88,7 @@ const USERS_ONLINE_TYPE = 3;
 const AUTH_OK_TYPE = 4;
 
 function makeMouseMoveMessage(x, y) {
-  console.log("x, y:", x, y);
+  log.Print("x, y:", x, y);
 
   const messageSize = (
     TYPE_SIZE +  // type
@@ -129,31 +144,31 @@ async function makeAuthUserMessage(area, user) {
   dv.setUint16(offset, messageSize, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   dv.setInt8(offset, AUTH_USER_TYPE, ENDIANNE);
   offset += TYPE_SIZE;
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   // area
   dv.setUint16(offset, areaEncoded.size, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   for (let i = 0; i < typedArea.length; i++, offset++) {
     dv.setUint8(offset, typedArea[i], ENDIANNE);
   }
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   // user
   dv.setUint16(offset, userEncoded.size, ENDIANNE);
   offset += SIZE_PREFIX_SIZE;
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   for (let i = 0; i < typedUser.length; i++, offset++) {
     dv.setUint8(offset, typedUser[i], ENDIANNE);
   }
 
-  console.log("offset:", offset); // DEBUG
+  log.Print("offset:", offset); // DEBUG
   return buffer;
 }
 
@@ -184,7 +199,7 @@ class Socket {
     }
 
     if (this.conn.readyState === Socket.CONNECTING) {
-      console.log('[Socket send]: still in connecting state');
+      log.Print('[Socket send]: still in connecting state');
     } else {
       const c = fn => fn();
 
@@ -313,31 +328,52 @@ async function messageLoop(hs, event /* another set of bytes have come... */ ) {
     const type = dv.getInt8(offset, ENDIANNE);
     offset += TYPE_SIZE;
 
+    const slice = buffer.slice(offset);
+
     switch (type) {
       case MOUSE_MOVE_TYPE:
-        setTimeout(() => handleMouseMoveMessage(hs.onMouseMove, buffer.slice(offset)), 0); /* throw it in loop */
+        setTimeout(() => handleMouseMoveMessage(hs.onMouseMove, slice), 0); /* throw it in a loop */
         offset += size;
         break;
       case AUTH_OK_TYPE:
-        const message = new Blob([buffer.slice(offset)]);
+        const message = new Blob([slice]);
         setTimeout(() => handleAuthOkMessage(hs.onAuthOk, message), 0); /* throw it in a loop */
         offset += size;
         break;
       case USERS_ONLINE_TYPE:
-        setTimeout(() => handleUsersOnlineMessage(hs.onUsersOnline, buffer.slice(offset)), 0); /* throw it in a loop */
+        setTimeout(() => handleUsersOnlineMessage(hs.onUsersOnline, slice), 0); /* throw it in a loop */
         offset += size;
         break;
       default:
-        console.log("[messageLoop]: unknown type =", type);
+        log.Print("[messageLoop]: unknown type =", type);
         return;
     }
   }
 }
 
-async function handleMouseMoveMessage(fn, buffer /* ArrayBuffer */) {
-  const bytes = new Blob([buffer])
+async function handleMouseMoveMessage(fn, buf /* ArrayBuffer */) {
+  let offset = 0;
+  const dv = new DataView(buf)
 
-  fn(bytes);
+  let nameSize = dv.getUint16(offset, ENDIANNE);
+  offset += SIZE_PREFIX_SIZE;
+
+  if (nameSize === 0) {
+    throw new Error('[handleMouseMoveMessage]: nameSize is 0 =', nameSize);
+  }
+
+  const nameBytes = new Uint8Array(buf, offset, nameSize);
+  const blob = new Blob([nameBytes]);
+  const name = await blob.text();
+  offset += nameSize;
+
+  const xPos = dv.getFloat32(offset,  ENDIANNE);
+  offset += COORD_SIZE;
+
+  const yPos = dv.getFloat32(offset, ENDIANNE);
+  offset += COORD_SIZE;
+
+  fn({ name, xPos, yPos });
 }
 
 async function handleAuthOkMessage(fn, message /* Blob */) {
@@ -346,20 +382,20 @@ async function handleAuthOkMessage(fn, message /* Blob */) {
 }
 
 function handleUsersOnlineMessage(fn, buffer /* ArrayBuffer */) {
-  console.log("handle users online message");
+  log.Print("handle users online message");
   const users = [];
   fn(users)
 }
 
 function closeHandler(event) {
   ;(event.wasClean
-    ? console.log(`Closed cleanly: code=${event.code} reason=${event.reason}`)
-    : console.log("Connection died")
+    ? log.Print(`Closed cleanly: code=${event.code} reason=${event.reason}`)
+    : log.Print("Connection died")
   );
 }
 
 function errorHandler(event) {
-  console.log("error =", event);
+  log.Print("error =", event);
 }
 
 async function authUser(socket, user) {
@@ -382,12 +418,12 @@ async function establishProtocol(socket, user) {
 
   // run
   if (socket.isReady()) {
-    console.log("socket is running..."); // DEBUG
+    log.Print("socket is running..."); // DEBUG
 
     const handlers = {
       onAuthOk: (text) => { ;(text === "ok" && user.setToken(text)); },
-      onMouseMove: (coords) => { console.log("[onMouseMove]: coords =", coords); },
-      onUsersOnline: (users) => { console.log("[onUsersOnline]: users =", users); },
+      onMouseMove: (message) => { log.Print("[onMouseMove]: message =", message); },
+      onUsersOnline: (users) => { log.Print("[onUsersOnline]: users =", users); },
     };
 
     socket.onMessage((event) => messageLoop(handlers, event));
@@ -422,12 +458,12 @@ async function proceedNewArea() {
       throw new Error("[proceedNewArea]: empty area name");
     }
 
-    console.log('areaName:', areaName); // DEBUG
+    log.Print('areaName:', areaName); // DEBUG
     setUrl(`/${areaName}`);
 
     return areaName;
   } catch (e) {
-    console.log("error occured while retrieving response body text");
+    log.Print("error occured while retrieving response body text");
     console.error(e);
   }
 }
@@ -450,12 +486,12 @@ async function proceedNewUser(areaName) {
       throw new Error("[proceedNewUser]: empty user name");
     }
 
-    console.log("userName:", userName); // DEBUG
+    log.Print("userName:", userName); // DEBUG
     bindUserToArea(areaName, userName);
 
     return userName;
   } catch (e) {
-    console.log("error occured while retrieving response body text");
+    log.Print("error occured while retrieving response body text");
     throw new Error(e);
   }
 }
@@ -468,18 +504,20 @@ async function listUsersOnline(areaName) {
 
   try {
     const users = await response.text();
-    console.log("users: ", users);
+    log.Print("users: ", users);
   } catch (e) {
     throw new Error(e);
   }
 }
 
 async function restoreSession(areaName, userName) {
-  console.log("areaName, userName", areaName, userName); // DEBUG
+  log.Print("areaName, userName", areaName, userName); // DEBUG
   await new Promise(resolve => resolve());
 }
 
 async function main() {
+  log.mode = 'debug';
+
   const socket = new Socket();
   const user = new User();
 
