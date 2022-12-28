@@ -39,7 +39,6 @@ message HasUserResponse {
 
 service UserManager {
   rpc Add(AddUserRequest) returns (AddUserResponse);
-  rpc Write(WriteUserRequest) returns (WriteUserResponse);
   rpc Read(ReadUserRequest) returns (ReadUserResponse);
 }
 
@@ -55,14 +54,6 @@ message MouseMoveCoords {
 message TextInput {
   string value = 1;
 }
-
-message WriteUserRequest {
-  string area = 1;
-  string name = 2;
-  bytes message = 3;
-}
-
-message WriteUserResponse {}
 
 enum MessageType {
   MOUSE_MOUVE = 0;
@@ -92,12 +83,16 @@ service CursorManager {
   rpc Read(ReadCursorRequest) returns (ReadCursorResponse);
 }
 
+message Coords {
+  float xPos = 1;
+  float yPos = 2;
+}
+
 message WriteCursorRequest {
   string area = 1;
   string name = 2;
 
-  float xPos = 3;
-  float yPos = 4;
+  Coords coords = 3;
 }
 
 message WriteCursorResponse {}

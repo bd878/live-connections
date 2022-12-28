@@ -173,7 +173,6 @@ var _AreaManager_serviceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserManagerClient interface {
 	Add(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
-	Write(ctx context.Context, in *WriteUserRequest, opts ...grpc.CallOption) (*WriteUserResponse, error)
 	Read(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*ReadUserResponse, error)
 }
 
@@ -194,15 +193,6 @@ func (c *userManagerClient) Add(ctx context.Context, in *AddUserRequest, opts ..
 	return out, nil
 }
 
-func (c *userManagerClient) Write(ctx context.Context, in *WriteUserRequest, opts ...grpc.CallOption) (*WriteUserResponse, error) {
-	out := new(WriteUserResponse)
-	err := c.cc.Invoke(ctx, "/disk.UserManager/Write", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *userManagerClient) Read(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*ReadUserResponse, error) {
 	out := new(ReadUserResponse)
 	err := c.cc.Invoke(ctx, "/disk.UserManager/Read", in, out, opts...)
@@ -217,7 +207,6 @@ func (c *userManagerClient) Read(ctx context.Context, in *ReadUserRequest, opts 
 // for forward compatibility
 type UserManagerServer interface {
 	Add(context.Context, *AddUserRequest) (*AddUserResponse, error)
-	Write(context.Context, *WriteUserRequest) (*WriteUserResponse, error)
 	Read(context.Context, *ReadUserRequest) (*ReadUserResponse, error)
 	mustEmbedUnimplementedUserManagerServer()
 }
@@ -228,9 +217,6 @@ type UnimplementedUserManagerServer struct {
 
 func (UnimplementedUserManagerServer) Add(context.Context, *AddUserRequest) (*AddUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Add not implemented")
-}
-func (UnimplementedUserManagerServer) Write(context.Context, *WriteUserRequest) (*WriteUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
 func (UnimplementedUserManagerServer) Read(context.Context, *ReadUserRequest) (*ReadUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
@@ -266,24 +252,6 @@ func _UserManager_Add_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManager_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WriteUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserManagerServer).Write(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/disk.UserManager/Write",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagerServer).Write(ctx, req.(*WriteUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _UserManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ReadUserRequest)
 	if err := dec(in); err != nil {
@@ -309,10 +277,6 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Add",
 			Handler:    _UserManager_Add_Handler,
-		},
-		{
-			MethodName: "Write",
-			Handler:    _UserManager_Write_Handler,
 		},
 		{
 			MethodName: "Read",

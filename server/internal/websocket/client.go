@@ -203,6 +203,7 @@ func (c *Client) readLoop() {
       c.hub.register <- c
 
       defer func() {
+        c.lc.WriteMouseCoords(c.area, c.name, c.coords.xPos, c.coords.yPos)
         c.hub.unregister <- c
       }()
     case mouseMoveMessageType:
@@ -214,7 +215,7 @@ func (c *Client) readLoop() {
 
       var mouseMoveMessage []byte = c.doMouseMoveMessage()
       log.Println("mouse move response message =", mouseMoveMessage)
-      c.send <- mouseMoveMessage // broadcast
+      c.hub.broadcast <- mouseMoveMessage
     default:
       log.Println("unknown message type =", messageType)
       break

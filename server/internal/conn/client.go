@@ -108,7 +108,9 @@ func (s *LiveConnections) HasUser(area string, user string) bool {
 func (s *LiveConnections) WriteMouseCoords(area string, user string, xPos float32, yPos float32) {
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
-  _, err := s.cursorClient.Write(ctx, &disk.WriteCursorRequest{Area: area, Name: user, XPos: xPos, YPos: yPos})
+
+  coords := &disk.Coords{XPos: xPos, YPos: yPos}
+  _, err := s.cursorClient.Write(ctx, &disk.WriteCursorRequest{Area: area, Name: user, Coords: coords})
   if err != nil {
     log.Fatalf("cursorClient.Write failed: %v", err)
   }
