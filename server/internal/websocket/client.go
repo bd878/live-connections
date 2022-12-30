@@ -9,8 +9,10 @@ import (
   "strings"
   "errors"
 
-  lc "github.com/teralion/live-connections/server/internal/conn"
   ws "github.com/gorilla/websocket"
+
+  lc "github.com/teralion/live-connections/server/internal/conn"
+  t "github.com/teralion/live-connections/server/internal/types"
 )
 
 const (
@@ -33,6 +35,8 @@ const (
   listClientsOnlineMessageType int8 = 3
 
   authOkMessageType int8 = 4
+
+  initMouseCoordsType int8 = 5
 )
 
 var newline = []byte{'\n'}
@@ -42,12 +46,6 @@ var upgrader = ws.Upgrader{
   ReadBufferSize: 512,
   WriteBufferSize: 512,
   CheckOrigin: checkClientOrigin,
-}
-
-type Coords struct {
-  xPos float32
-
-  yPos float32
 }
 
 type Client struct {
@@ -63,7 +61,7 @@ type Client struct {
 
   name string
 
-  coords Coords
+  coords t.Coords
 }
 
 func checkClientOrigin(r *http.Request) bool {
@@ -143,7 +141,7 @@ func (c *Client) takeMouseMoveMessage(mr *bytes.Reader) error {
   }
 
   // rewrite each time new coords received
-  c.coords = Coords{xPos: xPos, yPos: yPos}
+  c.coords = t.Coords{XPos: xPos, YPos: yPos}
 
   log.Println("take coords =", xPos, yPos)
   return nil
@@ -202,8 +200,21 @@ func (c *Client) readLoop() {
       c.send <- doTextMessage("ok", authOkMessageType) // TODO: token
       c.hub.register <- c
 
+      coords := c.lc.ReadMouseCoords(c.area, c.name)
+      log.Println("read coords =", coords.XPos, coords.YPos)
+      if coords != nil && coords.XPos != 0 && coords.YPos != 0 {
+        log.Println("restore coords =", coords.XPos, coords.YPos)
+        c.hub.broadcast <- c.doMouseMoveMessage(initMouseCoordsType, coords)
+      }
+
       defer func() {
-        c.lc.WriteMouseCoords(c.area, c.name, c.coords.xPos, c.coords.yPos)
+        log.Println("mouse coords to write =", c.coords.XPos, c.coords.YPos)
+        if c.coords.XPos != 0 && c.coords.YPos != 0 { // has been initialized
+          log.Println("save mouse coords")
+          c.lc.WriteMouseCoords(c.area, c.name, c.coords.XPos, c.coords.YPos)
+        } else {
+          log.Println("mouse coords has not been initialized to save")
+        }
         c.hub.unregister <- c
       }()
     case mouseMoveMessageType:
@@ -213,7 +224,7 @@ func (c *Client) readLoop() {
         break
       }
 
-      var mouseMoveMessage []byte = c.doMouseMoveMessage()
+      var mouseMoveMessage []byte = c.doMouseMoveMessage(mouseMoveMessageType, &c.coords)
       log.Println("mouse move response message =", mouseMoveMessage)
       c.hub.broadcast <- mouseMoveMessage
     default:
@@ -341,12 +352,12 @@ func doTextMessage(text string, messageType int8) []byte {
   return res
 }
 
-func (c *Client) doMouseMoveMessage() []byte {
+func (c *Client) doMouseMoveMessage(messageType int8, coords *t.Coords) []byte {
   var err error
 
   // TODO: pack to struct
   typeBytes := new(bytes.Buffer)
-  if err = binary.Write(typeBytes, enc, mouseMoveMessageType); err != nil {
+  if err = binary.Write(typeBytes, enc, messageType); err != nil {
     log.Println("error writing mouse move type =", err)
     return []byte{}
   }
@@ -364,12 +375,12 @@ func (c *Client) doMouseMoveMessage() []byte {
   }
 
   coordsBytes := new(bytes.Buffer)
-  if err = binary.Write(coordsBytes, enc, c.coords.xPos); err != nil {
+  if err = binary.Write(coordsBytes, enc, coords.XPos); err != nil {
     log.Println("error writing user x coord =", err)
     return []byte{}
   }
 
-  if err = binary.Write(coordsBytes, enc, c.coords.yPos); err != nil {
+  if err = binary.Write(coordsBytes, enc, coords.YPos); err != nil {
     log.Println("error writing user y coord =", err)
     return []byte{}
   }

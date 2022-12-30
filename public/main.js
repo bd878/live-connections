@@ -87,6 +87,8 @@ const USERS_ONLINE_TYPE = 3;
 
 const AUTH_OK_TYPE = 4;
 
+const INIT_MOUSE_COORDS_TYPE = 5;
+
 function makeMouseMoveMessage(x, y) {
   log.Print("x, y:", x, y);
 
@@ -335,6 +337,10 @@ async function messageLoop(hs, event /* another set of bytes have come... */ ) {
         setTimeout(() => handleMouseMoveMessage(hs.onMouseMove, slice), 0); /* throw it in a loop */
         offset += size;
         break;
+      case INIT_MOUSE_COORDS_TYPE:
+        setTimeout(() => handleMouseMoveMessage(hs.onInitMouseCoords, slice), 0); /* throw it in a loop */
+        offset += size;
+        break;
       case AUTH_OK_TYPE:
         const message = new Blob([slice]);
         setTimeout(() => handleAuthOkMessage(hs.onAuthOk, message), 0); /* throw it in a loop */
@@ -423,6 +429,7 @@ async function establishProtocol(socket, user) {
     const handlers = {
       onAuthOk: (text) => { ;(text === "ok" && user.setToken(text)); },
       onMouseMove: (message) => { log.Print("[onMouseMove]: message =", message); },
+      onInitMouseCoords: (message) => { log.Print("[onInitMouseCoords]: message =", message); },
       onUsersOnline: (users) => { log.Print("[onUsersOnline]: users =", users); },
     };
 

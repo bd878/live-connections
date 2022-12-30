@@ -80,7 +80,7 @@ message AddUserResponse {
 
 service CursorManager {
   rpc Write(WriteCursorRequest) returns (WriteCursorResponse);
-  rpc Read(ReadCursorRequest) returns (ReadCursorResponse);
+  rpc Read(ReadCursorRequest) returns (Coords);
 }
 
 message Coords {
@@ -100,9 +100,4 @@ message WriteCursorResponse {}
 message ReadCursorRequest {
   string area = 1;
   string name = 2;
-}
-
-message ReadCursorResponse {
-  float xPos = 1;
-  float yPos = 2;
 }

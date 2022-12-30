@@ -292,7 +292,7 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CursorManagerClient interface {
 	Write(ctx context.Context, in *WriteCursorRequest, opts ...grpc.CallOption) (*WriteCursorResponse, error)
-	Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*ReadCursorResponse, error)
+	Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*Coords, error)
 }
 
 type cursorManagerClient struct {
@@ -312,8 +312,8 @@ func (c *cursorManagerClient) Write(ctx context.Context, in *WriteCursorRequest,
 	return out, nil
 }
 
-func (c *cursorManagerClient) Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*ReadCursorResponse, error) {
-	out := new(ReadCursorResponse)
+func (c *cursorManagerClient) Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*Coords, error) {
+	out := new(Coords)
 	err := c.cc.Invoke(ctx, "/disk.CursorManager/Read", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -326,7 +326,7 @@ func (c *cursorManagerClient) Read(ctx context.Context, in *ReadCursorRequest, o
 // for forward compatibility
 type CursorManagerServer interface {
 	Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error)
-	Read(context.Context, *ReadCursorRequest) (*ReadCursorResponse, error)
+	Read(context.Context, *ReadCursorRequest) (*Coords, error)
 	mustEmbedUnimplementedCursorManagerServer()
 }
 
@@ -337,7 +337,7 @@ type UnimplementedCursorManagerServer struct {
 func (UnimplementedCursorManagerServer) Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedCursorManagerServer) Read(context.Context, *ReadCursorRequest) (*ReadCursorResponse, error) {
+func (UnimplementedCursorManagerServer) Read(context.Context, *ReadCursorRequest) (*Coords, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
 func (UnimplementedCursorManagerServer) mustEmbedUnimplementedCursorManagerServer() {}

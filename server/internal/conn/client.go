@@ -13,6 +13,7 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
+  t "github.com/teralion/live-connections/server/internal/types"
 )
 
 const (
@@ -114,4 +115,18 @@ func (s *LiveConnections) WriteMouseCoords(area string, user string, xPos float3
   if err != nil {
     log.Fatalf("cursorClient.Write failed: %v", err)
   }
+}
+
+func (s *LiveConnections) ReadMouseCoords(area string, user string) *t.Coords {
+  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  defer cancel()
+
+  resp, err := s.cursorClient.Read(ctx, &disk.ReadCursorRequest{Area: area, Name: user})
+  if err != nil {
+    log.Println("cursorClient.Read failed: %v", err)
+    return nil
+  }
+
+  coords := t.Coords{XPos: resp.XPos, YPos: resp.YPos}
+  return &coords
 }

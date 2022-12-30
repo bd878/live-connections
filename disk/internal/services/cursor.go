@@ -1,7 +1,6 @@
 package services
 
 import (
-  "fmt"
   "errors"
   "log"
   "context"
@@ -33,6 +32,8 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
     storeFile *os.File
   )
 
+  log.Println("write mouse coords =", request.Coords.XPos, request.Coords.YPos)
+
   if !utils.IsNameSafe(request.Area) {
     return nil, errors.New("area name not safe")
   }
@@ -43,7 +44,10 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
 
   fp := filepath.Join(s.Dir, request.Area, request.Name, cursorFileName)
 
+  log.Println("write coords in file =", fp)
+
   if p, err = proto.Marshal(request.Coords); err != nil {
+    log.Println("failed to marshal coords")
     return nil, err
   }
 
@@ -53,6 +57,7 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
     0644,
   )
   if err != nil {
+    log.Println("failed to open file =", fp)
     return nil, err
   }
 
@@ -70,8 +75,54 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
   return &pb.WriteCursorResponse{}, nil
 }
 
-func (s *CursorServer) Read(ctx context.Context, request *pb.ReadCursorRequest) (*pb.ReadCursorResponse, error) {
-  fmt.Println("not implemented")
-  return &pb.ReadCursorResponse{XPos: 0, YPos: 0}, nil
+func (s *CursorServer) Read(ctx context.Context, request *pb.ReadCursorRequest) (*pb.Coords, error) {
+  var (
+    err error
+    f *os.File
+    size int64
+    info os.FileInfo
+    bytesRead int
+  )
+
+  if !utils.IsNameSafe(request.Area) {
+    return nil, errors.New("area name not safe")
+  }
+
+  if !utils.IsNameSafe(request.Name) {
+    return nil, errors.New("user name not safe")
+  }
+
+  fp := filepath.Join(s.Dir, request.Area, request.Name, cursorFileName)
+  f, err = os.OpenFile(
+    fp,
+    os.O_RDONLY|os.O_CREATE,
+    0644,
+  )
+  if err != nil {
+    return nil, err
+  }
+
+  if info, err = f.Stat(); err != nil {
+    return nil, err
+  }
+
+  size = info.Size()
+  p := make([]byte, size)
+
+  bytesRead, err = f.Read(p)
+  if err != nil {
+    return nil, err
+  }
+
+  if int64(bytesRead) != size {
+    return nil, errors.New("read less bytes than in file")
+  }
+
+  coords := &pb.Coords{}
+  if err = proto.Unmarshal(p, coords); err != nil {
+    return nil, err
+  }
+
+  return coords, nil
 }
 
