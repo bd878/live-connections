@@ -18,6 +18,7 @@ func NewHTTPServer(addr string, done chan struct{}) *http.Server {
   router := mux.NewRouter()
 
   router.HandleFunc("/public/{resource}", servePublic).Methods("GET")
+  router.HandleFunc("/public/{subpath}/{resource}", servePublic).Methods("GET")
   router.PathPrefix("/{area}").HandlerFunc(serveIndexFile).Methods("GET")
   router.PathPrefix("/").HandlerFunc(serveIndexFile).Methods("GET")
 
@@ -51,6 +52,8 @@ func serveIndexFile(w http.ResponseWriter, r *http.Request) {
 func servePublic(w http.ResponseWriter, r *http.Request) {
   vars := mux.Vars(r)
   resource := vars["resource"]
+  subpath := vars["subpath"]
 
-  http.ServeFile(w, r, filepath.Join(publicPath, resource))
+  w.Header().Set("Cache-Control", "no-store")
+  http.ServeFile(w, r, filepath.Join(publicPath, subpath, resource))
 }
