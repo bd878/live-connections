@@ -1,8 +1,6 @@
-import log from "./log.js";
-import C from "./constants.js";
-import { setUrl, bindUserToArea } from "./utils.js";
+import C from 'constants';
 
-async function proceedNewArea() {
+async function createNewArea(): AreaName {
   const response = await fetch(C.PROTOCOL + C.BACKEND_URL + "/area/new");
   if (!response.ok) {
     throw new Error("[proceedNewArea]: failed to create new area");
@@ -14,17 +12,14 @@ async function proceedNewArea() {
       throw new Error("[proceedNewArea]: empty area name");
     }
 
-    log.Print('areaName:', areaName); // DEBUG
-    setUrl(`/${areaName}`);
-
-    return areaName;
+    return areaName as AreaName;
   } catch (e) {
     log.Print("error occured while retrieving response body text");
-    console.error(e);
+    throw new Error(e);
   }
 }
 
-async function proceedNewUser(areaName) {
+async function createNewUser(areaName: AreaName): UserName {
   const response = await fetch(C.PROTOCOL + C.BACKEND_URL + "/join", {
     method: "POST",
     headers: {
@@ -42,23 +37,11 @@ async function proceedNewUser(areaName) {
       throw new Error("[proceedNewUser]: empty user name");
     }
 
-    log.Print("userName:", userName); // DEBUG
-    bindUserToArea(areaName, userName);
-
-    return userName;
+    return userName as UserName;
   } catch (e) {
     log.Print("error occured while retrieving response body text");
     throw new Error(e);
   }
 }
 
-async function restoreSession(areaName, userName) {
-  log.Print("areaName, userName", areaName, userName); // DEBUG
-  await new Promise(resolve => resolve());
-}
-
-export {
-  proceedNewArea,
-  proceedNewUser,
-  restoreSession,
-};
+export { createNewUser, createNewArea };

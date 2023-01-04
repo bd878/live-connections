@@ -1,0 +1,18 @@
+{
+  "name": "live-connections-client",
+  "version": "1.0.0",
+  "description": "GUI client that supports live connections",
+  "scripts": {
+    "tsc": "npx tsc",
+    "clear": "rm -rf ../public/build/*.js ../public/build/*.js.map",
+    "build:dev": "esbuild --bundle ./init.ts --outdir=../public/build/",
+    "build:stage": "esbuild --bundle ./init.ts --outdir=../public/build/ --minify --sourcemap",
+    "build:prod": "esbuild --bundle ./init.ts --outfile=../public/build/ --minify"
+  },
+  "author": "bd878",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.15.7",
+    "typescript": "^4.8.2"
+  }
+}

@@ -1,4 +1,3 @@
-
 class User {
   constructor(areaName = '', userName = '', token = '') {
     this.area = areaName;
@@ -28,3 +27,4 @@ class User {
 }
 
 export default User;
+export { create } from './static';

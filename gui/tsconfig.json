@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "rootDir": "./",
+    "noEmit": true,
+    "strict": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "removeComments": true,
+    "lib": ["es7", "dom"], 
+    "target": "esnext"
+  },
+  "typeAcquisition": {
+    "exclude": ["node_modules"]
+  }
+}

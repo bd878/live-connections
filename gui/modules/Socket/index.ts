@@ -1,3 +1,5 @@
+import log from 'modules/log';
+
 class Socket {
   static CONNECTING = 0;
 

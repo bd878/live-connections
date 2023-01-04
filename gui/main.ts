@@ -3,8 +3,8 @@ import { makeMouseMoveMessage } from './modules/messages.js';
 import { establishProtocol } from './modules/protocol.js';
 import { debounce, takeAreaName, findUserName } from './modules/utils.js';
 import log from './modules/log.js';
-import User from './modules/User.js';
-import Socket from './modules/Socket.js';
+import User from 'entities/User';
+import Area from 'entities/Area';
 
 async function run(socket, user) {
   const handlers = {
@@ -15,6 +15,8 @@ async function run(socket, user) {
   };
 
   try {
+    socket.create(C.BACKEND_URL + C.SOCKET_PATH);
+
     await establishProtocol(handlers, socket, user);
   } catch (e) {
     throw new Error(e);
@@ -30,6 +32,21 @@ function trackMouseEvents(s /* socket */) {
       s.send(makeMouseMoveMessage(event.clientX, event.clientY));
     }),
   );
+}
+
+async function proceedNewArea() {
+  const areaName = await Area.create();
+  setUrl(`/${areaName}`);
+}
+
+async function proceedNewUser(areaName) {
+  const userName = await User.create(areaName);
+  bindUserToArea(areaName, userName);
+}
+
+async function restoreSession(areaName, userName) {
+  log.Print("areaName, userName", areaName, userName); // DEBUG
+  await new Promise(resolve => resolve());
 }
 
 async function main() {
@@ -69,22 +86,4 @@ async function main() {
   await restoreSession(areaName, userName);
 }
 
-async function init() {
-  const rootEl = document.getElementById("root");
-  if (!rootEl) {
-    throw ReferenceError("[init]: no #root");
-  }
-
-  if (!window['WebSocket']) {
-    console.error("[init]: browser does not support WebSockets");
-    return;
-  }
-
-  main();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+export default main;
