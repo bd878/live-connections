@@ -1,89 +1,68 @@
-import { proceedNewArea, proceedNewUser, restoreSession } from './modules/scenario.js';
-import { makeMouseMoveMessage } from './modules/messages.js';
-import { establishProtocol } from './modules/protocol.js';
-import { debounce, takeAreaName, findUserName } from './modules/utils.js';
-import log from './modules/log.js';
+import { makeMouseMoveMessage } from 'protocol/messages';
+import select from 'protocol/select';
+import establish from 'protocol/init';
+import takeAreaName from 'misc/takeAreaName';
+import findUserName from 'misc/findUserName';
+import log from 'modules/log';
 import User from 'entities/User';
 import Area from 'entities/Area';
+import socket from 'net/socket';
 
-async function run(socket, user) {
-  const handlers = {
-    onAuthOk: (text) => { ;(text === "ok" && user.setToken(text)); },
-    onMouseMove: (message) => { log.Print("[onMouseMove]: message =", message); },
-    onInitMouseCoords: (message) => { log.Print("[onInitMouseCoords]: message =", message); },
-    onUsersOnline: (users) => { log.Print("[onUsersOnline]: users =", users); },
-  };
+/* Waits for protocol message on socket */
+async function run(): void {
+  let resolve, reject;
+  const p = new Promise((r, j) => {
+    resolve = r;
+    reject = j;
+  });
 
   try {
-    socket.create(C.BACKEND_URL + C.SOCKET_PATH);
+    while (1) {
+      const message = await socket.waitMessage();
+      select(message);
+    }
 
-    await establishProtocol(handlers, socket, user);
+    ;(resolve && resolve(true));
   } catch (e) {
-    throw new Error(e);
+    log.Print("[main run]: failed to run");
+    ;(reject && reject(e));
   }
-
-  trackMouseEvents(socket);
 }
 
-function trackMouseEvents(s /* socket */) {
-  document.addEventListener(
-    'mousemove',
-    debounce((event) => {
-      s.send(makeMouseMoveMessage(event.clientX, event.clientY));
-    }),
-  );
-}
-
-async function proceedNewArea() {
+/* Applies to server for new area allocation */
+async function proceedNewArea(): AreaName {
   const areaName = await Area.create();
   setUrl(`/${areaName}`);
+  return areaName;
 }
 
-async function proceedNewUser(areaName) {
+/* Applies to server for new user registration */
+async function proceedNewUser(areaName: AreaName): UserName {
   const userName = await User.create(areaName);
   bindUserToArea(areaName, userName);
+  return userName;
 }
 
-async function restoreSession(areaName, userName) {
-  log.Print("areaName, userName", areaName, userName); // DEBUG
-  await new Promise(resolve => resolve());
-}
-
+/* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
   log.mode = 'debug';
-
-  const socket = new Socket();
-  const user = new User();
+  socket.init();
 
   let userName;
-
   let areaName = takeAreaName(window.location.pathname);
+
   if (!areaName) {
     areaName = await proceedNewArea();
-    userName = await proceedNewUser(areaName);
-
-    user.define(areaName, userName);
-
-    await run(socket, user);
-
-    return;
+  } else {
+    userName = findUserName(areaName);
   }
 
-  userName = findUserName(areaName);
   if (!userName) {
     userName = await proceedNewUser(areaName)
-
-    user.define(areaName, userName);
-
-    await run(socket, user);
-
-    return;
   }
 
-  user.define(areaName, userName);
-
-  await run(socket, user);
-  await restoreSession(areaName, userName);
+  await establish(areaName, userName);
+  await run();
 }
 
 export default main;

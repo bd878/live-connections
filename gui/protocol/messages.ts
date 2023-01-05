@@ -1,5 +1,5 @@
 import log from 'modules/log';
-import C from './constants';
+import C from './const';
 
 function makeMouseMoveMessage(x, y) {
   log.Print("x, y:", x, y);

@@ -1,7 +1,7 @@
-import C from './constants';
+import C from './const';
 import log from 'modules/log';
 
-async function handleMouseMoveMessage(fn: Fn, buf: any /* ArrayBuffer */) {
+async function parseMouseMoveMessage(buf: any /* ArrayBuffer */): MouseMoveEvent {
   let offset = 0;
   const dv = new DataView(buf)
 
@@ -9,7 +9,7 @@ async function handleMouseMoveMessage(fn: Fn, buf: any /* ArrayBuffer */) {
   offset += C.SIZE_PREFIX_SIZE;
 
   if (nameSize === 0) {
-    throw new Error('[handleMouseMoveMessage]: nameSize is 0 =', nameSize);
+    throw new Error('[parseMouseMoveMessage]: nameSize is 0 =', nameSize);
   }
 
   const nameBytes = new Uint8Array(buf, offset, nameSize);
@@ -23,22 +23,22 @@ async function handleMouseMoveMessage(fn: Fn, buf: any /* ArrayBuffer */) {
   const yPos = dv.getFloat32(offset, C.ENDIANNE);
   offset += C.COORD_SIZE;
 
-  fn({ name, xPos, yPos });
+  return { name, xPos, yPos } as MouseMoveEvent;
 }
 
-async function handleAuthOkMessage(fn, message /* Blob */) {
+async function parseAuthOkMessage(message: any /* Blob */): AuthOkEvent {
   const text = await message.text();
-  fn(text);
+  return {text} as AuthOkEvent;
 }
 
-function handleUsersOnlineMessage(fn, buffer /* ArrayBuffer */) {
+function parseUsersOnlineMessage(buffer: any /* ArrayBuffer */): UsersOnlineEvent {
   log.Print("handle users online message");
   const users = [];
-  fn(users)
+  return {users} as UsersOnlineEvent;
 }
 
 export {
-  handleMouseMoveMessage,
-  handleAuthOkMessage,
-  handleUsersOnlineMessage,
+  parseMouseMoveMessage,
+  parseAuthOkMessage,
+  parseUsersOnlineMessage,
 };

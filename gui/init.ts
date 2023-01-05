@@ -14,7 +14,11 @@ function init() {
     return;
   }
 
-  main();
+  try {
+    main();
+  } catch (e) {
+    console.error("[init]: failed to run app", err);
+  }
 }
 
 if (document.readyState === 'loading') {

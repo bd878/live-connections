@@ -1,4 +1,3 @@
-
 function takeAreaName(path: string): string {
   if (!path) {
     return "";

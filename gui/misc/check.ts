@@ -1,4 +1,3 @@
-
 const fn: Fn = () => {};
 
 function check(

@@ -1,0 +1,9 @@
+const C = {
+  CONNECTING: 0,
+  OPEN: 1,
+  TIMEOUT_OPEN: 2000,
+  SOCKET_PATH: "/ws",
+  BACKEND_URL: "localhost:8080",
+};
+
+export default C;
