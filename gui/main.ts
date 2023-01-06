@@ -5,11 +5,14 @@ import socket from './net/socket';
 import log from './modules/log';
 import User from './entities/User';
 import Area from './entities/Area';
+import Main from './components/Main';
+import Root from './components/Root';
 import debounce from './misc/debounce';
 import takeAreaName from './misc/takeAreaName';
 import findUserName from './misc/findUserName';
 import bindUserToArea from './misc/bindUserToArea';
 import setUrl from './misc/setUrl';
+import setRoot from './misc/setRoot';
 
 function trackMouseEvents() {
   log.Print("[main]: track mouse events");
@@ -86,6 +89,10 @@ async function main() {
   }
 
   await establish(areaName, userName);
+
+  Main.create();
+  setRoot();
+  Root.append(Main.get());
 
   trackMouseEvents();
 

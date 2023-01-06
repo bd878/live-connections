@@ -22,3 +22,7 @@ type AuthOkEvent = {
 type UsersOnlineEvent = {
   users: UserName[];
 };
+
+interface Appendable {
+  append(I: Element): void;
+}
