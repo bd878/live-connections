@@ -1,9 +1,11 @@
+import { create } from './static';
+
 const users: User[] = [];
 
 class User {
   constructor(
     public area: AreaName = '',
-    public user: UserName = '',
+    public name: UserName = '',
     public token: string | null = null
   ) {
     this.isAuthed = this.isAuthed.bind(this);
@@ -18,22 +20,23 @@ class User {
     return !this.isAuthed();
   }
 
-  setToken(token: string): void {
+  setToken(token: string) {
     this.token = token;
   }
 
-  define(areaName: AreaName, userName: UserName): void {
+  define(areaName: AreaName, userName: UserName) {
     ;(!this.area && (this.area = areaName));
-    ;(!this.user && (this.name = userName));
+    ;(!this.name && (this.name = userName));
   }
 }
 
-function makeUser(area: AreaName, name: UserName, token: string | null = null): User {
+function make(area: AreaName, name: UserName, token: string | null = null): User {
   const user = new User(area, name, token);
   users.push(user)
   return user;
 }
 
-export default User;
-export { makeUser };
-export { create } from './static';
+export default {
+  make,
+  create
+};

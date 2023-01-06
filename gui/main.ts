@@ -1,16 +1,32 @@
-import { makeMouseMoveMessage } from 'protocol/messages';
-import select from 'protocol/select';
-import establish from 'protocol/init';
-import takeAreaName from 'misc/takeAreaName';
-import findUserName from 'misc/findUserName';
-import log from 'modules/log';
-import User from 'entities/User';
-import Area from 'entities/Area';
-import socket from 'net/socket';
+import { makeMouseMoveMessage } from './protocol/messages';
+import select from './protocol/select';
+import establish from './protocol/init';
+import socket from './net/socket';
+import log from './modules/log';
+import User from './entities/User';
+import Area from './entities/Area';
+import debounce from './misc/debounce';
+import takeAreaName from './misc/takeAreaName';
+import findUserName from './misc/findUserName';
+import bindUserToArea from './misc/bindUserToArea';
+import setUrl from './misc/setUrl';
+
+function trackMouseEvents() {
+  log.Print("[main]: track mouse events");
+
+  document.addEventListener(
+    'mousemove',
+    debounce((event: any) => {
+      socket.send(makeMouseMoveMessage(event.clientX, event.clientY));
+    }),
+  );
+}
 
 /* Waits for protocol message on socket */
-async function run(): void {
-  let resolve, reject;
+async function run() {
+  log.Print("[main]: run");
+
+  let resolve: any, reject: any;
   const p = new Promise((r, j) => {
     resolve = r;
     reject = j;
@@ -19,6 +35,9 @@ async function run(): void {
   try {
     while (1) {
       const message = await socket.waitMessage();
+
+      log.Print("[run]: on message");
+
       select(message);
     }
 
@@ -30,14 +49,18 @@ async function run(): void {
 }
 
 /* Applies to server for new area allocation */
-async function proceedNewArea(): AreaName {
+async function proceedNewArea(): Promise<AreaName> {
+  log.Print("[gui]: proceed new area");
+
   const areaName = await Area.create();
   setUrl(`/${areaName}`);
   return areaName;
 }
 
 /* Applies to server for new user registration */
-async function proceedNewUser(areaName: AreaName): UserName {
+async function proceedNewUser(areaName: AreaName): Promise<UserName> {
+  log.Print("[gui]: proceed new user");
+
   const userName = await User.create(areaName);
   bindUserToArea(areaName, userName);
   return userName;
@@ -45,7 +68,8 @@ async function proceedNewUser(areaName: AreaName): UserName {
 
 /* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
-  log.mode = 'debug';
+  log.Print("[gui]: main");
+
   socket.init();
 
   let userName;
@@ -62,6 +86,9 @@ async function main() {
   }
 
   await establish(areaName, userName);
+
+  trackMouseEvents();
+
   await run();
 }
 

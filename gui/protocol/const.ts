@@ -1,4 +1,4 @@
-const C = {
+const C: Record<string, any> = {
   LITTLE_ENDIANNE: 1,
 
   SIZE_PREFIX_SIZE: 2,

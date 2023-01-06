@@ -1,14 +1,11 @@
 import main from "./main";
-
-/*
- * init module
- * initializes an app.
- * It tests an environment
- * for neccessary properties
- * and calls main program
- **/
+import log from "./modules/log";
 
 function init() {
+  log.mode = 'debug';
+
+  log.Print("[gui]: init");
+
   if (!window['WebSocket']) {
     console.error("[init]: browser does not support WebSockets");
     return;
@@ -17,7 +14,7 @@ function init() {
   try {
     main();
   } catch (e) {
-    console.error("[init]: failed to run app", err);
+    console.error("[init]: failed to run app", e);
   }
 }
 

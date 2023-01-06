@@ -1,8 +1,8 @@
-import http from 'net/http';
-import log from 'modules/log';
-import rtti from 'rtti';
+import http from '../../net/http';
+import log from '../../modules/log';
+import rtti from '../../rtti';
 
-async function create(areaName: AreaName): UserName {
+async function create(areaName: AreaName): Promise<UserName> {
   const response = await http.post("/join", {
     method: "POST",
     headers: {
@@ -13,7 +13,7 @@ async function create(areaName: AreaName): UserName {
 
   const userName = await response.text();
   if (!rtti.isUserName(userName)) {
-    throw new Error('[create User]: response text is not area name: ', userName);
+    throw new Error(`[create User]: response text is not area name: ${userName}`);
   }
 
   log.Print("[User create]: userName:", userName);

@@ -1,10 +1,10 @@
 const fn: Fn = () => {};
 
 function check(
-  checkFn: Fn<any, bool>,
+  checkFn: Fn<any, boolean>,
   trueFn: Fn,
   falseFn: Fn = fn
-): any {
+): Fn {
   return (args: any) => checkFn() ? trueFn(args) : falseFn();
 }
 

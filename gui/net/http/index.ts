@@ -1,35 +1,32 @@
 import C from './const';
+import log from '../../modules/log';
 
-async function get(path: string) {
+async function get(path: string): Promise<any> {
   const response = await fetch(C.PROTOCOL + C.BACKEND_URL + path);
   if (!response.ok) {
     throw new Error("[get]: failed to create new area");
   }
 
   try {
-    await response.blob(); // try - fail
-
     return response;
-  } catch (e) {
+  } catch (e: any) {
     log.Print("error occured while retrieving response body text");
     throw new Error(e);
   }
 }
 
-async function post(path: string, options: Record<string, any>) {
+async function post(path: string, options: Record<string, any>): Promise<any> {
   const response = await fetch(C.PROTOCOL + C.BACKEND_URL + path, options);
   if (!response.ok) {
     throw new Error("[http post]: failed to create new user");
   }
 
   try {
-    await response.blob(); // try - fail
-
     return response;
-  } catch (e) {
+  } catch (e: any) {
     log.Print("error occured while retrieving response body text");
     throw new Error(e);
   }
 }
 
-export { get, post };
+export default { get, post };

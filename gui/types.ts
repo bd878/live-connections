@@ -3,7 +3,11 @@ type AreaName = string;
 
 type UserName = string;
 
-type Fn<A = any, R = any> = (args: A) => R;
+type ABuffer = any;
+
+type DView = any;
+
+type Fn<A = any, R = any> = (args?: A) => R;
 
 type MouseMoveEvent = {
   xPos: number;
@@ -16,5 +20,5 @@ type AuthOkEvent = {
 };
 
 type UsersOnlineEvent = {
-  users: string[];
+  users: UserName[];
 };

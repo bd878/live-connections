@@ -1,33 +1,20 @@
-import debounce from 'misc/debounce';
-import socket from 'net/socket';
+import socket from '../net/socket';
+import log from '../modules/log';
 
-function onAuthOk(text) {
-  ;(text === "ok" && user.setToken(text));
+function onAuthOk(e: AuthOkEvent) {
+  ;(e.text === "ok" && log.Print("set token:", e));
 }
 
-function onMouseMove(message) {
-  log.Print("[onMouseMove]: message =", message);
+function onMouseMove(e: MouseMoveEvent) {
+  log.Print("[onMouseMove]: e =", e);
 }
 
-function onInitMouseCoords(message) {
-  log.Print("[onInitMouseCoords]: message =", message);
+function onInitMouseCoords(e: MouseMoveEvent) {
+  log.Print("[onInitMouseCoords]: e =", e);
 }
 
-function onUsersOnline(users) {
+function onUsersOnline(users: UsersOnlineEvent) {
   log.Print("[onUsersOnline]: users =", users);
-}
-
-function trackMouseEvents() {
-  document.addEventListener(
-    'mousemove',
-    debounce((event) => {
-      socket.send(makeMouseMoveMessage(event.clientX, event.clientY));
-    }),
-  );
-}
-
-function trackUserInput() {
-  /**/
 }
 
 export {

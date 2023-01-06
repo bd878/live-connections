@@ -1,5 +1,5 @@
 import C from './const';
-import log from 'modules/log';
+import log from '../modules/log';
 import {
   parseMouseMoveMessage,
   parseAuthOkMessage,
@@ -12,9 +12,9 @@ import {
   onAuthOk,
 } from './handlers';
 
-async function select(event: any /* another set of bytes have come... */ ) {
-  let buffer = await event.data.arrayBuffer();
-  const dv = new DataView(buffer);
+async function select(b: any /* another set of bytes have come... */ ) {
+  let buffer = await b.data.arrayBuffer();
+  const dv: any = new DataView(buffer);
 
   let offset = 0;
   let size = 0;
@@ -24,7 +24,7 @@ async function select(event: any /* another set of bytes have come... */ ) {
     offset += C.SIZE_PREFIX_SIZE;
 
     if (size === 0) {
-      throw new Error('[select]: size is 0 =', size);
+      throw new Error(`[select]: size is 0 = ${size}`);
     }
 
     const type = dv.getInt8(offset, C.ENDIANNE);
@@ -34,28 +34,36 @@ async function select(event: any /* another set of bytes have come... */ ) {
 
     switch (type) {
       case C.MOUSE_MOVE_TYPE:
-        setTimeout(() => onMouseMove(
-          parseMouseMoveMessage(slice)
-        ), 0); /* throw it in a loop */
+        log.Print("[select]: mouse move");
+
+        setTimeout(() => {
+          parseMouseMoveMessage(slice).then(onMouseMove);
+        }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.INIT_MOUSE_COORDS_TYPE:
-        setTimeout(() => onInitMouseCoords(
-          parseMouseMoveMessage(slice)
-        ), 0); /* throw it in a loop */
+        log.Print("[select]: init mouse coords");
+
+        setTimeout(() => {
+          parseMouseMoveMessage(slice).then(onInitMouseCoords);
+        }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.AUTH_OK_TYPE:
+        log.Print("[select]: auth ok");
+
         const message = new Blob([slice]);
-        setTimeout(() => onAuthOk(
-          parseAuthOkMessage(message)
-        ), 0); /* throw it in a loop */
+        setTimeout(() => {
+          parseAuthOkMessage(message).then(onAuthOk);
+        }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
-        setTimeout(() => onUsersOnline(
-          parseUsersOnlineMessage(slice)
-        ), 0); /* throw it in a loop */
+        log.Print("[select]: users online");
+
+        setTimeout(() => {
+          parseUsersOnlineMessage(slice).then(onUsersOnline);
+        }, 0); /* throw it in a loop */
         offset += size;
         break;
       default:

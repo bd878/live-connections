@@ -4,3 +4,4 @@
 *.git/*
 .git
 files/*
+public/build/*

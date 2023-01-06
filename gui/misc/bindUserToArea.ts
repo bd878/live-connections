@@ -1,5 +1,5 @@
 function bindUserToArea(areaName: AreaName, userName: UserName) {
-  return localStorage.setItem(area, user);
+  localStorage.setItem(areaName, userName);
 }
 
 export default bindUserToArea;

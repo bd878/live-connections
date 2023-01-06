@@ -1,4 +1,4 @@
-const C = {
+const C: Record<string, any> = {
   PROTOCOL: "https://",
   BACKEND_URL: "localhost:8080",
 };

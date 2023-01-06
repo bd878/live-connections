@@ -1,4 +1,4 @@
-function setUrl(url: string) {
+function setUrl(url: string): void {
   if (!url) {
     throw new Error(`[setUrl]: url arg is not defined: ${url}`);
   }

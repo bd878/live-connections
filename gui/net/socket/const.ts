@@ -1,4 +1,4 @@
-const C = {
+const C: Record<string, any> = {
   CONNECTING: 0,
   OPEN: 1,
   TIMEOUT_OPEN: 2000,

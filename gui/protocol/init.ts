@@ -1,13 +1,17 @@
 import { makeAuthUserMessage } from './messages';
-import log from 'modules/log';
-import socket from 'net/socket';
+import log from '../modules/log';
+import socket from '../net/socket';
 
 async function authUser(areaName: AreaName, userName: UserName) {
+  log.Print("[protocol]: auth user");
+
   const authMessage = await makeAuthUserMessage(areaName, userName);
   socket.send(authMessage);
 }
 
-async function establish(areaName: AreaName, userName: UserName): void {
+async function establish(areaName: AreaName, userName: UserName) {
+  log.Print("[protocol]: establish");
+
   await socket.waitOpen();
   await authUser(areaName, userName);
 
@@ -16,7 +20,7 @@ async function establish(areaName: AreaName, userName: UserName): void {
 
   if (!socket.isReady()) {
     log.Print("[protocol establish]: error on message handling");
-    throw new Error(err);    
+    throw new Error("socket is not ready");
   }
 }
 

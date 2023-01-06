@@ -1,4 +1,4 @@
-import log from 'modules/log';
+import log from '../../modules/log';
 import C from './const';
 
 /* TODO: rewrite on class to open
@@ -6,11 +6,11 @@ import C from './const';
 
 let conn: WebSocket | null = null; /* private */
 
-function onError(err) { /* private */
+function onError(err: any) { /* private */
   console.error('[onError]: error on socket', err);
 }
 
-function onClose(event) { /* private */
+function onClose(event: any) { /* private */
   ;(event.wasClean
     ? log.Print(`Closed cleanly: code=${event.code} reason=${event.reason}`)
     : log.Print("Connection died")
@@ -18,6 +18,8 @@ function onClose(event) { /* private */
 }
 
 function init() {
+  log.Print("[socket]: init");
+
   conn = new WebSocket("wss://" + C.BACKEND_URL + C.SOCKET_PATH);
 
   conn.addEventListener('error', onError);
@@ -25,10 +27,14 @@ function init() {
 }
 
 function isReady(): boolean {
+  if (!conn) {
+    throw new ReferenceError("[Socket]: connection is not created");
+  }
+
   return conn.readyState === C.OPEN;
 }
 
-function send(message: any) {
+function send(message: any): void {
   if (!conn) {
     throw new ReferenceError("[Socket]: connection is not created");
   }
@@ -40,35 +46,35 @@ function send(message: any) {
   }
 }
 
-function waitOpen(): Promise {
+function waitOpen(): Promise<any> {
   if (conn) {
     if (conn.readyState === C.OPEN) {
       return Promise.resolve();
     }
 
-    return new Promise(resolve => (
-      conn.addEventListener('open', resolve)
-    ));
-  } else {
-    return Promise.reject();
-  }
-}
-
-function waitMessage(): Promise {
-  if (conn) {
     return new Promise(resolve => {
-      const onMessage = (event) => {
-        conn.removeEventListener('message', onMessage);
-        resolve(event);
-      };
-      conn.addEventListener('message', onMessage);
+      ;(conn && conn.addEventListener('open', resolve));
     });
   } else {
     return Promise.reject();
   }
 }
 
-export {
+function waitMessage(): Promise<void> {
+  if (conn) {
+    return new Promise(resolve => {
+      const onMessage = (event: any) => {
+        ;(conn && conn.removeEventListener('message', onMessage));
+        resolve(event);
+      };
+      ;(conn && conn.addEventListener('message', onMessage));
+    });
+  } else {
+    return Promise.reject();
+  }
+}
+
+export default {
   waitMessage,
   waitOpen,
   send,

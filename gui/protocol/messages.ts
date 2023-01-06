@@ -1,7 +1,7 @@
-import log from 'modules/log';
+import log from '../modules/log';
 import C from './const';
 
-function makeMouseMoveMessage(x, y) {
+function makeMouseMoveMessage(x: number, y: number): ABuffer {
   log.Print("x, y:", x, y);
 
   const messageSize = (
@@ -11,7 +11,7 @@ function makeMouseMoveMessage(x, y) {
   );
 
   const buffer = new ArrayBuffer(C.SIZE_PREFIX_SIZE + messageSize);
-  const dv = new DataView(buffer);
+  const dv: any = new DataView(buffer);
 
   let offset = 0;
   dv.setUint16(offset, messageSize, C.ENDIANNE);
@@ -29,7 +29,7 @@ function makeMouseMoveMessage(x, y) {
   return buffer;
 }
 
-async function makeAuthUserMessage(area, user) {
+async function makeAuthUserMessage(area: AreaName, user: UserName): Promise<ABuffer> {
   const areaEncoded = new Blob([area], { type: "text/plain"});
   const userEncoded = new Blob([user], { type: "text/plain"});
 
@@ -51,38 +51,32 @@ async function makeAuthUserMessage(area, user) {
     C.SIZE_PREFIX_SIZE + // total size
     messageSize
   );
-  const dv = new DataView(buffer);
+  const dv: any = new DataView(buffer);
 
   // message
   let offset = 0;
   dv.setUint16(offset, messageSize, C.ENDIANNE);
   offset += C.SIZE_PREFIX_SIZE;
 
-  log.Print("offset:", offset); // DEBUG
   dv.setInt8(offset, C.AUTH_USER_TYPE, C.ENDIANNE);
   offset += C.TYPE_SIZE;
 
-  log.Print("offset:", offset); // DEBUG
   // area
   dv.setUint16(offset, areaEncoded.size, C.ENDIANNE);
   offset += C.SIZE_PREFIX_SIZE;
 
-  log.Print("offset:", offset); // DEBUG
   for (let i = 0; i < typedArea.length; i++, offset++) {
     dv.setUint8(offset, typedArea[i], C.ENDIANNE);
   }
 
-  log.Print("offset:", offset); // DEBUG
   // user
   dv.setUint16(offset, userEncoded.size, C.ENDIANNE);
   offset += C.SIZE_PREFIX_SIZE;
 
-  log.Print("offset:", offset); // DEBUG
   for (let i = 0; i < typedUser.length; i++, offset++) {
     dv.setUint8(offset, typedUser[i], C.ENDIANNE);
   }
 
-  log.Print("offset:", offset); // DEBUG
   return buffer;
 }
 

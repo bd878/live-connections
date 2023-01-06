@@ -1,5 +1,5 @@
 const log = {
-  mode: 'silent' | 'warn' | 'debug' = 'silent',
+  mode: 'silent',
 
   _isDebug() { return this.mode === 'debug'; },
   _isSilent() { return this.mode === 'silent'; },

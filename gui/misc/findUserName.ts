@@ -1,4 +1,4 @@
-function findUserName(areaName: AreaName | undefined): UserName | undefined {
+function findUserName(areaName: AreaName | undefined) {
   if (!areaName) {
     return undefined;
   }

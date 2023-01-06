@@ -1,4 +1,16 @@
+import { create } from './static';
+
+const areas: Area[] = [];
+
 class Area {}
 
-export default Area;
-export { createNewArea } from './requests';
+function make(): Area {
+  const area = new Area();
+  areas.push(area)
+  return area;
+}
+
+export default {
+  create,
+  make
+};
