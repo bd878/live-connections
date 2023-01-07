@@ -8,6 +8,7 @@ function set(el: HTMLDivElement): HTMLDivElement {
     throw error.noElementCreated("Root get");
   }
 
+  rootEl.classList.add("root");
   return rootEl;
 }
 

@@ -20,7 +20,7 @@ function onClose(event: any) { /* private */
 function init() {
   log.Print("[socket]: init");
 
-  conn = new WebSocket("wss://" + C.BACKEND_URL + C.SOCKET_PATH);
+  conn = new WebSocket(C.PROTOCOL + C.BACKEND_URL + C.SOCKET_PATH);
 
   conn.addEventListener('error', onError);
   conn.addEventListener('close', onClose);

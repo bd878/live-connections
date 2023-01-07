@@ -10,8 +10,8 @@ import (
 
 const addr = "localhost:8080"
 var (
-  serverCrt = filepath.Join("./", "cmd/server", "server.crt")
-  serverKey = filepath.Join("./", "cmd/server", "server.key")
+  serverCrt = filepath.Join("./", "cmd/server", "serverCert.pem")
+  serverKey = filepath.Join("./", "cmd/server", "serverKey.pem")
 )
 
 func main() {

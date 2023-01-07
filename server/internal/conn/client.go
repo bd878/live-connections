@@ -70,6 +70,8 @@ func (s *LiveConnections) HandleJoin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *LiveConnections) HandleNewArea(w http.ResponseWriter, r *http.Request) {
+  log.Println("new area request")
+
   ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
   defer cancel()
   resp, err := s.areaClient.Create(ctx, &disk.CreateAreaRequest{})
