@@ -15,6 +15,11 @@ type MouseMoveEvent = {
   name: string;
 };
 
+interface Elem {
+  root: HTMLElement | null;
+  name: string;
+}
+
 type AuthOkEvent = {
   text: string;
 };
@@ -24,5 +29,22 @@ type UsersOnlineEvent = {
 };
 
 interface Appendable {
-  append(I: Element): void;
+  append(I: Elem): void;
+}
+
+interface Settable {
+  set(domElem: HTMLElement): HTMLElement;
+}
+
+interface Creatable {
+  create(): HTMLElement;
+}
+
+interface Writable {
+  write(content: string): void;
+}
+
+interface Accessible {
+  has(): boolean;
+  get(): HTMLElement;
 }

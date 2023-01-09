@@ -1,40 +1,37 @@
 import error from '../../modules/error';
+import append from '../../methods/append';
+import get from '../../methods/get';
+import has from '../../methods/has';
+import set from '../../methods/set';
 
-let rootEl: HTMLDivElement | null = null
-
-function set(el: HTMLDivElement): HTMLDivElement {
-  rootEl = el;
-  if (!rootEl) {
-    throw error.noElementCreated("Root get");
+function setRoot(this: Root, domElem: HTMLElement): HTMLElement {
+  if (!this.root) {
+    throw error.noElementCreated(this.name);
   }
 
-  rootEl.classList.add("root");
-  return rootEl;
+  const result = set.call(this, domElem);
+  this.root.classList.add("root");
+
+  return result;
 }
 
-function has(): boolean {
-  return rootEl ? true : false;
+class Root implements
+  Elem,
+  Appendable,
+  Settable,
+  Accessible
+{
+  root: HTMLElement | null = null;
+  name: string = "root";
+
+  constructor() {}
+
+  append = append;
+  set = setRoot;
+  has = has;
+  get = get;
 }
 
-function get(): HTMLDivElement {
-  if (!rootEl) {
-    throw error.noElementCreated("Root get");
-  }
+const root = new Root();
 
-  return rootEl;
-}
-
-function append(el: HTMLDivElement) {
-  if (!rootEl) {
-    throw error.noElementCreated("Root get");
-  }
-
-  rootEl.append(el);
-}
-
-export default {
-  set,
-  get,
-  has,
-  append,
-};
+export default root;

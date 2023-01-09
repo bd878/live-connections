@@ -90,9 +90,9 @@ async function main() {
 
   await establish(areaName, userName);
 
-  Main.create();
   setRoot();
-  Root.append(Main.get());
+  Main.create();
+  Root.append(Main);
 
   trackMouseEvents();
 
