@@ -17,12 +17,12 @@ func main() {
 
   var serverCrt, serverKey, addr string
   var ok bool
-  serverCrt, ok = os.LookupEnv("LC_SERVER_CRT_PATH_SERVER")
+  serverCrt, ok = os.LookupEnv("LC_SERVER_CRT_PATH")
   if !ok {
     log.Fatal("No server crt path provided")
   }
 
-  serverKey, ok = os.LookupEnv("LC_SERVER_KEY_PATH_SERVER")
+  serverKey, ok = os.LookupEnv("LC_SERVER_KEY_PATH")
   if !ok {
     log.Fatal("No client crt path provded")
   }
