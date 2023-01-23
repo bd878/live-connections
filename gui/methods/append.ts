@@ -1,5 +1,6 @@
 import error from '../modules/error';
 
+/* public */
 function append(this: Elem, other: Elem) {
   if (!this.root) {
     throw error.noElementCreated(this.name);

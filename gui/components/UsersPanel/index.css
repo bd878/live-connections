@@ -1,0 +1,8 @@
+.users-panel {
+  display: flex;
+  flex-flow: row;
+}
+
+.users-panel {
+  background-color: blue;
+}

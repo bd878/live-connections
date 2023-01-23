@@ -1,26 +1,23 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
-import write from '../../methods/write';
 import create from './create';
 
-class UsersPanel implements
+class UsersList implements
   Elem,
   Creatable,
-  Accessible,
-  Writable
+  Accessible
 {
   root: HTMLElement | null = null;
-  name: string = "user-panel";
+  name: string = "users-list";
 
   constructor() {}
 
   get = get;
   has = has;
   create = create;
-  write = write;
 }
 
-const panel = new UsersPanel();
+const list = new UsersList();
 
-export default panel;
-export { UsersPanel };
+export default list;
+export { UsersList };

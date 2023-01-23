@@ -7,7 +7,7 @@
     "clear": "rm -rf ../public/build/*",
     "build:dev": "esbuild --bundle ./init.ts --outdir=../public/build/ --bundle ./style.css --outdir=../public/build/",
     "build:stage": "esbuild --bundle ./init.ts --outdir=../public/build/ --minify --sourcemap --bundle ./style.css --outdir=../public/build/",
-    "build:prod": "esbuild --bundle ./init.ts --outfile=../public/build/ --minify"
+    "build:prod": "esbuild --bundle ./init.ts --outdir=../public/build/ --minify"
   },
   "author": "bd878",
   "license": "MIT",

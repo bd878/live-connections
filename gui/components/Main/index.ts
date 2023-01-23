@@ -1,6 +1,6 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
-import create from '../../methods/create';
+import create from './create';
 
 class Main implements
   Elem,
@@ -20,3 +20,4 @@ class Main implements
 const main = new Main();
 
 export default main;
+export { Main };

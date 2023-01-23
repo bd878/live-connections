@@ -5,11 +5,12 @@ import has from '../../methods/has';
 import set from '../../methods/set';
 
 function setRoot(this: Root, domElem: HTMLElement): HTMLElement {
+  const result = set.call(this, domElem);
+
   if (!this.root) {
     throw error.noElementCreated(this.name);
   }
 
-  const result = set.call(this, domElem);
   this.root.classList.add("root");
 
   return result;
