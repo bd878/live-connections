@@ -3,6 +3,7 @@ package conn
 import (
   "net/http"
   "io"
+  "os"
   "time"
   "log"
   "fmt"
@@ -16,12 +17,8 @@ import (
   t "github.com/teralion/live-connections/server/internal/types"
 )
 
-const (
-  diskRequestTimeout = 10*time.Second
-  serverAddr = "localhost:50051"
-)
-
 type LiveConnections struct {
+  diskTimeout time.Duration
   areaClient disk.AreaManagerClient
   userClient disk.UserManagerClient
   cursorClient disk.CursorManagerClient
@@ -29,6 +26,21 @@ type LiveConnections struct {
 
 func NewLiveConnections() *LiveConnections {
   opts := []grpc.DialOption{grpc.WithInsecure()}
+
+  serverAddr, ok := os.LookupEnv("LC_DISK_ADDR")
+  if !ok {
+    log.Fatalf("Disk is lack of addr")
+  }
+
+  timeoutStr, ok := os.LookupEnv("LC_DISK_REQUEST_TIMEOUT")
+  if !ok {
+    log.Fatalf("No disk request timeout specified")
+  }
+
+  diskRequestTimeout, err := time.ParseDuration(timeoutStr)
+  if  err != nil {
+    log.Fatalf("Failed to parse timeout duration")
+  }
 
   conn, err := grpc.Dial(serverAddr, opts...)
   if err != nil {
@@ -40,6 +52,7 @@ func NewLiveConnections() *LiveConnections {
   cursorClient := disk.NewCursorManagerClient(conn)
 
   return &LiveConnections{
+    diskTimeout: diskRequestTimeout,
     areaClient: areaClient,
     userClient: userClient,
     cursorClient: cursorClient,
@@ -47,7 +60,7 @@ func NewLiveConnections() *LiveConnections {
 }
 
 func (s *LiveConnections) HandleJoin(w http.ResponseWriter, r *http.Request) {
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
 
   body, err := io.ReadAll(r.Body)
@@ -72,7 +85,7 @@ func (s *LiveConnections) HandleJoin(w http.ResponseWriter, r *http.Request) {
 func (s *LiveConnections) HandleNewArea(w http.ResponseWriter, r *http.Request) {
   log.Println("new area request")
 
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
   resp, err := s.areaClient.Create(ctx, &disk.CreateAreaRequest{})
   if err != nil {
@@ -87,7 +100,7 @@ func (s *LiveConnections) HandleAreaUsers(w http.ResponseWriter, r *http.Request
   vars := mux.Vars(r)
   p := vars["id"]
 
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
   resp, err := s.areaClient.ListUsers(ctx, &disk.ListAreaUsersRequest{Name: p})
   if err != nil {
@@ -99,7 +112,7 @@ func (s *LiveConnections) HandleAreaUsers(w http.ResponseWriter, r *http.Request
 }
 
 func (s *LiveConnections) HasUser(area string, user string) bool {
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
   resp, err := s.areaClient.HasUser(ctx, &disk.HasUserRequest{Area: area, User: user})
   if err != nil {
@@ -109,7 +122,7 @@ func (s *LiveConnections) HasUser(area string, user string) bool {
 }
 
 func (s *LiveConnections) WriteMouseCoords(area string, user string, xPos float32, yPos float32) {
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
 
   coords := &disk.Coords{XPos: xPos, YPos: yPos}
@@ -120,7 +133,7 @@ func (s *LiveConnections) WriteMouseCoords(area string, user string, xPos float3
 }
 
 func (s *LiveConnections) ReadMouseCoords(area string, user string) *t.Coords {
-  ctx, cancel := context.WithTimeout(context.Background(), diskRequestTimeout)
+  ctx, cancel := context.WithTimeout(context.Background(), s.diskTimeout)
   defer cancel()
 
   resp, err := s.cursorClient.Read(ctx, &disk.ReadCursorRequest{Area: area, Name: user})
