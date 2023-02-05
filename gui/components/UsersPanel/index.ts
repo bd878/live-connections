@@ -11,6 +11,7 @@ class UsersPanel implements
 {
   root: HTMLElement | null = null;
   name: string = "user-panel";
+  CSSClass: string = "users-panel";
 
   constructor() {}
 

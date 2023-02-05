@@ -20,6 +20,10 @@ interface Elem {
   name: string;
 }
 
+interface Styleable {
+  CSSClass: string;
+}
+
 type AuthOkEvent = {
   text: string;
 };
@@ -47,4 +51,8 @@ interface Writable {
 interface Accessible {
   has(): boolean;
   get(): HTMLElement;
+}
+
+interface Moveable {
+  move(x: number, y: number): void;
 }

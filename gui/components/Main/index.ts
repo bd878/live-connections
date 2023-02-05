@@ -5,10 +5,12 @@ import create from './create';
 class Main implements
   Elem,
   Creatable,
-  Accessible
+  Accessible,
+  Styleable
 {
   root: HTMLElement | null = null;
   name: string = "main";
+  CSSClass: string = "main";
 
   constructor() {}
 

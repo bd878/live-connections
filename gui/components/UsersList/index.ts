@@ -1,14 +1,16 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
-import create from './create';
+import create from '../../methods/create';
 
 class UsersList implements
   Elem,
   Creatable,
-  Accessible
+  Accessible,
+  Styleable
 {
   root: HTMLElement | null = null;
   name: string = "users-list";
+  CSSClass: string = "users-list";
 
   constructor() {}
 

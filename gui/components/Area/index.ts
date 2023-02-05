@@ -1,16 +1,18 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
 import write from '../../methods/write';
-import create from './create';
+import create from '../../methods/create';
 
 class Area implements
   Elem,
   Creatable,
   Accessible,
-  Writable
+  Writable,
+  Styleable
 {
   root: HTMLElement | null = null;
   name: string = "area";
+  CSSClass: string = "area";
 
   constructor() {}
 
