@@ -15,6 +15,10 @@ type MouseMoveEvent = {
   name: string;
 };
 
+type BaseContainer = 
+  | Record<string, any>
+  | Map<string, any>;
+
 interface Elem {
   root: HTMLElement | null;
   name: string;
@@ -55,4 +59,12 @@ interface Accessible {
 
 interface Moveable {
   move(x: number, y: number): void;
+}
+
+interface Containable<C extends BaseContainer = BaseContainer> {
+  container: C;
+
+  hasElem(key: string): boolean;
+  getElem(key: string): Elem;
+  addElem(key: string, elem: Elem): void;
 }

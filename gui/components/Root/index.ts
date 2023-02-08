@@ -1,6 +1,7 @@
 import append from '../../methods/append';
 import get from '../../methods/get';
 import has from '../../methods/has';
+import setRoot from './set';
 
 class Root implements
   Elem,
@@ -24,3 +25,4 @@ class Root implements
 const root = new Root();
 
 export default root;
+export { Root };

@@ -3,6 +3,14 @@ function noElementCreated(moduleName: string, ...args: any[]) {
   return create(moduleName, "no element created", args);
 }
 
+function wrongDataType(moduleName: string, ...args: any[]) {
+  return create(moduleName, "wrong data type", args);
+}
+
+function wrongInterface(moduleName: string, ...args: any[]) {
+  return create(moduleName, "wrong interface", args);
+}
+
 function failedToGet(m: string, ...args: any[]) {
   return create(m, "failed to get", args);
 }
@@ -15,4 +23,6 @@ export default {
   create,
   noElementCreated,
   failedToGet,
+  wrongDataType,
+  wrongInterface,
 };
