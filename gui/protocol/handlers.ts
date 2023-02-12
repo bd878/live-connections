@@ -2,6 +2,7 @@ import error from '../modules/error';
 import socket from '../net/socket';
 import log from '../modules/log';
 import area from '../components/Area';
+import usersList from '../components/UsersList';
 import createCursor from '../misc/createCursor';
 import { isMovable } from '../rtti';
 

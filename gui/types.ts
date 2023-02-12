@@ -34,6 +34,7 @@ type AuthOkEvent = {
 
 type UsersOnlineEvent = {
   users: UserName[];
+  colors: string[];
 };
 
 interface Appendable {
@@ -66,5 +67,9 @@ interface Containable<C extends BaseContainer = BaseContainer> {
 
   hasElem(key: string): boolean;
   getElem(key: string): Elem;
-  addElem(key: string, elem: Elem & Accessible): void;
+  addElem(key: string, elem: Elem): void;
+}
+
+interface Clearable {
+  clear(): void; /* virtual */
 }

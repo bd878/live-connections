@@ -4,7 +4,7 @@ import write from '../../methods/write';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
-import addElem from './addElem';
+import addElemChild from '../../methods/addElemChild';
 
 class Area implements
   Elem,
@@ -31,7 +31,7 @@ class Area implements
 
   hasElem = hasElem;
   getElem = getElem;
-  addElem = addElem;
+  addElem = addElemChild;
 }
 
 const area = new Area();
