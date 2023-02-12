@@ -10,7 +10,7 @@ async function get(path: string): Promise<any> {
   try {
     return response;
   } catch (e: any) {
-    log.Print("error occured while retrieving response body text");
+    log.Print("net get", "error occured while retrieving response body text");
     throw new Error(e);
   }
 }
@@ -24,7 +24,7 @@ async function post(path: string, options: Record<string, any>): Promise<any> {
   try {
     return response;
   } catch (e: any) {
-    log.Print("error occured while retrieving response body text");
+    log.Print("net post", "error occured while retrieving response body text");
     throw new Error(e);
   }
 }

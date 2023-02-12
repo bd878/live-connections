@@ -34,7 +34,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
 
     switch (type) {
       case C.MOUSE_MOVE_TYPE:
-        log.Print("[select]: mouse move");
+        log.Print("select", "mouse move");
 
         setTimeout(() => {
           parseMouseMoveMessage(slice).then(onMouseMove);
@@ -42,7 +42,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.INIT_MOUSE_COORDS_TYPE:
-        log.Print("[select]: init mouse coords");
+        log.Print("select", "init mouse coords");
 
         setTimeout(() => {
           parseMouseMoveMessage(slice).then(onInitMouseCoords);
@@ -50,7 +50,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.AUTH_OK_TYPE:
-        log.Print("[select]: auth ok");
+        log.Print("select", "auth ok");
 
         const message = new Blob([slice]);
         setTimeout(() => {
@@ -59,7 +59,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
-        log.Print("[select]: users online");
+        log.Print("select", "users online");
 
         setTimeout(() => {
           parseUsersOnlineMessage(slice).then(onUsersOnline);
@@ -67,7 +67,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       default:
-        log.Print("[select]: unknown type =", type);
+        log.Print("select", "unknown type =", type);
         return;
     }
   }

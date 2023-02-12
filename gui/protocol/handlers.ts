@@ -10,11 +10,11 @@ import { isMovable } from '../rtti';
  */
 
 function onAuthOk(e: AuthOkEvent) {
-  ;(e.text === "ok" && log.Print("set token:", e));
+  ;(e.text === "ok" && log.Print("onAuthOk", "set token:", e));
 }
 
 function onMouseMove(e: MouseMoveEvent) {
-  log.Print("[onMouseMove]: e =", e);
+  log.Print("onMouseMove", "e =", e);
 
   if (area.hasElem(e.name)) {
     const cursor = area.getElem(e.name);
@@ -30,11 +30,11 @@ function onMouseMove(e: MouseMoveEvent) {
 }
 
 function onInitMouseCoords(e: MouseMoveEvent) {
-  log.Print("[onInitMouseCoords]: e =", e);
+  log.Print("onInitMouseCoords", "e =", e);
 }
 
 function onUsersOnline(e: UsersOnlineEvent) {
-  log.Print("[onUsersOnline]: users =", e.users);
+  log.Print("onUsersOnline", "users =", e.users);
 }
 
 export {

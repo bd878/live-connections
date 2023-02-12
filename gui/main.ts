@@ -15,7 +15,7 @@ import setUrl from './misc/setUrl';
 import setRoot from './misc/setRoot';
 
 function trackMouseEvents() {
-  log.Print("[main]: track mouse events");
+  log.Print("main", "track mouse events");
 
   document.addEventListener(
     'mousemove',
@@ -27,7 +27,7 @@ function trackMouseEvents() {
 
 /* Waits for protocol message on socket */
 async function run() {
-  log.Print("[main]: run");
+  log.Print("main", "run");
 
   let resolve: any, reject: any;
   const p = new Promise((r, j) => {
@@ -39,21 +39,21 @@ async function run() {
     while (1) {
       const message = await socket.waitMessage();
 
-      log.Print("[run]: on message");
+      log.Print("run", "on message");
 
       select(message);
     }
 
     ;(resolve && resolve(true));
   } catch (e) {
-    log.Print("[main run]: failed to run");
+    log.Print("run", "failed to run");
     ;(reject && reject(e));
   }
 }
 
 /* Applies to server for new area allocation */
 async function proceedNewArea(): Promise<AreaName> {
-  log.Print("[gui]: proceed new area");
+  log.Print("gui", "proceed new area");
 
   const areaName = await Area.create();
   setUrl(`/${areaName}`);
@@ -62,7 +62,7 @@ async function proceedNewArea(): Promise<AreaName> {
 
 /* Applies to server for new user registration */
 async function proceedNewUser(areaName: AreaName): Promise<UserName> {
-  log.Print("[gui]: proceed new user");
+  log.Print("gui", "proceed new user");
 
   const userName = await User.create(areaName);
   bindUserToArea(areaName, userName);
@@ -71,7 +71,7 @@ async function proceedNewUser(areaName: AreaName): Promise<UserName> {
 
 /* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
-  log.Print("[gui]: main");
+  log.Print("gui", "main");
 
   socket.init();
 

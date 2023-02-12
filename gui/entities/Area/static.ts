@@ -9,7 +9,7 @@ async function create(): Promise<AreaName> {
     throw new Error(`[create Area]: response text is not area name: ${areaName}`);
   }
 
-  log.Print("[Area create]: areaName:", areaName);
+  log.Print("Area create", "areaName:", areaName);
   return areaName;
 }
 

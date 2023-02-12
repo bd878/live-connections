@@ -7,7 +7,7 @@ function move(this: Elem & Moveable, x: number, y: number): void {
     throw error.noElementCreated(this.name);
   }
 
-  log.Print(`[move]: name, x, y: ${this.name}, ${x}, ${y}`);
+  log.Print("move", `name, x, y: ${this.name}, ${x}, ${y}`);
   this.root.style.transform = `
     translate3D(
       ${x}px,

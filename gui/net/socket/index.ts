@@ -12,13 +12,13 @@ function onError(err: any) { /* private */
 
 function onClose(event: any) { /* private */
   ;(event.wasClean
-    ? log.Print(`Closed cleanly: code=${event.code} reason=${event.reason}`)
-    : log.Print("Connection died")
+    ? log.Print('onClose', `Closed cleanly: code=${event.code} reason=${event.reason}`)
+    : log.Print('onClose', "Connection died")
   );
 }
 
 function init() {
-  log.Print("[socket]: init");
+  log.Print("socket", "init");
 
   conn = new WebSocket(C.PROTOCOL + C.BACKEND_URL + C.SOCKET_PATH);
 
@@ -40,7 +40,7 @@ function send(message: any): void {
   }
 
   if (conn.readyState === C.CONNECTING) {
-    log.Print('[Socket send]: still in connecting state');
+    log.Print('Socket send', 'still in connecting state');
   } else {
     conn.send(message);
   }

@@ -5,10 +5,10 @@ const log = {
   _isSilent() { return this.mode === 'silent'; },
   _isWarn() { return this.mode === 'warn'; },
 
-  Print(message: string, ...args: any): void {
+  Print(entity: string, message: string, ...args: any): void {
     ;(
       (this._isDebug() || this._isWarn()) &&
-      (console.log(message, ...args))
+      (console.log(`[${entity}]: `, message, ...args))
     );
   }
 }

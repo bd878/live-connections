@@ -32,7 +32,7 @@ async function parseAuthOkMessage(message: any /* Blob */): Promise<AuthOkEvent>
 }
 
 async function parseUsersOnlineMessage(buffer: any /* ArrayBuffer */): Promise<UsersOnlineEvent> {
-  log.Print("handle users online message");
+  log.Print("parseUsersOnlineMessage", "handle users online message");
   const users: UserName[] = [];
   return {users};
 }

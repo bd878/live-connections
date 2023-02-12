@@ -2,7 +2,7 @@ import log from '../modules/log';
 import C from './const';
 
 function makeMouseMoveMessage(x: number, y: number): ABuffer {
-  log.Print("[makeMouseMoveMessage]: x, y:", x, y);
+  log.Print("makeMouseMoveMessage", "x, y:", x, y);
 
   const messageSize = (
     C.TYPE_SIZE +  // type

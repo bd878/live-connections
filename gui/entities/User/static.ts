@@ -16,7 +16,7 @@ async function create(areaName: AreaName): Promise<UserName> {
     throw new Error(`[create User]: response text is not area name: ${userName}`);
   }
 
-  log.Print("[User create]: userName:", userName);
+  log.Print("User create", "userName:", userName);
   return userName;
 }
 

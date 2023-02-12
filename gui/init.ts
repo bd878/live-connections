@@ -4,7 +4,7 @@ import log from "./modules/log";
 function init() {
   log.mode = 'debug';
 
-  log.Print("[gui]: init");
+  log.Print("gui", "init");
 
   if (!window['WebSocket']) {
     console.error("[init]: browser does not support WebSockets");
