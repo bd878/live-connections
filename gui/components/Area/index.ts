@@ -4,7 +4,7 @@ import write from '../../methods/write';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
-import addElem from '../../methods/addElem';
+import addElem from './addElem';
 
 class Area implements
   Elem,

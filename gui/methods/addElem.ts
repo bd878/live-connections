@@ -1,7 +1,7 @@
 import error from '../modules/error';
 
 /* public */
-function addElem(this: Elem & Containable, key: string, elem: Elem): boolean {
+function addElem(this: Elem & Containable, key: string, elem: Elem & Accessible): boolean {
   if (!this.root) {
     throw error.noElementCreated(this.name);
   }
