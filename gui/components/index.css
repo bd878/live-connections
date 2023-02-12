@@ -1,2 +1,6 @@
 @import "./Main/index.css";
 @import "./Root/index.css";
+@import "./Cursor/index.css";
+@import "./Area/index.css";
+@import "./UsersList/index.css";
+@import "./UsersPanel/index.css";
