@@ -279,54 +279,6 @@ func (c *Client) writeLoop() {
   }
 }
 
-func (h *Hub) ListClientsOnline() []string {
-  var names []string
-  for client := range h.clients {
-    names = append(names, client.name)
-  }
-  return names
-}
-
-func DoClientsOnlineMessage(users []string) []byte {
-  var err error
-
-  typeBytes := new(bytes.Buffer)
-  if err = binary.Write(typeBytes, enc, listClientsOnlineMessageType); err != nil {
-    log.Println("error writing message type =", err)
-    return []byte{}
-  }
-
-  usersBytes := new(bytes.Buffer)
-  for _, user := range users {
-    var size uint16 = uint16(len(user))
-    if err = binary.Write(usersBytes, enc, size); err != nil {
-      log.Println("error writing user name size =", err)
-      return []byte{}
-    }
-
-    if err = binary.Write(usersBytes, enc, []byte(user)); err != nil {
-      log.Println("error writing user name size =", err)
-      return []byte{}
-    }
-  }
-
-  size := typeBytes.Len() + usersBytes.Len()
-  sizeBytes := new(bytes.Buffer)
-  if err = binary.Write(sizeBytes, enc, uint16(size)); err != nil {
-    log.Println("error writing total size =", err)
-    return []byte{}
-  }
-
-  return bytes.Join(
-    [][]byte{
-      sizeBytes.Bytes(),
-      typeBytes.Bytes(),
-      usersBytes.Bytes(),
-    },
-    []byte{},
-  )
-}
-
 func doTextMessage(text string, messageType int8) []byte {
   var err error
   message := []byte(text)

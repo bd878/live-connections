@@ -2,7 +2,7 @@ import main from "./main";
 import log from "./modules/log";
 
 function init() {
-  // log.mode = 'debug';
+  log.mode = 'debug';
 
   log.Print("gui", "init");
 
