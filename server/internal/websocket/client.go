@@ -11,8 +11,8 @@ import (
 
   ws "github.com/gorilla/websocket"
 
-  lc "github.com/teralion/live-connections/server/internal/conn"
-  t "github.com/teralion/live-connections/server/internal/types"
+  "github.com/teralion/live-connections/server/internal/rpc"
+  "github.com/teralion/live-connections/server/internal/types"
 )
 
 const (
@@ -51,7 +51,7 @@ var upgrader = ws.Upgrader{
 type Client struct {
   conn *ws.Conn
 
-  lc *lc.LiveConnections
+  rpc *rpc.Disk
 
   hub *Hub
 
@@ -61,7 +61,7 @@ type Client struct {
 
   name string
 
-  coords t.Coords
+  coords types.Coords
 }
 
 func checkClientOrigin(r *http.Request) bool {
@@ -69,7 +69,7 @@ func checkClientOrigin(r *http.Request) bool {
   return strings.Contains(origin, "localhost")
 }
 
-func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub, liveConn *lc.LiveConnections) {
+func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub, liveConn *rpc.Disk) {
   conn, err := upgrader.Upgrade(w, r, nil)
 
   if err != nil {
@@ -77,7 +77,7 @@ func NewClient(w http.ResponseWriter, r *http.Request, hub *Hub, liveConn *lc.Li
     return;
   }
 
-  client := &Client{conn: conn, lc: liveConn, hub: hub, send: make(chan []byte, 256)}
+  client := &Client{conn: conn, rpc: liveConn, hub: hub, send: make(chan []byte, 256)}
 
   go client.readLoop()
   go client.writeLoop()
@@ -113,7 +113,7 @@ func (c *Client) takeAuthMessage(mr *bytes.Reader) error {
   area := string(areaBytes)
   user := string(userBytes)
 
-  userExists := c.lc.HasUser(area, user)
+  userExists := c.rpc.HasUser(area, user)
 
   if !userExists {
     return errors.New("no user")
@@ -141,7 +141,7 @@ func (c *Client) takeMouseMoveMessage(mr *bytes.Reader) error {
   }
 
   // rewrite each time new coords received
-  c.coords = t.Coords{XPos: xPos, YPos: yPos}
+  c.coords = types.Coords{XPos: xPos, YPos: yPos}
 
   log.Println("take coords =", xPos, yPos)
   return nil
@@ -200,7 +200,7 @@ func (c *Client) readLoop() {
       c.send <- doTextMessage("ok", authOkMessageType) // TODO: token
       c.hub.register <- c
 
-      coords := c.lc.ReadMouseCoords(c.area, c.name)
+      coords := c.rpc.ReadMouseCoords(c.area, c.name)
       log.Println("read coords =", coords.XPos, coords.YPos)
       if coords != nil && coords.XPos != 0 && coords.YPos != 0 {
         log.Println("restore coords =", coords.XPos, coords.YPos)
@@ -211,7 +211,7 @@ func (c *Client) readLoop() {
         log.Println("mouse coords to write =", c.coords.XPos, c.coords.YPos)
         if c.coords.XPos != 0 && c.coords.YPos != 0 { // has been initialized
           log.Println("save mouse coords")
-          c.lc.WriteMouseCoords(c.area, c.name, c.coords.XPos, c.coords.YPos)
+          c.rpc.WriteMouseCoords(c.area, c.name, c.coords.XPos, c.coords.YPos)
         } else {
           log.Println("mouse coords has not been initialized to save")
         }
@@ -304,7 +304,7 @@ func doTextMessage(text string, messageType int8) []byte {
   return res
 }
 
-func (c *Client) doMouseMoveMessage(messageType int8, coords *t.Coords) []byte {
+func (c *Client) doMouseMoveMessage(messageType int8, coords *types.Coords) []byte {
   var err error
 
   // TODO: pack to struct

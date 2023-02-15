@@ -10,27 +10,27 @@ import (
   "path/filepath"
 
   "github.com/gorilla/mux"
-  "github.com/teralion/live-connections/server/internal/conn"
-  ws "github.com/teralion/live-connections/server/internal/websocket"
+  "github.com/teralion/live-connections/server/internal/rpc"
+  "github.com/teralion/live-connections/server/internal/websocket"
 )
 
 var publicPath = filepath.Join("../", "public")
 
 func NewHTTPServer(addr string, done chan struct{}) *http.Server {
-  liveConn := conn.NewLiveConnections()
+  disk := rpc.NewDisk()
   router := mux.NewRouter()
 
-  hub := ws.NewHub()
+  hub := websocket.NewHub()
   go hub.Run()
 
   handleWS := func(w http.ResponseWriter, r *http.Request) {
-    ws.NewClient(w, r, hub, liveConn)
+    websocket.NewClient(w, r, hub, disk)
   }
 
   router.HandleFunc("/ws", handleWS).Methods("GET")
-  router.HandleFunc("/join", liveConn.HandleJoin).Methods("POST")
-  router.HandleFunc("/area/new", liveConn.HandleNewArea).Methods("GET")
-  router.HandleFunc("/area/{id}", liveConn.HandleAreaUsers).Methods("GET")
+  router.HandleFunc("/join", disk.HandleJoin).Methods("POST")
+  router.HandleFunc("/area/new", disk.HandleNewArea).Methods("GET")
+  router.HandleFunc("/area/{id}", disk.HandleAreaUsers).Methods("GET")
 
   srv := &http.Server{
     Addr: addr,
