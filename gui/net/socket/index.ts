@@ -17,10 +17,10 @@ function onClose(event: any) { /* private */
   );
 }
 
-function init() {
+function init(areaName: AreaName, userName: UserName) {
   log.Print("socket", "init");
 
-  conn = new WebSocket(C.PROTOCOL + C.BACKEND_URL + C.SOCKET_PATH);
+  conn = new WebSocket(C.PROTOCOL + C.BACKEND_URL + C.SOCKET_PATH + "/" + areaName + "/" + userName);
 
   conn.addEventListener('error', onError);
   conn.addEventListener('close', onClose);

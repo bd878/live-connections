@@ -73,8 +73,6 @@ async function proceedNewUser(areaName: AreaName): Promise<UserName> {
 async function main() {
   log.Print("gui", "main");
 
-  socket.init();
-
   let userName;
   let areaName = takeAreaName(window.location.pathname);
 
@@ -88,6 +86,7 @@ async function main() {
     userName = await proceedNewUser(areaName)
   }
 
+  socket.init(areaName, userName);
   await establish(areaName, userName);
 
   setRoot();
