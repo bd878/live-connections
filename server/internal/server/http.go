@@ -10,47 +10,55 @@ import (
   "path/filepath"
 
   "github.com/gorilla/mux"
-  "github.com/teralion/live-connections/server/internal/rpc"
-  "github.com/teralion/live-connections/server/internal/websocket"
 )
 
 var publicPath = filepath.Join("../", "public")
 
-func NewHTTPServer(addr string, done chan struct{}) *http.Server {
-  disk := rpc.NewDisk()
+type Server struct {
+  manager *Manager
+  httpServer *http.Server
+}
+
+func NewHTTPServer(addr string, done chan struct{}) *Server {
   router := mux.NewRouter()
+  manager := NewManager()
 
-  hub := websocket.NewHub()
-  go hub.Run()
+  router.HandleFunc("/ws/{area}/{user}", manager.HandleWS).Methods("GET")
+  router.HandleFunc("/join", manager.HandleJoinArea).Methods("POST")
+  router.HandleFunc("/area/new", manager.HandleNewArea).Methods("GET")
+  router.HandleFunc("/area/{id}", manager.HandleAreaUsers).Methods("GET")
 
-  handleWS := func(w http.ResponseWriter, r *http.Request) {
-    websocket.NewClient(w, r, hub, disk)
-  }
-
-  router.HandleFunc("/ws", handleWS).Methods("GET")
-  router.HandleFunc("/join", disk.HandleJoin).Methods("POST")
-  router.HandleFunc("/area/new", disk.HandleNewArea).Methods("GET")
-  router.HandleFunc("/area/{id}", disk.HandleAreaUsers).Methods("GET")
-
-  srv := &http.Server{
+  httpServer := &http.Server{
     Addr: addr,
     Handler: router,
     IdleTimeout: 5 * time.Minute,
     ReadHeaderTimeout: time.Minute,
   }
 
-  go func() {
-    sigint := make(chan os.Signal, 1)
-    signal.Notify(sigint, os.Interrupt)
-    <-sigint
+  server := &Server{
+    manager,
+    httpServer,
+  }
 
-    if err := srv.Shutdown(context.Background()); err != nil {
-      log.Printf("HTTP server Shutdown: %v", err)
-    } else {
-      log.Println("SIGINT caught")
-    }
-    close(done)
-  }()
+  go server.sigHandler(os.Interrupt, done)
 
-  return srv
+  return server
+}
+
+func (s *Server) ListenAndServeTLS(serverCrt string, serverKey string) error {
+  return s.httpServer.ListenAndServeTLS(serverCrt, serverKey)
+}
+
+func (s *Server) sigHandler(sig os.Signal, done chan struct{}) {
+  sigint := make(chan os.Signal, 1)
+  signal.Notify(sigint, sig)
+  <-sigint
+
+  if err := s.httpServer.Shutdown(context.Background()); err != nil {
+    log.Printf("HTTP server Shutdown: %v", err)
+  } else {
+    log.Println("SIGINT caught")
+  }
+
+  close(done)
 }

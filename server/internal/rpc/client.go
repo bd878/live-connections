@@ -14,7 +14,6 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
-  "github.com/teralion/live-connections/server/internal/types"
 )
 
 type Disk struct {
@@ -22,6 +21,11 @@ type Disk struct {
   area disk.AreaManagerClient
   user disk.UserManagerClient
   cursor disk.CursorManagerClient
+}
+
+type Coords struct {
+  XPos float32
+  YPos float32
 }
 
 func NewDisk() *Disk {
@@ -132,16 +136,15 @@ func (d *Disk) WriteMouseCoords(area string, user string, xPos float32, yPos flo
   }
 }
 
-func (d *Disk) ReadMouseCoords(area string, user string) *types.Coords {
+func (d *Disk) ReadMouseCoords(area string, user string) (*Coords, error) {
   ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
   defer cancel()
 
   resp, err := d.cursor.Read(ctx, &disk.ReadCursorRequest{Area: area, Name: user})
   if err != nil {
     log.Println("cursor.Read failed: %v", err)
-    return nil
+    return nil, err
   }
 
-  coords := types.Coords{XPos: resp.XPos, YPos: resp.YPos}
-  return &coords
+  return &Coords{resp.XPos, resp.YPos}, nil
 }
