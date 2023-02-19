@@ -2,9 +2,9 @@ package server
 
 import (
   "time"
-  "log"
 
   ws "github.com/gorilla/websocket"
+  "github.com/teralion/live-connections/server/internal/meta"
 )
 
 const MaxPayloadSize int64 = 2 << 10 // 1024 bytes
@@ -66,7 +66,7 @@ func (c *Client) ReadLoop() {
     case mouseMoveMessageType:
       c.hub.broadcast <- message.Encode()
     default:
-      log.Println("unknown event =", message.Type())
+      meta.Log().Warn("unknown event =", message.Type())
       break
     }
   }
@@ -96,19 +96,19 @@ func (c *Client) write(p []byte) {
   w, err := c.conn.NextWriter(ws.BinaryMessage)
   defer w.Close()
   if err != nil {
-    log.Println("obtaining next writer err =", err)
+    meta.Log().Warn("obtaining next writer err =", err)
     return
   }
 
   if _, err := w.Write(p); err != nil {
-    log.Println("failed to write bytes")
+    meta.Log().Warn("failed to write bytes")
     return
   }
 
   n := len(c.send)
   for i := 0; i < n; i++ {
     if _, err := w.Write(<-c.send); err != nil {
-      log.Println("failed to write bytes")
+      meta.Log().Warn("failed to write bytes")
       return
     }
   }
@@ -118,7 +118,7 @@ func (c *Client) ping() {
   c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
   if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
-    log.Printf("ping message writing failed, err: %v\n", err)
+    meta.Log().Warn("ping message writing failed, err: %v\n", err)
     return
   }
 

@@ -4,6 +4,7 @@ import (
   "net/http"
 
   "github.com/gorilla/mux"
+  "github.com/teralion/live-connections/server/internal/meta"
   "github.com/teralion/live-connections/server/internal/rpc"
 )
 
@@ -26,13 +27,17 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
   area := vars["area"]
   user := vars["user"]
 
+  meta.Log().Debug("area, user =", area, user)
+
   conn, err := UpgradeConnection(w, r)
   if err != nil {
+    meta.Log().Debug("failed to upgrade connection =", err)
     return
   }
 
   if !m.disk.HasUser(area, user) {
     w.WriteHeader(http.StatusBadRequest)
+    meta.Log().Warn("area/user not exists")
     return
   }
 

@@ -2,9 +2,10 @@ package server
 
 import (
   "io"
-  "log"
   "encoding/binary"
   "bytes"
+
+  "github.com/teralion/live-connections/server/internal/meta"
 )
 
 var enc = binary.LittleEndian
@@ -47,24 +48,24 @@ func NewMessage() *Message {
 func (m *Message) ReadFrom(r io.Reader) (int64, error) {
   var err error
   if err = binary.Read(r, enc, &m.size); err != nil {
-    log.Println("binary.Read size err =", err)
+    meta.Log().Warn("binary.Read size err =", err)
     return 0, err
   }
 
   m.raw = make([]byte, m.size)
   if err = binary.Read(r, enc, m.raw); err != nil {
-    log.Println("binary.Read message err =", err)
+    meta.Log().Warn("binary.Read message err =", err)
     return 0, err
   }
 
   if m.size != uint16(len(m.raw)) {
-    log.Println("size != message size = ", m.size, len(m.raw))
+    meta.Log().Warn("size != message size = ", m.size, len(m.raw))
     return 0, err
   }
 
   mr := bytes.NewReader(m.raw)
   if err = binary.Read(mr, enc, &m.messageType); err != nil {
-    log.Println("failed to read message type")
+    meta.Log().Warn("failed to read message type")
     return 0, err
   }
 
@@ -133,12 +134,12 @@ func (m *Message) parseMouseMoveMessage() error {
   mr := bytes.NewReader(m.raw)
 
   if err := binary.Read(mr, enc, &m.XPos); err != nil {
-    log.Println("failed to read xPos =",  err)
+    meta.Log().Warn("failed to read xPos =",  err)
     return err
   }
 
   if err := binary.Read(mr, enc, &m.YPos); err != nil {
-    log.Println("failed to read YPos =",  err)
+    meta.Log().Warn("failed to read YPos =",  err)
     return err
   }
 
@@ -151,17 +152,17 @@ func (m *Message) encodeTextMessage() []byte {
   result := new(bytes.Buffer)
   var size uint16 = uint16(len(message))
   if err := binary.Write(result, enc, size); err != nil {
-    log.Println("error writing text message size =", err)
+    meta.Log().Warn("error writing text message size =", err)
     return nil
   }
 
   if err := binary.Write(result, enc, m.messageType); err != nil {
-    log.Println("error writing text message type =", err)
+    meta.Log().Warn("error writing text message type =", err)
     return nil
   }
 
   if err := binary.Write(result, enc, message); err != nil {
-    log.Println("error writing text message =", err)
+    meta.Log().Warn("error writing text message =", err)
     return nil
   }
 
@@ -223,7 +224,7 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
 
   typeBytes := new(bytes.Buffer)
   if err = binary.Write(typeBytes, enc, listClientsOnlineMessageType); err != nil {
-    log.Println("error writing message type =", err)
+    meta.Log().Warn("error writing message type =", err)
     return nil
   }
 
@@ -231,12 +232,12 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
   for _, user := range m.clients {
     var size uint16 = uint16(len(user))
     if err = binary.Write(usersBytes, enc, size); err != nil {
-      log.Println("error writing user name size =", err)
+      meta.Log().Warn("error writing user name size =", err)
       return nil
     }
 
     if err = binary.Write(usersBytes, enc, []byte(user)); err != nil {
-      log.Println("error writing user name size =", err)
+      meta.Log().Warn("error writing user name size =", err)
       return nil
     }
   }
@@ -244,7 +245,7 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
   size := typeBytes.Len() + usersBytes.Len()
   sizeBytes := new(bytes.Buffer)
   if err = binary.Write(sizeBytes, enc, uint16(size)); err != nil {
-    log.Println("error writing total size =", err)
+    meta.Log().Warn("error writing total size =", err)
     return nil
   }
 

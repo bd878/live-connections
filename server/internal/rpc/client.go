@@ -5,7 +5,6 @@ import (
   "io"
   "os"
   "time"
-  "log"
   "fmt"
   "context"
   "strings"
@@ -14,6 +13,7 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
+  "github.com/teralion/live-connections/server/internal/meta"
 )
 
 type Disk struct {
@@ -33,22 +33,22 @@ func NewDisk() *Disk {
 
   serverAddr, ok := os.LookupEnv("LC_DISK_ADDR")
   if !ok {
-    log.Fatalf("Disk is lack of addr")
+    meta.Log().Fatal("Disk is lack of addr")
   }
 
   timeoutStr, ok := os.LookupEnv("LC_DISK_REQUEST_TIMEOUT")
   if !ok {
-    log.Fatalf("No disk request timeout specified")
+    meta.Log().Fatal("No disk request timeout specified")
   }
 
   diskRequestTimeout, err := time.ParseDuration(timeoutStr)
   if  err != nil {
-    log.Fatalf("Failed to parse timeout duration")
+    meta.Log().Fatal("Failed to parse timeout duration")
   }
 
   conn, err := grpc.Dial(serverAddr, opts...)
   if err != nil {
-    log.Fatalf("failed to dial: %v\n", err)
+    meta.Log().Fatal("failed to dial: %v\n", err)
   }
 
   area := disk.NewAreaManagerClient(conn)
@@ -79,7 +79,7 @@ func (d *Disk) HandleJoin(w http.ResponseWriter, r *http.Request) {
 
   resp, err := d.user.Add(ctx, &disk.AddUserRequest{Area: areaName.String()})
   if err != nil {
-    log.Fatalf("user.Add failed: %v", err)
+    meta.Log().Fatal("user.Add failed: %v", err)
   }
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
   w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -87,13 +87,13 @@ func (d *Disk) HandleJoin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d *Disk) HandleNewArea(w http.ResponseWriter, r *http.Request) {
-  log.Println("new area request")
+  meta.Log().Debug("new area request")
 
   ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
   defer cancel()
   resp, err := d.area.Create(ctx, &disk.CreateAreaRequest{})
   if err != nil {
-    log.Fatalf("area.Create failed: %v", err)
+    meta.Log().Fatal("area.Create failed: %v", err)
   }
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
   w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -108,7 +108,7 @@ func (d *Disk) HandleAreaUsers(w http.ResponseWriter, r *http.Request) {
   defer cancel()
   resp, err := d.area.ListUsers(ctx, &disk.ListAreaUsersRequest{Name: p})
   if err != nil {
-    log.Fatalf("area.ListUsers failed: %v", err)
+    meta.Log().Fatal("area.ListUsers failed: %v", err)
   }
   w.Header().Set("Access-Control-Allow-Origin", "*")
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
@@ -120,7 +120,7 @@ func (d *Disk) HasUser(area string, user string) bool {
   defer cancel()
   resp, err := d.area.HasUser(ctx, &disk.HasUserRequest{Area: area, User: user})
   if err != nil {
-    log.Fatalf("area.HasUser failed: %v", err)
+    meta.Log().Fatal("area.HasUser failed: %v", err)
   }
   return resp.Result
 }
@@ -132,7 +132,7 @@ func (d *Disk) WriteMouseCoords(area string, user string, xPos float32, yPos flo
   coords := &disk.Coords{XPos: xPos, YPos: yPos}
   _, err := d.cursor.Write(ctx, &disk.WriteCursorRequest{Area: area, Name: user, Coords: coords})
   if err != nil {
-    log.Fatalf("cursor.Write failed: %v", err)
+    meta.Log().Fatal("cursor.Write failed: %v", err)
   }
 }
 
@@ -142,7 +142,7 @@ func (d *Disk) ReadMouseCoords(area string, user string) (*Coords, error) {
 
   resp, err := d.cursor.Read(ctx, &disk.ReadCursorRequest{Area: area, Name: user})
   if err != nil {
-    log.Println("cursor.Read failed: %v", err)
+    meta.Log().Warn("cursor.Read failed: %v", err)
     return nil, err
   }
 

@@ -6,10 +6,10 @@ import (
   "os"
   "context"
   "os/signal"
-  "log"
   "path/filepath"
 
   "github.com/gorilla/mux"
+  "github.com/teralion/live-connections/server/internal/meta"
 )
 
 var publicPath = filepath.Join("../", "public")
@@ -55,9 +55,9 @@ func (s *Server) sigHandler(sig os.Signal, done chan struct{}) {
   <-sigint
 
   if err := s.httpServer.Shutdown(context.Background()); err != nil {
-    log.Printf("HTTP server Shutdown: %v", err)
+    meta.Log().Debug("HTTP server Shutdown: %v", err)
   } else {
-    log.Println("SIGINT caught")
+    meta.Log().Debug("SIGINT caught")
   }
 
   close(done)
