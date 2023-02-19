@@ -82,6 +82,8 @@ func (c *Client) ReadLoop() {
       break
     }
   }
+
+  meta.Log().Debug(c.name, "exit reading loop")
 }
 
 func (c *Client) WriteLoop() {
@@ -94,51 +96,60 @@ func (c *Client) WriteLoop() {
     ticker.Stop()
   }()
 
+  var err error
   for {
     select {
     case bytes := <-c.send:
-      c.write(bytes)
+      err = c.write(bytes)
     case <-ticker.C:
-      c.ping()
+      err = c.ping()
+    }
+
+    if err != nil {
+      break
     }
   }
+
+  meta.Log().Debug(c.name, "exit writing loop")
 }
 
-func (c *Client) write(p []byte) {
+func (c *Client) write(p []byte) error {
   c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
   w, err := c.conn.NextWriter(ws.BinaryMessage)
-  defer w.Close()
   if err != nil {
     meta.Log().Warn("obtaining next writer err =", err)
-    return
+    return err
   }
+  defer w.Close()
 
   meta.Log().Debug("write p =", p)
 
   if _, err := w.Write(p); err != nil {
     meta.Log().Warn("failed to write bytes")
-    return
+    return err
   }
 
   n := len(c.send)
   for i := 0; i < n; i++ {
     if _, err := w.Write(<-c.send); err != nil {
       meta.Log().Warn("failed to write bytes")
-      return
+      return err
     }
   }
+
+  return nil
 }
 
-func (c *Client) ping() {
+func (c *Client) ping() error {
   c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
   if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
     meta.Log().Warn("ping message writing failed, err: %v\n", err)
-    return
+    return err
   }
 
-  return
+  return nil
 }
 
 func (c *Client) unregister() {

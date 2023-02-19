@@ -75,6 +75,10 @@ func (m *Message) SetUser(user string) {
   m.user = user
 }
 
+func (m *Message) SetClients(clients []string) {
+  m.clients = clients
+}
+
 func (m *Message) Decode() error {
   switch (m.Type()) {
   case authMessageType:

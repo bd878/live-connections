@@ -8,7 +8,7 @@ const log = {
   Print(entity: string, message: string, ...args: any): void {
     ;(
       (this._isDebug() || this._isWarn()) &&
-      (console.log(`[${entity}]: `, message, ...args))
+      (console.log(`[${entity}]:`, message, ...args))
     );
   }
 }

@@ -52,6 +52,9 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
     m.hubs[area] = hub
 
     go hub.Run()
+  } else {
+    meta.Log().Debug("hub is running already, take it")
+    hub = m.hubs[area]
   }
 
   client := NewClient(conn, hub, area, user)

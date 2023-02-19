@@ -53,10 +53,12 @@ func (h *Hub) Run() {
 func (h *Hub) broadcastClientsOnline() {
   meta.Log().Debug("broadcast clients online")
 
-  var clientsOnline []string
-  clientsOnline = h.ListClientsOnline()
+  clientsOnline := h.ListClientsOnline()
 
-  h.broadcast <- EncodeClientsOnline(clientsOnline)
+  if len(clientsOnline) > 0 {
+    encodedClients := EncodeClientsOnline(clientsOnline)
+    h.broadcast <- encodedClients
+  }
 }
 
 func (h *Hub) ListClientsOnline() []string {
