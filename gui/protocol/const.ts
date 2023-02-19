@@ -4,6 +4,8 @@ const C: Record<string, any> = {
   SIZE_PREFIX_SIZE: 2,
   TYPE_SIZE: 1,
 
+  COUNT_USERS_SIZE: 2,
+
   MOUSE_MOVE_TYPE: 2,
   COORD_SIZE: 4,
 
