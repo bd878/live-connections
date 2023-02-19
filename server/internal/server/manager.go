@@ -35,15 +35,20 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
     return
   }
 
+  meta.Log().Debug("connection upgraded")
+
   if !m.disk.HasUser(area, user) {
     w.WriteHeader(http.StatusBadRequest)
     meta.Log().Warn("area/user not exists")
     return
+  } else {
+    meta.Log().Debug("area/user has found")
   }
 
   var hub *Hub
   if m.hubs[area] == nil {
-    hub = NewHub()
+    meta.Log().Debug("no hub is running, creating")
+    hub = NewHub(area)
     m.hubs[area] = hub
 
     go hub.Run()

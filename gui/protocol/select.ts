@@ -24,7 +24,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
     offset += C.SIZE_PREFIX_SIZE;
 
     if (size === 0) {
-      throw new Error(`[select]: size is 0 = ${size}`);
+      throw new Error(`[select]: size is 0`);
     }
 
     const type = dv.getInt8(offset, C.ENDIANNE);

@@ -7,6 +7,7 @@ import (
 )
 
 type LogWriter struct {
+  prefix string
   degree string
 }
 
@@ -15,20 +16,23 @@ var (
   instance LogWriter
 )
 
-func NewLogWriter(degree string) *LogWriter {
+func NewLogWriter(prefix string, degree string) *LogWriter {
   once.Do(func() {
     if degree == "" {
       degree = "debug"
     }
 
-    instance = LogWriter{degree}
+    instance = LogWriter{
+      prefix: prefix,
+      degree: degree,
+    }
   })
 
   return &instance
 }
 
 func Log() *LogWriter {
-  return NewLogWriter("debug")
+  return NewLogWriter("", "debug")
 }
 
 func (l *LogWriter) Info(text ...any) {

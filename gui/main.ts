@@ -86,6 +86,8 @@ async function main() {
     userName = await proceedNewUser(areaName)
   }
 
+  log.Print("gui", "areaName, userName:", areaName, userName);
+
   socket.init(areaName, userName);
   await establish(areaName, userName);
 

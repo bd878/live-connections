@@ -1,17 +1,20 @@
 package server
 
+import (
+  "github.com/teralion/live-connections/server/internal/meta"
+)
+
 type Hub struct {
+  area string
   clients map[*Client]bool
-
   register chan *Client
-
   unregister chan *Client
-
   broadcast chan []byte
 }
 
-func NewHub() *Hub {
+func NewHub(area string) *Hub {
   return &Hub{
+    area: area,
     clients: make(map[*Client]bool),
     register: make(chan *Client),
     unregister: make(chan *Client),
@@ -20,6 +23,8 @@ func NewHub() *Hub {
 }
 
 func (h *Hub) Run() {
+  meta.Log().Debug("hub is running")
+
   for {
     select {
     case client := <-h.register:
@@ -46,6 +51,8 @@ func (h *Hub) Run() {
 }
 
 func (h *Hub) broadcastClientsOnline() {
+  meta.Log().Debug("broadcast clients online")
+
   var clientsOnline []string
   clientsOnline = h.ListClientsOnline()
 

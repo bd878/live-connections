@@ -41,29 +41,41 @@ func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
 }
 
 func (c *Client) ReadLoop() {
+  meta.Log().Debug(c.name, "launch reading loop")
   for {
     _, r, err := c.conn.NextReader()
     if err != nil {
+      meta.Log().Warn("failed to obtain next reader")
       break
     }
 
     message := NewMessage()
+    meta.Log().Info(c.name, "received new message")
     if _, err := message.ReadFrom(r); err != nil {
+      meta.Log().Warn(c.name, "failed to read message", err)
       break
     }
 
     if err := message.Decode(); err != nil {
+      meta.Log().Warn(c.name, "failed to decode message:", err)
       break
     }
 
     switch message.Type() {
     case authMessageType:
+      meta.Log().Debug(c.name, "received auth message")
+
       c.area = message.area
       c.name = message.user
 
       c.hub.register <- c
       defer c.unregister()
     case mouseMoveMessageType:
+      meta.Log().Debug(c.name, "received mouse move message")
+
+      message.SetArea(c.area)
+      message.SetUser(c.name)
+
       c.hub.broadcast <- message.Encode()
     default:
       meta.Log().Warn("unknown event =", message.Type())
@@ -73,6 +85,8 @@ func (c *Client) ReadLoop() {
 }
 
 func (c *Client) WriteLoop() {
+  meta.Log().Debug(c.name, "launch writing loop")
+
   ticker := time.NewTicker(pingPeriod)
 
   defer func() {
@@ -100,6 +114,8 @@ func (c *Client) write(p []byte) {
     return
   }
 
+  meta.Log().Debug("write p =", p)
+
   if _, err := w.Write(p); err != nil {
     meta.Log().Warn("failed to write bytes")
     return
@@ -126,6 +142,8 @@ func (c *Client) ping() {
 }
 
 func (c *Client) unregister() {
+  meta.Log().Debug(c.name, "unregister")
+
   c.hub.unregister <- c
   // TODO: write coords to disk
 }

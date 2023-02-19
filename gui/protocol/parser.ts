@@ -9,7 +9,7 @@ async function parseMouseMoveMessage(buf: any /* ArrayBuffer */): Promise<MouseM
   offset += C.SIZE_PREFIX_SIZE;
 
   if (nameSize === 0) {
-    throw new Error(`[parseMouseMoveMessage]: nameSize is 0 = ${nameSize}`);
+    throw new Error(`[parseMouseMoveMessage]: nameSize is 0`);
   }
 
   const nameBytes = new Uint8Array(buf, offset, nameSize);
