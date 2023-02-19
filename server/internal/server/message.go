@@ -240,6 +240,7 @@ func EncodeClientsOnline(clients []string) []byte {
   return m.encodeClientsOnlineMessage()
 }
 
+// totalSize + type + usersCount + []{userSize + userBytes}
 func (m *Message) encodeClientsOnlineMessage() []byte {
   meta.Log().Debug("encode clients online message")
 
@@ -249,9 +250,15 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
     return nil
   }
 
+  countBytes := new(bytes.Buffer)
+  if err := binary.Write(countBytes, enc, uint16(len(m.clients))); err != nil {
+    meta.Log().Warn("error writing users count =", err)
+    return nil
+  }
+
   usersBytes := new(bytes.Buffer)
   for _, user := range m.clients {
-    var size uint16 = uint16(len(user))
+    size := uint16(len(user))
     if err := binary.Write(usersBytes, enc, size); err != nil {
       meta.Log().Warn("error writing user name size =", err)
       return nil
@@ -263,7 +270,7 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
     }
   }
 
-  size := typeBytes.Len() + usersBytes.Len()
+  size := typeBytes.Len() + countBytes.Len() + usersBytes.Len()
   sizeBytes := new(bytes.Buffer)
   if err := binary.Write(sizeBytes, enc, uint16(size)); err != nil {
     meta.Log().Warn("error writing total size =", err)
@@ -274,6 +281,7 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
     [][]byte{
       sizeBytes.Bytes(),
       typeBytes.Bytes(),
+      countBytes.Bytes(),
       usersBytes.Bytes(),
     },
     []byte{},
