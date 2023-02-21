@@ -18,7 +18,6 @@ const writeWait = 10 * time.Second
 type Client struct {
   conn *ws.Conn
   hub *Hub
-  auth chan bool
   send chan []byte
 
   area string
@@ -35,7 +34,6 @@ func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
     hub: hub,
     area: area,
     name: name,
-    auth: make(chan bool),
     send: make(chan []byte, 256),
   }
 }

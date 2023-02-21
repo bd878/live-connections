@@ -7,7 +7,7 @@ import (
 )
 
 const (
-  charset = "0123456789ABCDEF"
+  charset = "0123456789ABCDEF" // hex decodes user gui values (color, ...etc)
 )
 
 func RandomString(n int) string {
