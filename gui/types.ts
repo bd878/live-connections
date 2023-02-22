@@ -3,6 +3,8 @@ type AreaName = string;
 
 type UserName = string;
 
+type Color = string;
+
 type ABuffer = any;
 
 type DView = any;
@@ -62,6 +64,11 @@ interface Moveable {
   move(x: number, y: number): void;
 }
 
+interface Redrawable {
+  redraw(piece: string): void;
+}
+
+// local state is ok
 interface Containable<C extends BaseContainer = BaseContainer> {
   container: C;
 
