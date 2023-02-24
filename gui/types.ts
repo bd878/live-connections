@@ -17,6 +17,11 @@ type MouseMoveEvent = {
   name: string;
 };
 
+type Coords = {
+  xPos: number;
+  yPos: number;
+};
+
 type BaseContainer = 
   | Record<string, any>
   | Map<string, any>;
@@ -36,7 +41,6 @@ type AuthOkEvent = {
 
 type UsersOnlineEvent = {
   users: UserName[];
-  colors: string[];
 };
 
 interface Appendable {
@@ -65,16 +69,16 @@ interface Moveable {
 }
 
 interface Redrawable {
-  redraw(piece: string): void;
+  redraw(piece: string, ...args: any[]): void;
 }
 
-// local state is ok
 interface Containable<C extends BaseContainer = BaseContainer> {
   container: C;
 
   hasElem(key: string): boolean;
   getElem(key: string): Elem;
   addElem(key: string, elem: Elem): void;
+  delElem(key: string): void;
 }
 
 interface Clearable {
