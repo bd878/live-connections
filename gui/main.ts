@@ -3,8 +3,8 @@ import select from './protocol/select';
 import establish from './protocol/init';
 import socket from './net/socket';
 import log from './modules/log';
-import User from './entities/User';
-import Area from './entities/Area';
+import users from './entities/users';
+import areas from './entities/areas';
 import Main from './components/Main';
 import Root from './components/Root';
 import debounce from './misc/debounce';
@@ -55,7 +55,7 @@ async function run() {
 async function proceedNewArea(): Promise<AreaName> {
   log.Print("gui", "proceed new area");
 
-  const areaName = await Area.create();
+  const areaName = await areas.create();
   setUrl(`/${areaName}`);
   return areaName;
 }
@@ -64,7 +64,7 @@ async function proceedNewArea(): Promise<AreaName> {
 async function proceedNewUser(areaName: AreaName): Promise<UserName> {
   log.Print("gui", "proceed new user");
 
-  const userName = await User.create(areaName);
+  const userName = await users.create(areaName);
   bindUserToArea(areaName, userName);
   return userName;
 }
@@ -88,6 +88,7 @@ async function main() {
 
   log.Print("gui", "areaName, userName:", areaName, userName);
 
+  areas.make(areaName);
   socket.init(areaName, userName);
   await establish(areaName, userName);
 

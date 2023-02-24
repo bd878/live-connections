@@ -1,4 +1,5 @@
 import { create } from './static';
+import getColorFromUserName from '../../misc/getColorFromUserName';
 
 let users: Record<string, User> = {};
 let _list: User[] = []; // fast iterate
@@ -26,24 +27,29 @@ function flush() {
   _list = [];
 }
 
-function list(): { names: UserName[]; colors: Color[]; } {
+function listNames(): UserName[] {
   const names: UserName[] = [];
-  const colors: Color[] = [];
 
   for (let i = 0; i < _list.length; i++) {
-    const user = _list[i];
-
-    names.push(user.name);
-    colors.push(user.color);
+    names.push(_list[i].name);
   }
 
-  return { names, colors };
+  return names;
+}
+
+function set(area: AreaName, list: string[]) {
+  flush();
+  for (let i = 0; i < list.length; i++) {
+    const name = list[i];
+    make(area, name, getColorFromUserName(name));
+  }
 }
 
 export default {
   make,
   create,
   users,
-  list,
+  listNames,
+  set,
   flush,
 };

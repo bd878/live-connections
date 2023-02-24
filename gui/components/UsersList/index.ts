@@ -3,6 +3,7 @@ import has from '../../methods/has';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
+import delElemChild from '../../methods/delElemChild';
 import addElemChild from '../../methods/addElemChild';
 import clearContainer from '../../methods/clearContainer';
 
@@ -33,6 +34,7 @@ class UsersList implements
   hasElem = hasElem;
   getElem = getElem;
   addElem = addElemChild;
+  delElem = delElemChild;
 }
 
 const list = new UsersList();

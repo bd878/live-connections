@@ -12,7 +12,7 @@ function make(areaName: string): Area {
   return area;
 }
 
-function getMy(): Area {
+function my(): Area {
   if (!area) {
     throw error.noElementCreated("areas");
   }
@@ -22,5 +22,5 @@ function getMy(): Area {
 export default {
   create,
   make,
-  getMy,
+  my,
 };

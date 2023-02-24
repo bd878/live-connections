@@ -3,6 +3,10 @@ function noElementCreated(moduleName: string, ...args: any[]) {
   return create(moduleName, "no element created", args);
 }
 
+function outOfRange(moduleName: string, ...args: any[]) {
+  return create(moduleName, "out of range", args);
+}
+
 function wrongDataType(moduleName: string, ...args: any[]) {
   return create(moduleName, "wrong data type", args);
 }
@@ -22,6 +26,7 @@ function create(moduleName: string, message: string, ...args: any[]): Error {
 export default {
   create,
   noElementCreated,
+  outOfRange,
   failedToGet,
   wrongDataType,
   wrongInterface,

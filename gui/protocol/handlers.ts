@@ -2,8 +2,12 @@ import error from '../modules/error';
 import socket from '../net/socket';
 import log from '../modules/log';
 import area from '../components/Area';
+import users from '../entities/users';
+import areas from '../entities/areas';
+import cursors from '../entities/cursors';
 import usersList from '../components/UsersList';
-import createCursor from '../misc/createCursor';
+import Cursor from '../components/Cursor';
+import diff from '../misc/diff';
 import { isMovable } from '../rtti';
 
 /*
@@ -17,17 +21,8 @@ function onAuthOk(e: AuthOkEvent) {
 function onMouseMove(e: MouseMoveEvent) {
   log.Print("onMouseMove", "e =", e);
 
-  if (area.hasElem(e.name)) {
-    const cursor = area.getElem(e.name);
-    if (isMovable(cursor)) {
-      cursor.move(e.xPos, e.yPos);
-    } else {
-      throw error.wrongInterface(cursor.name, "Movable");
-    }
-  } else {
-    const cursor = createCursor(e.name, e.xPos, e.yPos);
-    area.addElem(e.name, cursor);
-  }
+  cursors.set(e.name, e.xPos, e.yPos);
+  area.redraw('cursor', e.name);
 }
 
 function onInitMouseCoords(e: MouseMoveEvent) {
@@ -35,7 +30,25 @@ function onInitMouseCoords(e: MouseMoveEvent) {
 }
 
 function onUsersOnline(e: UsersOnlineEvent) {
-  log.Print("onUsersOnline", "users =", e.users);
+  const diffPair = diff(users.listNames(), e.users);
+  const current = diffPair[0];
+  const next = diffPair[1];
+
+  for (let i = 0; i < current.length; i++) {
+    ;(area.hasElem(current[i]) && area.delElem(current[i]));
+  }
+
+  for (let i = 0; i < next.length; i++) {
+    if (!area.hasElem(next[i])) {
+      const cursor = new Cursor();
+      cursor.create();
+      area.addElem(next[i], cursor);
+    }
+  }
+
+  users.set(areas.my().name, e.users);
+
+  area.redraw("cursors")
 }
 
 export {

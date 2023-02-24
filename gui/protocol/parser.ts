@@ -59,8 +59,7 @@ async function parseUsersOnlineMessage(buf: any /* ArrayBuffer */): Promise<User
 
   log.Print("parseUsersOnlineMessage", "leave");
 
-  const colors: string[] = [];
-  return { users, colors };
+  return { users };
 }
 
 export {

@@ -14,14 +14,7 @@ function redraw(this: Area, piece: string, ...args: any[]) {
 
 function redrawCursors(this: Area) {
   for (let i = 0; i < cursors.length(); i++) {
-    const name = cursors.getNameAt(i);
-    if (!this.hasElem(name)) {
-      const cursor = new Cursor();
-      cursor.create();
-      this.addElem(name, cursor);
-    }
-
-    redrawSingleCursor.call(this, name);
+    redrawSingleCursor.call(this, cursors.getNameAt(i));
   }
 }
 
