@@ -8,7 +8,6 @@ import cursors from '../entities/cursors';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
 import diff from '../misc/diff';
-import { isMovable } from '../rtti';
 
 /*
  * External handlers
@@ -34,21 +33,23 @@ function onUsersOnline(e: UsersOnlineEvent) {
   const current = diffPair[0];
   const next = diffPair[1];
 
+  users.set(areas.my().name, e.users);
+
   for (let i = 0; i < current.length; i++) {
     ;(area.hasElem(current[i]) && area.delElem(current[i]));
   }
 
   for (let i = 0; i < next.length; i++) {
     if (!area.hasElem(next[i])) {
-      const cursor = new Cursor();
+      const user = users.getByName(next[i]);
+      const cursor = new Cursor(user.color);
       cursor.create();
+      cursor.redraw();
       area.addElem(next[i], cursor);
     }
   }
 
-  users.set(areas.my().name, e.users);
-
-  area.redraw("cursors")
+  area.redraw("cursors");
 }
 
 export {

@@ -3,6 +3,8 @@ type AreaName = string;
 
 type UserName = string;
 
+type CursorName = UserName;
+
 type Color = string;
 
 type ABuffer = any;

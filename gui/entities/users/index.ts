@@ -1,7 +1,8 @@
 import { create } from './static';
+import error from '../../modules/error';
 import getColorFromUserName from '../../misc/getColorFromUserName';
 
-let users: Record<string, User> = {};
+let users: Map<string, User> = new Map;
 let _list: User[] = []; // fast iterate
 
 class User {
@@ -16,14 +17,14 @@ class User {
 function make(area: AreaName, name: UserName, color: Color, token: string | null = null): User {
   const user = new User(area, name, color, token);
 
-  users[name] = user;
+  users.set(name, user);
   _list.push(user);
 
   return user;
 }
 
 function flush() {
-  users = {};
+  users = new Map();
   _list = [];
 }
 
@@ -45,10 +46,18 @@ function set(area: AreaName, list: string[]) {
   }
 }
 
+function getByName(name: UserName): User {
+  const user = users.get(name);
+  if (!user) {
+    throw error.failedToGet("users getByName", name);
+  }
+  return user;
+}
+
 export default {
   make,
   create,
-  users,
+  getByName,
   listNames,
   set,
   flush,

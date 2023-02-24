@@ -18,7 +18,7 @@ function redrawCursors(this: Area) {
   }
 }
 
-function redrawSingleCursor(this: Area, name: UserName) {
+function redrawSingleCursor(this: Area, name: CursorName) {
   if (!this.hasElem(name)) {
     throw error.noElementCreated("Area redrawSingleCursor");
   }
