@@ -5,6 +5,8 @@ import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
 import addElemChild from '../../methods/addElemChild';
+import delElemChild from '../../methods/delElemChild';
+import redraw from './redraw';
 
 class Area implements
   Elem,
@@ -12,7 +14,8 @@ class Area implements
   Accessible,
   Writable,
   Styleable,
-  Containable
+  Containable,
+  Redrawable
 {
   root: HTMLElement | null = null;
   name: string = "area";
@@ -29,9 +32,12 @@ class Area implements
   create = create;
   write = write;
 
+  redraw = redraw;
+
   hasElem = hasElem;
   getElem = getElem;
   addElem = addElemChild;
+  delElem = delElemChild;
 }
 
 const area = new Area();
