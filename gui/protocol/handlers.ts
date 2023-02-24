@@ -7,6 +7,7 @@ import areas from '../entities/areas';
 import cursors from '../entities/cursors';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
+import UserTile from '../components/UserTile';
 import diff from '../misc/diff';
 
 /*
@@ -37,19 +38,24 @@ function onUsersOnline(e: UsersOnlineEvent) {
 
   for (let i = 0; i < current.length; i++) {
     ;(area.hasElem(current[i]) && area.delElem(current[i]));
+    ;(usersList.hasElem(current[i]) && usersList.delElem(current[i]));
   }
 
   for (let i = 0; i < next.length; i++) {
     if (!area.hasElem(next[i])) {
       const user = users.getByName(next[i]);
+
       const cursor = new Cursor(user.color);
       cursor.create();
       cursor.redraw();
       area.addElem(next[i], cursor);
+
+      const tile = new UserTile(user.color);
+      tile.create();
+      tile.redraw();
+      usersList.addElem(next[i], tile);
     }
   }
-
-  area.redraw("cursors");
 }
 
 export {

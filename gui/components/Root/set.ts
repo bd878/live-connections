@@ -6,7 +6,7 @@ function setRoot(this: Root, domElem: HTMLElement): HTMLElement {
   const result = set.call(this, domElem);
 
   if (!this.root) {
-    throw error.noElementCreated(this.name);
+    throw error.noElementCreated('Root setRoot', this.name);
   }
 
   this.root.classList.add("root");
