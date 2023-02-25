@@ -5,14 +5,12 @@
   "scripts": {
     "tsc": "npx tsc",
     "clear": "rm -rf ../public/build/*",
-    "build:dev": "esbuild --bundle ./init.ts --outdir=../public/build/ --bundle ./style.css --outdir=../public/build/",
-    "build:stage": "esbuild --bundle ./init.ts --outdir=../public/build/ --minify --sourcemap --bundle ./style.css --outdir=../public/build/",
-    "build:prod": "esbuild --bundle ./init.ts --outdir=../public/build/ --minify"
+    "build:dev": "./scripts/build --mode dev",
+    "build:prod": "./scripts/build --mode prod"
   },
   "author": "bd878",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.15.7",
     "typescript": "^4.8.2"
   }
 }
