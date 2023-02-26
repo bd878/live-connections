@@ -1,8 +1,7 @@
-import C from './const';
 import log from '../../modules/log';
 
 async function get(path: string): Promise<any> {
-  const response = await fetch(C.PROTOCOL + C.BACKEND_URL + path);
+  const response = await fetch(HTTP_PROTOCOL + BACKEND_URL + path);
   if (!response.ok) {
     throw new Error("[get]: failed to create new area");
   }
@@ -16,7 +15,7 @@ async function get(path: string): Promise<any> {
 }
 
 async function post(path: string, options: Record<string, any>): Promise<any> {
-  const response = await fetch(C.PROTOCOL + C.BACKEND_URL + path, options);
+  const response = await fetch(HTTP_PROTOCOL + BACKEND_URL + path, options);
   if (!response.ok) {
     throw new Error("[http post]: failed to create new user");
   }

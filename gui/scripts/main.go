@@ -5,6 +5,8 @@ import (
   "flag"
   "os"
   "path/filepath"
+
+  dotenv "github.com/joho/godotenv"
   "github.com/evanw/esbuild/pkg/api"
 )
 
@@ -15,6 +17,11 @@ var mode = flag.String("mode", "dev", "build mode")
 func main() {
   if err := os.RemoveAll(outDirPath); err != nil {
     fmt.Println("failed to clear", outDirPath)
+    os.Exit(1)
+  }
+
+  if err := dotenv.Load(); err != nil {
+    fmt.Println("Error loading .env file")
     os.Exit(1)
   }
 
@@ -37,9 +44,20 @@ func main() {
   }
 }
 
+func define() map[string]string {
+  return map[string]string{
+    "BACKEND_URL": os.Getenv("BACKEND_URL"),
+    "SOCKET_PROTOCOL": os.Getenv("SOCKET_PROTOCOL"),
+    "HTTP_PROTOCOL": os.Getenv("HTTP_PROTOCOL"),
+    "SOCKET_PATH": os.Getenv("SOCKET_PATH"),
+    "TIMEOUT_OPEN": os.Getenv("TIMEOUT_OPEN"),
+  }
+}
+
 func buildDev() api.BuildResult {
   result := api.Build(api.BuildOptions{
     EntryPoints: []string{"./init.ts", "./style.css"},
+    Define: define(),
     Bundle: true,
     Write: true,
     Outdir: outDirPath,
@@ -51,6 +69,7 @@ func buildDev() api.BuildResult {
 func buildProd() api.BuildResult {
   result := api.Build(api.BuildOptions{
     EntryPoints: []string{"./init.ts", "./style.css"},
+    Define: define(),
     Bundle: true,
     Write: true,
     MinifyWhitespace: true,
