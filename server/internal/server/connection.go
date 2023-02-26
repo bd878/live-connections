@@ -10,7 +10,7 @@ import (
 
 func checkClientOrigin(r *http.Request) bool {
   origin := r.Host
-  return strings.Contains(origin, "localhost")
+  return strings.Contains(origin, "localhost") || strings.Contains(origin, "live-connections")
 }
 
 var upgrader = ws.Upgrader{

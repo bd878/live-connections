@@ -45,8 +45,8 @@ func NewHTTPServer(addr string, done chan struct{}) *Server {
   return server
 }
 
-func (s *Server) ListenAndServeTLS(serverCrt string, serverKey string) error {
-  return s.httpServer.ListenAndServeTLS(serverCrt, serverKey)
+func (s *Server) ListenAndServe() error {
+  return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) sigHandler(sig os.Signal, done chan struct{}) {

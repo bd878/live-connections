@@ -15,19 +15,7 @@ func main() {
     meta.Log().Fatal("Error loading .env file")
   }
 
-  var serverCrt, serverKey, addr string
-  var ok bool
-  serverCrt, ok = os.LookupEnv("LC_SERVER_CRT_PATH")
-  if !ok {
-    meta.Log().Fatal("No server crt path provided")
-  }
-
-  serverKey, ok = os.LookupEnv("LC_SERVER_KEY_PATH")
-  if !ok {
-    meta.Log().Fatal("No client crt path provded")
-  }
-
-  addr, ok = os.LookupEnv("LC_SERVER_ADDR")
+  addr, ok := os.LookupEnv("LC_SERVER_ADDR")
   if !ok {
     meta.Log().Fatal("Client is lack of addr")
   }
@@ -36,8 +24,8 @@ func main() {
 
   srv := server.NewHTTPServer(addr, done)
   meta.Log().Info("server is listening on =", addr)
-  if err := srv.ListenAndServeTLS(serverCrt, serverKey); err != http.ErrServerClosed {
-    meta.Log().Error("HTTP server ListenAndServeTLS:", err)
+  if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+    meta.Log().Error("HTTP server ListenAndServe:", err)
   }
 
   <-done
