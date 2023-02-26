@@ -10,18 +10,16 @@ import (
   "github.com/evanw/esbuild/pkg/api"
 )
 
-var outDirPath = filepath.Join("../", "public/build")
-
 var mode = flag.String("mode", "dev", "build mode")
 
 func main() {
-  if err := os.RemoveAll(outDirPath); err != nil {
-    fmt.Println("failed to clear", outDirPath)
+  if err := dotenv.Load(); err != nil {
+    fmt.Println("Error loading .env file")
     os.Exit(1)
   }
 
-  if err := dotenv.Load(); err != nil {
-    fmt.Println("Error loading .env file")
+  if err := os.RemoveAll(os.Getenv("GUI_BUILD_DIR")); err != nil {
+    fmt.Println("failed to clear", os.Getenv("GUI_BUILD_DIR"))
     os.Exit(1)
   }
 
@@ -39,17 +37,20 @@ func main() {
   }
 
   if len(result.Errors) != 0 {
-    fmt.Println("build has errors")
+    fmt.Println("build has errors:")
+    for _, msg := range result.Errors {
+      fmt.Println(msg.Text)
+    }
     os.Exit(1)
   }
 }
 
 func define() map[string]string {
   return map[string]string{
-    "BACKEND_URL": os.Getenv("BACKEND_URL"),
-    "SOCKET_PROTOCOL": os.Getenv("SOCKET_PROTOCOL"),
-    "HTTP_PROTOCOL": os.Getenv("HTTP_PROTOCOL"),
-    "SOCKET_PATH": os.Getenv("SOCKET_PATH"),
+    "BACKEND_URL": fmt.Sprintf("\"%s\"", os.Getenv("BACKEND_URL")),
+    "SOCKET_PROTOCOL": fmt.Sprintf("\"%s\"", os.Getenv("SOCKET_PROTOCOL")),
+    "HTTP_PROTOCOL": fmt.Sprintf("\"%s\"", os.Getenv("HTTP_PROTOCOL")),
+    "SOCKET_PATH": fmt.Sprintf("\"%s\"", os.Getenv("SOCKET_PATH")),
     "TIMEOUT_OPEN": os.Getenv("TIMEOUT_OPEN"),
   }
 }
@@ -60,7 +61,7 @@ func buildDev() api.BuildResult {
     Define: define(),
     Bundle: true,
     Write: true,
-    Outdir: outDirPath,
+    Outdir: os.Getenv("GUI_BUILD_DIR"),
   })
 
   return result
@@ -75,7 +76,7 @@ func buildProd() api.BuildResult {
     MinifyWhitespace: true,
     MinifyIdentifiers: true,
     MinifySyntax: true,
-    Outdir: outDirPath,
+    Outdir: os.Getenv("GUI_BUILD_DIR"),
   })
 
   return result
