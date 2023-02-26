@@ -4,7 +4,6 @@ import (
   "fmt"
   "flag"
   "os"
-  "path/filepath"
 
   dotenv "github.com/joho/godotenv"
   "github.com/evanw/esbuild/pkg/api"
