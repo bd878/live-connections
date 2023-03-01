@@ -287,119 +287,119 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 	Metadata: "disk.proto",
 }
 
-// CursorManagerClient is the client API for CursorManager service.
+// SquareManagerClient is the client API for SquareManager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type CursorManagerClient interface {
-	Write(ctx context.Context, in *WriteCursorRequest, opts ...grpc.CallOption) (*WriteCursorResponse, error)
-	Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*Coords, error)
+type SquareManagerClient interface {
+	Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*WriteSquareResponse, error)
+	Read(ctx context.Context, in *ReadSquareRequest, opts ...grpc.CallOption) (*Coords, error)
 }
 
-type cursorManagerClient struct {
+type squareManagerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCursorManagerClient(cc grpc.ClientConnInterface) CursorManagerClient {
-	return &cursorManagerClient{cc}
+func NewSquareManagerClient(cc grpc.ClientConnInterface) SquareManagerClient {
+	return &squareManagerClient{cc}
 }
 
-func (c *cursorManagerClient) Write(ctx context.Context, in *WriteCursorRequest, opts ...grpc.CallOption) (*WriteCursorResponse, error) {
-	out := new(WriteCursorResponse)
-	err := c.cc.Invoke(ctx, "/disk.CursorManager/Write", in, out, opts...)
+func (c *squareManagerClient) Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*WriteSquareResponse, error) {
+	out := new(WriteSquareResponse)
+	err := c.cc.Invoke(ctx, "/disk.SquareManager/Write", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *cursorManagerClient) Read(ctx context.Context, in *ReadCursorRequest, opts ...grpc.CallOption) (*Coords, error) {
+func (c *squareManagerClient) Read(ctx context.Context, in *ReadSquareRequest, opts ...grpc.CallOption) (*Coords, error) {
 	out := new(Coords)
-	err := c.cc.Invoke(ctx, "/disk.CursorManager/Read", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/disk.SquareManager/Read", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CursorManagerServer is the server API for CursorManager service.
-// All implementations must embed UnimplementedCursorManagerServer
+// SquareManagerServer is the server API for SquareManager service.
+// All implementations must embed UnimplementedSquareManagerServer
 // for forward compatibility
-type CursorManagerServer interface {
-	Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error)
-	Read(context.Context, *ReadCursorRequest) (*Coords, error)
-	mustEmbedUnimplementedCursorManagerServer()
+type SquareManagerServer interface {
+	Write(context.Context, *WriteSquareRequest) (*WriteSquareResponse, error)
+	Read(context.Context, *ReadSquareRequest) (*Coords, error)
+	mustEmbedUnimplementedSquareManagerServer()
 }
 
-// UnimplementedCursorManagerServer must be embedded to have forward compatible implementations.
-type UnimplementedCursorManagerServer struct {
+// UnimplementedSquareManagerServer must be embedded to have forward compatible implementations.
+type UnimplementedSquareManagerServer struct {
 }
 
-func (UnimplementedCursorManagerServer) Write(context.Context, *WriteCursorRequest) (*WriteCursorResponse, error) {
+func (UnimplementedSquareManagerServer) Write(context.Context, *WriteSquareRequest) (*WriteSquareResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedCursorManagerServer) Read(context.Context, *ReadCursorRequest) (*Coords, error) {
+func (UnimplementedSquareManagerServer) Read(context.Context, *ReadSquareRequest) (*Coords, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedCursorManagerServer) mustEmbedUnimplementedCursorManagerServer() {}
+func (UnimplementedSquareManagerServer) mustEmbedUnimplementedSquareManagerServer() {}
 
-// UnsafeCursorManagerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CursorManagerServer will
+// UnsafeSquareManagerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SquareManagerServer will
 // result in compilation errors.
-type UnsafeCursorManagerServer interface {
-	mustEmbedUnimplementedCursorManagerServer()
+type UnsafeSquareManagerServer interface {
+	mustEmbedUnimplementedSquareManagerServer()
 }
 
-func RegisterCursorManagerServer(s *grpc.Server, srv CursorManagerServer) {
-	s.RegisterService(&_CursorManager_serviceDesc, srv)
+func RegisterSquareManagerServer(s *grpc.Server, srv SquareManagerServer) {
+	s.RegisterService(&_SquareManager_serviceDesc, srv)
 }
 
-func _CursorManager_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WriteCursorRequest)
+func _SquareManager_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WriteSquareRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CursorManagerServer).Write(ctx, in)
+		return srv.(SquareManagerServer).Write(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.CursorManager/Write",
+		FullMethod: "/disk.SquareManager/Write",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CursorManagerServer).Write(ctx, req.(*WriteCursorRequest))
+		return srv.(SquareManagerServer).Write(ctx, req.(*WriteSquareRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CursorManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadCursorRequest)
+func _SquareManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadSquareRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CursorManagerServer).Read(ctx, in)
+		return srv.(SquareManagerServer).Read(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/disk.CursorManager/Read",
+		FullMethod: "/disk.SquareManager/Read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CursorManagerServer).Read(ctx, req.(*ReadCursorRequest))
+		return srv.(SquareManagerServer).Read(ctx, req.(*ReadSquareRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _CursorManager_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "disk.CursorManager",
-	HandlerType: (*CursorManagerServer)(nil),
+var _SquareManager_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "disk.SquareManager",
+	HandlerType: (*SquareManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Write",
-			Handler:    _CursorManager_Write_Handler,
+			Handler:    _SquareManager_Write_Handler,
 		},
 		{
 			MethodName: "Read",
-			Handler:    _CursorManager_Read_Handler,
+			Handler:    _SquareManager_Read_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

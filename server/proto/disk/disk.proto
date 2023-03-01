@@ -78,9 +78,9 @@ message AddUserResponse {
   string name = 1;
 }
 
-service CursorManager {
-  rpc Write(WriteCursorRequest) returns (WriteCursorResponse);
-  rpc Read(ReadCursorRequest) returns (Coords);
+service SquareManager {
+  rpc Write(WriteSquareRequest) returns (WriteSquareResponse);
+  rpc Read(ReadSquareRequest) returns (Coords);
 }
 
 message Coords {
@@ -88,16 +88,16 @@ message Coords {
   float yPos = 2;
 }
 
-message WriteCursorRequest {
+message WriteSquareRequest {
   string area = 1;
   string name = 2;
 
   Coords coords = 3;
 }
 
-message WriteCursorResponse {}
+message WriteSquareResponse {}
 
-message ReadCursorRequest {
+message ReadSquareRequest {
   string area = 1;
   string name = 2;
 }

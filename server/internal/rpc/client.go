@@ -20,7 +20,7 @@ type Disk struct {
   timeout time.Duration
   area disk.AreaManagerClient
   user disk.UserManagerClient
-  cursor disk.CursorManagerClient
+  square disk.SquareManagerClient
 }
 
 type Coords struct {
@@ -53,13 +53,13 @@ func NewDisk() *Disk {
 
   area := disk.NewAreaManagerClient(conn)
   user := disk.NewUserManagerClient(conn)
-  cursor := disk.NewCursorManagerClient(conn)
+  square := disk.NewSquareManagerClient(conn)
 
   return &Disk{
     timeout: diskRequestTimeout,
     area: area,
     user: user,
-    cursor: cursor,
+    square: square,
   }
 }
 
@@ -130,9 +130,9 @@ func (d *Disk) WriteMouseCoords(area string, user string, xPos float32, yPos flo
   defer cancel()
 
   coords := &disk.Coords{XPos: xPos, YPos: yPos}
-  _, err := d.cursor.Write(ctx, &disk.WriteCursorRequest{Area: area, Name: user, Coords: coords})
+  _, err := d.square.Write(ctx, &disk.WriteSquareRequest{Area: area, Name: user, Coords: coords})
   if err != nil {
-    meta.Log().Fatal("cursor.Write failed: %v", err)
+    meta.Log().Fatal("square.Write failed: %v", err)
   }
 }
 
@@ -140,9 +140,9 @@ func (d *Disk) ReadMouseCoords(area string, user string) (*Coords, error) {
   ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
   defer cancel()
 
-  resp, err := d.cursor.Read(ctx, &disk.ReadCursorRequest{Area: area, Name: user})
+  resp, err := d.square.Read(ctx, &disk.ReadSquareRequest{Area: area, Name: user})
   if err != nil {
-    meta.Log().Warn("cursor.Read failed: %v", err)
+    meta.Log().Warn("square.Read failed: %v", err)
     return nil, err
   }
 

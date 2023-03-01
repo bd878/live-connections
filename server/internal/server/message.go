@@ -16,8 +16,10 @@ const (
   mouseMoveMessageType int8 = 2
   listClientsOnlineMessageType int8 = 3
   authOkMessageType int8 = 4
-  initMouseCoordsMessageType int8 = 5
+  mouseInitMessageType int8 = 5
   textMessageType int8 = 6
+  squareMoveMessageType int8 = 9
+  squareInitMessageType int8 = 10
 )
 
 type Message struct {
@@ -84,7 +86,8 @@ func (m *Message) Decode() error {
   case authMessageType:
     return m.parseAuthMessage()
   case mouseMoveMessageType:
-    return m.parseMouseMoveMessage()
+  case squareMoveMessageType:
+    return m.parseMoveMessage()
   }
   return nil
 }
@@ -95,7 +98,8 @@ func (m *Message) Encode() []byte {
   case textMessageType:
     return m.encodeTextMessage()
   case mouseMoveMessageType:
-    return m.encodeMouseMoveMessage()
+  case squareMoveMessageType:
+    return m.encodeMoveMessage()
   case listClientsOnlineMessageType:
     return m.encodeClientsOnlineMessage()
   }
@@ -139,8 +143,8 @@ func (m *Message) parseAuthMessage() error {
 }
 
 // XPos + YPos
-func (m *Message) parseMouseMoveMessage() error {
-  meta.Log().Debug("parse mouse move message")
+func (m *Message) parseMoveMessage() error {
+  meta.Log().Debug("parse move message")
 
   mr := bytes.NewReader(m.raw)
 
@@ -184,12 +188,12 @@ func (m *Message) encodeTextMessage() []byte {
 }
 
 // totalSize + type + userSize + userBytes + XPos + YPos
-func (m *Message) encodeMouseMoveMessage() []byte {
-  meta.Log().Debug("encode mouse move message")
+func (m *Message) encodeMoveMessage() []byte {
+  meta.Log().Debug("encode move message")
 
   typeBytes := new(bytes.Buffer)
-  if err := binary.Write(typeBytes, enc, mouseMoveMessageType); err != nil {
-    meta.Log().Warn("error writing mouse move type")
+  if err := binary.Write(typeBytes, enc, m.messageType); err != nil {
+    meta.Log().Warn("error writing move type")
     return nil
   }
 
@@ -245,7 +249,7 @@ func (m *Message) encodeClientsOnlineMessage() []byte {
   meta.Log().Debug("encode clients online message")
 
   typeBytes := new(bytes.Buffer)
-  if err := binary.Write(typeBytes, enc, listClientsOnlineMessageType); err != nil {
+  if err := binary.Write(typeBytes, enc, m.messageType); err != nil {
     meta.Log().Warn("error writing message type =", err)
     return nil
   }

@@ -14,18 +14,18 @@ import (
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
-const cursorFileName = "cursor.state"
+const squareFileName = "square.state"
 
-type CursorServer struct {
-  pb.UnimplementedCursorManagerServer
+type SquareServer struct {
+  pb.UnimplementedSquareManagerServer
   Dir string
 }
 
-func NewCursorManagerServer(baseDir string) *CursorServer {
-  return &CursorServer{Dir: baseDir}
+func NewSquareManagerServer(baseDir string) *SquareServer {
+  return &SquareServer{Dir: baseDir}
 }
 
-func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest) (*pb.WriteCursorResponse, error) {
+func (s *SquareServer) Write(ctx context.Context, request *pb.WriteSquareRequest) (*pb.WriteSquareResponse, error) {
   var (
     p []byte
     err error
@@ -42,7 +42,7 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
     return nil, errors.New("user name not safe")
   }
 
-  fp := filepath.Join(s.Dir, request.Area, request.Name, cursorFileName)
+  fp := filepath.Join(s.Dir, request.Area, request.Name, squareFileName)
 
   log.Println("write coords in file =", fp)
 
@@ -72,10 +72,10 @@ func (s *CursorServer) Write(ctx context.Context, request *pb.WriteCursorRequest
     return nil, err
   }
 
-  return &pb.WriteCursorResponse{}, nil
+  return &pb.WriteSquareResponse{}, nil
 }
 
-func (s *CursorServer) Read(ctx context.Context, request *pb.ReadCursorRequest) (*pb.Coords, error) {
+func (s *SquareServer) Read(ctx context.Context, request *pb.ReadSquareRequest) (*pb.Coords, error) {
   var (
     err error
     f *os.File
@@ -92,7 +92,7 @@ func (s *CursorServer) Read(ctx context.Context, request *pb.ReadCursorRequest) 
     return nil, errors.New("user name not safe")
   }
 
-  fp := filepath.Join(s.Dir, request.Area, request.Name, cursorFileName)
+  fp := filepath.Join(s.Dir, request.Area, request.Name, squareFileName)
   f, err = os.OpenFile(
     fp,
     os.O_RDONLY|os.O_CREATE,

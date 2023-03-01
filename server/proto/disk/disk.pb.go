@@ -802,7 +802,7 @@ func (x *Coords) GetYPos() float32 {
 	return 0
 }
 
-type WriteCursorRequest struct {
+type WriteSquareRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -812,8 +812,8 @@ type WriteCursorRequest struct {
 	Coords *Coords `protobuf:"bytes,3,opt,name=coords,proto3" json:"coords,omitempty"`
 }
 
-func (x *WriteCursorRequest) Reset() {
-	*x = WriteCursorRequest{}
+func (x *WriteSquareRequest) Reset() {
+	*x = WriteSquareRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_disk_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -821,13 +821,13 @@ func (x *WriteCursorRequest) Reset() {
 	}
 }
 
-func (x *WriteCursorRequest) String() string {
+func (x *WriteSquareRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WriteCursorRequest) ProtoMessage() {}
+func (*WriteSquareRequest) ProtoMessage() {}
 
-func (x *WriteCursorRequest) ProtoReflect() protoreflect.Message {
+func (x *WriteSquareRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_disk_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -839,40 +839,40 @@ func (x *WriteCursorRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WriteCursorRequest.ProtoReflect.Descriptor instead.
-func (*WriteCursorRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use WriteSquareRequest.ProtoReflect.Descriptor instead.
+func (*WriteSquareRequest) Descriptor() ([]byte, []int) {
 	return file_disk_proto_rawDescGZIP(), []int{15}
 }
 
-func (x *WriteCursorRequest) GetArea() string {
+func (x *WriteSquareRequest) GetArea() string {
 	if x != nil {
 		return x.Area
 	}
 	return ""
 }
 
-func (x *WriteCursorRequest) GetName() string {
+func (x *WriteSquareRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *WriteCursorRequest) GetCoords() *Coords {
+func (x *WriteSquareRequest) GetCoords() *Coords {
 	if x != nil {
 		return x.Coords
 	}
 	return nil
 }
 
-type WriteCursorResponse struct {
+type WriteSquareResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *WriteCursorResponse) Reset() {
-	*x = WriteCursorResponse{}
+func (x *WriteSquareResponse) Reset() {
+	*x = WriteSquareResponse{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_disk_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -880,13 +880,13 @@ func (x *WriteCursorResponse) Reset() {
 	}
 }
 
-func (x *WriteCursorResponse) String() string {
+func (x *WriteSquareResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*WriteCursorResponse) ProtoMessage() {}
+func (*WriteSquareResponse) ProtoMessage() {}
 
-func (x *WriteCursorResponse) ProtoReflect() protoreflect.Message {
+func (x *WriteSquareResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_disk_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -898,12 +898,12 @@ func (x *WriteCursorResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use WriteCursorResponse.ProtoReflect.Descriptor instead.
-func (*WriteCursorResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use WriteSquareResponse.ProtoReflect.Descriptor instead.
+func (*WriteSquareResponse) Descriptor() ([]byte, []int) {
 	return file_disk_proto_rawDescGZIP(), []int{16}
 }
 
-type ReadCursorRequest struct {
+type ReadSquareRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -912,8 +912,8 @@ type ReadCursorRequest struct {
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 }
 
-func (x *ReadCursorRequest) Reset() {
-	*x = ReadCursorRequest{}
+func (x *ReadSquareRequest) Reset() {
+	*x = ReadSquareRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_disk_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -921,13 +921,13 @@ func (x *ReadCursorRequest) Reset() {
 	}
 }
 
-func (x *ReadCursorRequest) String() string {
+func (x *ReadSquareRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ReadCursorRequest) ProtoMessage() {}
+func (*ReadSquareRequest) ProtoMessage() {}
 
-func (x *ReadCursorRequest) ProtoReflect() protoreflect.Message {
+func (x *ReadSquareRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_disk_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -939,19 +939,19 @@ func (x *ReadCursorRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ReadCursorRequest.ProtoReflect.Descriptor instead.
-func (*ReadCursorRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ReadSquareRequest.ProtoReflect.Descriptor instead.
+func (*ReadSquareRequest) Descriptor() ([]byte, []int) {
 	return file_disk_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *ReadCursorRequest) GetArea() string {
+func (x *ReadSquareRequest) GetArea() string {
 	if x != nil {
 		return x.Area
 	}
 	return ""
 }
 
-func (x *ReadCursorRequest) GetName() string {
+func (x *ReadSquareRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
@@ -1005,15 +1005,15 @@ var file_disk_proto_rawDesc = []byte{
 	0x6d, 0x65, 0x22, 0x30, 0x0a, 0x06, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x12, 0x0a, 0x04,
 	0x78, 0x50, 0x6f, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x02, 0x52, 0x04, 0x78, 0x50, 0x6f, 0x73,
 	0x12, 0x12, 0x0a, 0x04, 0x79, 0x50, 0x6f, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x02, 0x52, 0x04,
-	0x79, 0x50, 0x6f, 0x73, 0x22, 0x62, 0x0a, 0x12, 0x57, 0x72, 0x69, 0x74, 0x65, 0x43, 0x75, 0x72,
-	0x73, 0x6f, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x61, 0x72,
+	0x79, 0x50, 0x6f, 0x73, 0x22, 0x62, 0x0a, 0x12, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x71, 0x75,
+	0x61, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x61, 0x72,
 	0x65, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x61, 0x72, 0x65, 0x61, 0x12, 0x12,
 	0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61,
 	0x6d, 0x65, 0x12, 0x24, 0x0a, 0x06, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x18, 0x03, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x64, 0x69, 0x73, 0x6b, 0x2e, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73,
 	0x52, 0x06, 0x63, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x22, 0x15, 0x0a, 0x13, 0x57, 0x72, 0x69, 0x74,
-	0x65, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x3b, 0x0a, 0x11, 0x52, 0x65, 0x61, 0x64, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x52, 0x65, 0x71,
+	0x65, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x3b, 0x0a, 0x11, 0x52, 0x65, 0x61, 0x64, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x61, 0x72, 0x65, 0x61, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x09, 0x52, 0x04, 0x61, 0x72, 0x65, 0x61, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x2a, 0x2e, 0x0a, 0x0b,
@@ -1040,13 +1040,13 @@ var file_disk_proto_rawDesc = []byte{
 	0x61, 0x64, 0x12, 0x15, 0x2e, 0x64, 0x69, 0x73, 0x6b, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x55, 0x73,
 	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x64, 0x69, 0x73, 0x6b,
 	0x2e, 0x52, 0x65, 0x61, 0x64, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x32, 0x7c, 0x0a, 0x0d, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x4d, 0x61, 0x6e, 0x61, 0x67,
+	0x65, 0x32, 0x7c, 0x0a, 0x0d, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x4d, 0x61, 0x6e, 0x61, 0x67,
 	0x65, 0x72, 0x12, 0x3c, 0x0a, 0x05, 0x57, 0x72, 0x69, 0x74, 0x65, 0x12, 0x18, 0x2e, 0x64, 0x69,
-	0x73, 0x6b, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x52, 0x65,
+	0x73, 0x6b, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x19, 0x2e, 0x64, 0x69, 0x73, 0x6b, 0x2e, 0x57, 0x72, 0x69,
-	0x74, 0x65, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x74, 0x65, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x12, 0x2d, 0x0a, 0x04, 0x52, 0x65, 0x61, 0x64, 0x12, 0x17, 0x2e, 0x64, 0x69, 0x73, 0x6b, 0x2e,
-	0x52, 0x65, 0x61, 0x64, 0x43, 0x75, 0x72, 0x73, 0x6f, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x52, 0x65, 0x61, 0x64, 0x53, 0x71, 0x75, 0x61, 0x72, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x0c, 0x2e, 0x64, 0x69, 0x73, 0x6b, 0x2e, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x73, 0x42,
 	0x38, 0x5a, 0x36, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x74, 0x65,
 	0x72, 0x61, 0x6c, 0x69, 0x6f, 0x6e, 0x2f, 0x6c, 0x69, 0x76, 0x65, 0x2d, 0x63, 0x6f, 0x6e, 0x6e,
@@ -1086,27 +1086,27 @@ var file_disk_proto_goTypes = []interface{}{
 	(*AddUserRequest)(nil),        // 13: disk.AddUserRequest
 	(*AddUserResponse)(nil),       // 14: disk.AddUserResponse
 	(*Coords)(nil),                // 15: disk.Coords
-	(*WriteCursorRequest)(nil),    // 16: disk.WriteCursorRequest
-	(*WriteCursorResponse)(nil),   // 17: disk.WriteCursorResponse
-	(*ReadCursorRequest)(nil),     // 18: disk.ReadCursorRequest
+	(*WriteSquareRequest)(nil),    // 16: disk.WriteSquareRequest
+	(*WriteSquareResponse)(nil),   // 17: disk.WriteSquareResponse
+	(*ReadSquareRequest)(nil),     // 18: disk.ReadSquareRequest
 }
 var file_disk_proto_depIdxs = []int32{
 	0,  // 0: disk.ReadUserRequest.messageType:type_name -> disk.MessageType
-	15, // 1: disk.WriteCursorRequest.coords:type_name -> disk.Coords
+	15, // 1: disk.WriteSquareRequest.coords:type_name -> disk.Coords
 	2,  // 2: disk.AreaManager.Create:input_type -> disk.CreateAreaRequest
 	4,  // 3: disk.AreaManager.ListUsers:input_type -> disk.ListAreaUsersRequest
 	6,  // 4: disk.AreaManager.HasUser:input_type -> disk.HasUserRequest
 	13, // 5: disk.UserManager.Add:input_type -> disk.AddUserRequest
 	11, // 6: disk.UserManager.Read:input_type -> disk.ReadUserRequest
-	16, // 7: disk.CursorManager.Write:input_type -> disk.WriteCursorRequest
-	18, // 8: disk.CursorManager.Read:input_type -> disk.ReadCursorRequest
+	16, // 7: disk.SquareManager.Write:input_type -> disk.WriteSquareRequest
+	18, // 8: disk.SquareManager.Read:input_type -> disk.ReadSquareRequest
 	3,  // 9: disk.AreaManager.Create:output_type -> disk.CreateAreaResponse
 	5,  // 10: disk.AreaManager.ListUsers:output_type -> disk.ListAreaUsersResponse
 	7,  // 11: disk.AreaManager.HasUser:output_type -> disk.HasUserResponse
 	14, // 12: disk.UserManager.Add:output_type -> disk.AddUserResponse
 	12, // 13: disk.UserManager.Read:output_type -> disk.ReadUserResponse
-	17, // 14: disk.CursorManager.Write:output_type -> disk.WriteCursorResponse
-	15, // 15: disk.CursorManager.Read:output_type -> disk.Coords
+	17, // 14: disk.SquareManager.Write:output_type -> disk.WriteSquareResponse
+	15, // 15: disk.SquareManager.Read:output_type -> disk.Coords
 	9,  // [9:16] is the sub-list for method output_type
 	2,  // [2:9] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
@@ -1301,7 +1301,7 @@ func file_disk_proto_init() {
 			}
 		}
 		file_disk_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WriteCursorRequest); i {
+			switch v := v.(*WriteSquareRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1313,7 +1313,7 @@ func file_disk_proto_init() {
 			}
 		}
 		file_disk_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WriteCursorResponse); i {
+			switch v := v.(*WriteSquareResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1325,7 +1325,7 @@ func file_disk_proto_init() {
 			}
 		}
 		file_disk_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ReadCursorRequest); i {
+			switch v := v.(*ReadSquareRequest); i {
 			case 0:
 				return &v.state
 			case 1:
