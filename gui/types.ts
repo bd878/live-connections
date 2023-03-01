@@ -3,7 +3,7 @@ type AreaName = string;
 
 type UserName = string;
 
-type CursorName = UserName;
+type Uid = string;
 
 type Color = string;
 
@@ -70,8 +70,18 @@ interface Moveable {
   move(x: number, y: number): void;
 }
 
+interface Colored {
+  color: string;
+}
+
 interface Redrawable {
   redraw(piece: string, ...args: any[]): void;
+}
+
+interface Identifable {
+  id: string;
+  setId(id: string): void;
+  getUid(): Uid;
 }
 
 interface Containable<C extends BaseContainer = BaseContainer> {
