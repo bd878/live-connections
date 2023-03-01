@@ -9,16 +9,16 @@ function redraw(this: Area, piece: string, ...args: any[]) {
   }
 }
 
-function redrawSingleCursor(this: Area, name: CursorName) {
-  if (!this.hasElem(name)) {
+function redrawSingleCursor(this: Area, uid: Uid) {
+  if (!this.hasElem(uid)) {
     throw error.noElementCreated("Area redrawSingleCursor");
   }
-  const elem = this.getElem(name);
+  const elem = this.getElem(uid);
   if (!rtti.isMovable(elem)) {
-    throw error.wrongInterface("Area redrawSingleCursor", name, "is not movable");
+    throw error.wrongInterface("Area redrawSingleCursor", uid, "is not movable");
   }
-  const x = cursors.getX(name);
-  const y = cursors.getY(name);
+  const x = cursors.getX(uid);
+  const y = cursors.getY(uid);
   elem.move(x, y);
 }
 

@@ -1,58 +1,58 @@
 import error from '../../modules/error';
 
-let cursorsX: Map<CursorName, number> = new Map();
-let cursorsY: Map<CursorName, number> = new Map();
-let names: CursorName[] = []; // TODO: nameToIndex, indextToName
+let cursorsX: Map<Uid, number> = new Map();
+let cursorsY: Map<Uid, number> = new Map();
+let uids: Uid[] = [];
 let total: number = 0;
 
 function length(): number {
   return total;
 }
 
-function getNameAt(i: number): CursorName {
-  const name = names[i];
-  if (!name) {
+function getUidAt(i: number): Uid {
+  const uid = uids[i];
+  if (!uid) {
     throw error.outOfRange("cursors", i);
   }
-  return name;
+  return uid;
 }
 
-function has(name: CursorName): boolean {
-  return cursorsX.has(name);
+function has(uid: Uid): boolean {
+  return cursorsX.has(uid);
 }
 
-function remove(name: CursorName) {
-  cursorsX.delete(name);
-  cursorsY.delete(name);
-  names = names.filter(n => n != name);
+function remove(uid: Uid) {
+  cursorsX.delete(uid);
+  cursorsY.delete(uid);
+  uids = uids.filter(n => n != uid);
   total--;
 }
 
-function set(name: CursorName, xPos: number, yPos: number) {
-  if (!cursorsX.has(name) && !cursorsY.has(name)) {
-    names.push(name);
+function set(uid: Uid, xPos: number, yPos: number) {
+  if (!cursorsX.has(uid) && !cursorsY.has(uid)) {
+    uids.push(uid);
     total++;
   }
 
-  cursorsX.set(name, xPos);
-  cursorsY.set(name, yPos);
+  cursorsX.set(uid, xPos);
+  cursorsY.set(uid, yPos);
 }
 
-function getX(name: CursorName): number {
-  const xPos = cursorsX.get(name);
-  if (!xPos) throw error.failedToGet("cursors getX", name);
+function getX(uid: Uid): number {
+  const xPos = cursorsX.get(uid);
+  if (!xPos) throw error.failedToGet("cursors getX", uid);
   return xPos;
 }
 
-function getY(name: CursorName): number {
-  const yPos = cursorsY.get(name);
-  if (!yPos) throw error.failedToGet("cursors getY", name);
+function getY(uid: Uid): number {
+  const yPos = cursorsY.get(uid);
+  if (!yPos) throw error.failedToGet("cursors getY", uid);
   return yPos;
 }
 
 export default {
   length,
-  getNameAt,
+  getUidAt,
   has,
   set,
   getX,
