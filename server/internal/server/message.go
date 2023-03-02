@@ -86,6 +86,7 @@ func (m *Message) Decode() error {
   case authMessageType:
     return m.parseAuthMessage()
   case mouseMoveMessageType:
+    return m.parseMoveMessage()
   case squareMoveMessageType:
     return m.parseMoveMessage()
   }
@@ -95,9 +96,11 @@ func (m *Message) Decode() error {
 func (m *Message) Encode() []byte {
   switch (m.Type()) {
   case authMessageType:
+    return m.encodeTextMessage()
   case textMessageType:
     return m.encodeTextMessage()
   case mouseMoveMessageType:
+    return m.encodeMoveMessage()
   case squareMoveMessageType:
     return m.encodeMoveMessage()
   case listClientsOnlineMessageType:
@@ -240,7 +243,7 @@ func (m *Message) encodeMoveMessage() []byte {
 }
 
 func EncodeClientsOnline(clients []string) []byte {
-  m := &Message{clients: clients}
+  m := &Message{messageType: listClientsOnlineMessageType, clients: clients}
   return m.encodeClientsOnlineMessage()
 }
 
