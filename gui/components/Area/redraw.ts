@@ -1,5 +1,6 @@
 import type { Area } from './index';
 import rtti from '../../rtti';
+import log from '../../modules/log';
 import cursors from '../../entities/cursors';
 import error from '../../modules/error';
 
@@ -10,6 +11,7 @@ function redraw(this: Area, piece: string, ...args: any[]) {
 }
 
 function redrawSingleCursor(this: Area, uid: Uid) {
+  log.Print("redrawSingleCursor", uid);
   if (!this.hasElem(uid)) {
     throw error.noElementCreated("Area redrawSingleCursor");
   }

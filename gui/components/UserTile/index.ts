@@ -1,8 +1,8 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
+import getName from '../../methods/getName';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
-import getUid from '../../methods/getUid';
 import redraw from '../../methods/redrawBg';
 
 class UserTile implements
@@ -11,12 +11,16 @@ class UserTile implements
   Accessible,
   Styleable,
   Redrawable,
+  Identifable,
   Colored
 {
+  static cname: string = "UserTile";
+
   root: HTMLElement | null = null;
   id: string = '';
-  name: string = "user-tile";
   CSSClass: string = "user-tile";
+
+  getName = getName;
 
   constructor(public color: string = '') {}
 
@@ -27,7 +31,6 @@ class UserTile implements
   redraw = redraw;
 
   setId = setId;
-  getUid = getUid;
 }
 
 export default UserTile;

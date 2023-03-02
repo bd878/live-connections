@@ -4,6 +4,7 @@ import write from '../../methods/write';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
+import getName from '../../methods/getName';
 import addElemChild from '../../methods/addElemChild';
 import delElemChild from '../../methods/delElemChild';
 import redraw from './redraw';
@@ -17,11 +18,14 @@ class Area implements
   Containable,
   Redrawable
 {
+  static cname: string = "Area";
+
   root: HTMLElement | null = null;
-  name: string = "area";
   CSSClass: string = "area";
 
   container: BaseContainer;
+
+  getName = getName;
 
   constructor() {
     this.container = new Map();

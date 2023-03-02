@@ -1,5 +1,6 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
+import getName from '../../methods/getName';
 import create from './create';
 
 class Main implements
@@ -8,9 +9,12 @@ class Main implements
   Accessible,
   Styleable
 {
+  static cname: string = "Main";
+
   root: HTMLElement | null = null;
-  name: string = "main";
   CSSClass: string = "main";
+
+  getName = getName;
 
   constructor() {}
 

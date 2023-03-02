@@ -3,6 +3,7 @@ import has from '../../methods/has';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
+import getName from '../../methods/getName';
 import delElemChild from '../../methods/delElemChild';
 import addElemChild from '../../methods/addElemChild';
 import clearContainer from '../../methods/clearContainer';
@@ -15,11 +16,14 @@ class UsersList implements
   Containable,
   Clearable
 {
+  static cname: string = "UsersList";
+
   root: HTMLElement | null = null;
-  name: string = "users-list";
   CSSClass: string = "users-list";
 
   container: BaseContainer;
+
+  getName = getName;
 
   constructor() {
     this.container = new Map();

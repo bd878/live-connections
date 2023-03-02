@@ -1,5 +1,6 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
+import getName from '../../methods/getName';
 import write from '../../methods/write';
 import create from './create';
 
@@ -9,9 +10,12 @@ class UsersPanel implements
   Accessible,
   Writable
 {
+  static cname: string = "UserPanel";
+
   root: HTMLElement | null = null;
-  name: string = "user-panel";
   CSSClass: string = "users-panel";
+
+  getName = getName;
 
   constructor() {}
 

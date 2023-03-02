@@ -1,17 +1,17 @@
 import error from '../modules/error';
 
 /* public */
-function addElem(this: Elem & Containable, key: string, elem: Elem): boolean {
+function addElem(this: Elem & Containable, uid: Uid, elem: Elem): boolean {
   if (!this.root) {
-    throw error.noElementCreated(this.name);
+    throw error.noElementCreated(this.getName());
   }
 
   if (this.container instanceof Map) {
-    this.container.set(key, elem);
+    this.container.set(uid, elem);
     return true;
   }
 
-  throw error.wrongDataType(this.name, typeof this.container);
+  throw error.wrongDataType(this.getName(), typeof this.container);
 }
 
 export default addElem;

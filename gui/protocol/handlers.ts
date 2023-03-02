@@ -10,6 +10,7 @@ import Cursor from '../components/Cursor';
 import Square from '../components/Square';
 import UserTile from '../components/UserTile';
 import diff from '../misc/diff';
+import getUid from '../misc/getUid';
 
 /*
  * External handlers
@@ -22,8 +23,8 @@ function onAuthOk(e: AuthOkEvent) {
 function onMouseMove(e: MouseMoveEvent) {
   log.Print("onMouseMove", "e =", e);
 
-  cursors.set(e.name, e.xPos, e.yPos);
-  area.redraw('cursor', e.name);
+  cursors.set(getUid(Cursor.name, e.name), e.xPos, e.yPos);
+  area.redraw('cursor', getUid(Cursor.name, e.name));
 }
 
 function onInitMouseCoords(e: MouseMoveEvent) {
@@ -38,31 +39,49 @@ function onUsersOnline(e: UsersOnlineEvent) {
   users.set(areas.my().name, e.users);
 
   for (let i = 0; i < current.length; i++) {
-    ;(area.hasElem(current[i]) && area.delElem(current[i]));
-    ;(usersList.hasElem(current[i]) && usersList.delElem(current[i]));
+    const name = current[i];
+
+    const cUid = getUid(Cursor.name, name);
+    const sUid = getUid(Square.name, name);
+    const tUid = getUid(UserTile.name, name);
+
+    ;(area.hasElem(cUid) && area.delElem(cUid));
+    ;(area.hasElem(sUid) && area.delElem(sUid));
+    ;(usersList.hasElem(tUid) && usersList.delElem(tUid));
   }
 
   for (let i = 0; i < next.length; i++) {
-    if (!area.hasElem(next[i])) {
-      const user = users.getByName(next[i]);
+    const name = next[i];
+    const user = users.getByName(name);
 
+    const cUid = getUid(Cursor.name, name);
+    if (!area.hasElem(cUid)) {
+      log.Print("create cursor", cUid);
       const cursor = new Cursor(user.color);
-      cursor.setId(next[i]);
+      cursor.setId(name);
       cursor.create();
       cursor.redraw();
-      area.addElem(cursor.getUid(), cursor);
+      area.addElem(cUid, cursor);
+    }
 
+    const sUid = getUid(Square.name, name);
+    if (!area.hasElem(sUid)) {
+      log.Print("create square", sUid);
       const square = new Square();
-      square.setId(next[i]);
+      square.setId(name);
       square.create();
       square.redraw();
-      area.addElem(square.getUid(), square);
+      area.addElem(sUid, square);
+    }
 
+    const tUid = getUid(UserTile.name, name);
+    if (!area.hasElem(tUid)) {
+      log.Print("create tile", tUid);
       const tile = new UserTile(user.color);
-      tile.setId(next[i]);
+      tile.setId(name);
       tile.create();
       tile.redraw();
-      usersList.addElem(tile.getUid(), tile);
+      usersList.addElem(tUid, tile);
     }
   }
 }

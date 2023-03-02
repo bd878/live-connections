@@ -2,7 +2,7 @@ import get from '../../methods/get';
 import has from '../../methods/has';
 import move from '../../methods/move';
 import setId from '../../methods/setId';
-import getUid from '../../methods/getUid';
+import getName from '../../methods/getName';
 import create from '../../methods/create';
 import redraw from '../../methods/redrawBg';
 
@@ -16,10 +16,13 @@ class Cursor implements
   Identifable,
   Colored
 {
+  static cname: string = "Cursor";
+
   root: HTMLElement | null = null;
   id: string = '';
-  name: string = "cursor";
   CSSClass: string = "cursor";
+
+  getName = getName;
 
   constructor(public color: string = '') {}
 
@@ -31,7 +34,6 @@ class Cursor implements
   redraw = redraw;
 
   setId = setId;
-  getUid = getUid;
 }
 
 export default Cursor;

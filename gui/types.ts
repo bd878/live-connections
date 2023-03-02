@@ -5,6 +5,8 @@ type UserName = string;
 
 type Uid = string;
 
+type Id = string;
+
 type Color = string;
 
 type ABuffer = any;
@@ -30,7 +32,7 @@ type BaseContainer =
 
 interface Elem {
   root: HTMLElement | null;
-  name: string;
+  getName(): string;
 }
 
 interface Styleable {
@@ -79,18 +81,17 @@ interface Redrawable {
 }
 
 interface Identifable {
-  id: string;
-  setId(id: string): void;
-  getUid(): Uid;
+  id: Id;
+  setId(id: Id): void;
 }
 
 interface Containable<C extends BaseContainer = BaseContainer> {
   container: C;
 
-  hasElem(key: string): boolean;
-  getElem(key: string): Elem;
-  addElem(key: string, elem: Elem): void;
-  delElem(key: string): void;
+  hasElem(uid: Uid): boolean;
+  getElem(uid: Uid): Elem;
+  addElem(uid: Uid, elem: Elem): void;
+  delElem(uid: Uid): void;
 }
 
 interface Clearable {

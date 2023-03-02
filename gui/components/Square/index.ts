@@ -3,7 +3,7 @@ import has from '../../methods/has';
 import move from '../../methods/move';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
-import getUid from '../../methods/getUid';
+import getName from '../../methods/getName';
 import redraw from '../../methods/redrawBg';
 
 class Square implements
@@ -16,10 +16,13 @@ class Square implements
   Identifable,
   Colored
 {
+  static cname: string = "Square";
+
   root: HTMLElement | null = null;
   id: string = '';
-  name: string = "square";
   CSSClass: string = "square";
+
+  getName = getName;
 
   constructor(public color: string = '') {}
 
@@ -31,7 +34,6 @@ class Square implements
   redraw = redraw;
 
   setId = setId;
-  getUid = getUid;
 }
 
 export default Square;

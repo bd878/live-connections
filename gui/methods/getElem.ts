@@ -1,16 +1,16 @@
 import error from '../modules/error';
 
 /* public */
-function getElem(this: Elem & Containable, key: string): Elem {
+function getElem(this: Elem & Containable, uid: Uid): Elem {
   if (!this.root) {
-    throw error.noElementCreated(this.name);
+    throw error.noElementCreated(this.getName());
   }
 
   if (this.container instanceof Map) {
-    return this.container.get(key);
+    return this.container.get(uid);
   }
 
-  throw error.wrongDataType(this.name, typeof this.container);
+  throw error.wrongDataType(this.getName(), typeof this.container);
 }
 
 export default getElem;
