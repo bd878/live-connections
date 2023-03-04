@@ -1,26 +1,19 @@
 import { create } from './static';
 import error from '../../modules/error';
 
-let area: Area | null = null;
+let _myName: AreaName | null = null;
 
-class Area {
-  constructor(public name: string = '') {}
+function setMyName(areaName: string) {
+  _myName = areaName;
 }
 
-function make(areaName: string): Area {
-  area = new Area(areaName);
-  return area;
-}
-
-function my(): Area {
-  if (!area) {
-    throw error.noElementCreated("areas");
-  }
-  return area;
+function myName(): AreaName {
+  if (!_myName) throw error.failedToGet("areas myName");
+  return _myName;
 }
 
 export default {
   create,
-  make,
-  my,
+  setMyName,
+  myName,
 };
