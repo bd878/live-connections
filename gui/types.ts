@@ -5,7 +5,7 @@ type UserName = string;
 
 type Uid = string;
 
-type Id = string;
+type Id = UserName;
 
 type Color = string;
 
@@ -15,7 +15,7 @@ type DView = any;
 
 type Fn<A = any, R = any> = (args?: A) => R;
 
-type MouseMoveEvent = {
+type CoordsEvent = {
   xPos: number;
   yPos: number;
   name: string;
