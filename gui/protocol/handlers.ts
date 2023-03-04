@@ -4,7 +4,8 @@ import log from '../modules/log';
 import area from '../components/Area';
 import users from '../entities/users';
 import areas from '../entities/areas';
-import cursors from '../entities/cursors';
+import coords from '../entities/coords';
+import squares from '../entities/squares';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
 import Square from '../components/Square';
@@ -20,15 +21,48 @@ function onAuthOk(e: AuthOkEvent) {
   ;(e.text === "ok" && log.Print("onAuthOk", "set token:", e));
 }
 
-function onMouseMove(e: MouseMoveEvent) {
+function onMouseMove(e: CoordsEvent) {
   log.Print("onMouseMove", "e =", e);
 
-  cursors.set(getUid(Cursor.name, e.name), e.xPos, e.yPos);
-  area.redraw('cursor', getUid(Cursor.name, e.name));
+  coords.set(getUid(Cursor.cname, e.name), e.xPos, e.yPos);
+  area.redraw('cursor', getUid(Cursor.cname, e.name));
 }
 
-function onInitMouseCoords(e: MouseMoveEvent) {
+function onSquareMove(e: CoordsEvent) {
+  log.Print("onSquareMove", "e =", e);
+}
+
+function onInitMouseCoords(e: CoordsEvent) {
   log.Print("onInitMouseCoords", "e =", e);
+
+  const cUid = getUid(Cursor.cname, e.name);
+  if (!area.hasElem(cUid)) {
+    log.Print("create cursor", cUid);
+
+    const user = users.getByName(e.name);
+    const cursor = new Cursor(user.color);
+    cursor.setId(e.name);
+    cursor.create();
+    cursor.redraw();
+    area.addElem(cUid, cursor);
+  }
+}
+
+function onInitSquareCoords(e: CoordsEvent) {
+  log.Print("onInitSquareCoords", "e =", e);
+
+  const sUid = getUid(Square.cname, e.name);
+  if (!area.hasElem(sUid)) {
+    log.Print("create square", sUid);
+
+    ;((users.myName() === e.name) && squares.setMyUid(sUid));
+
+    const square = new Square();
+    square.setId(e.name);
+    square.create();
+    square.redraw();
+    area.addElem(sUid, square);
+  }
 }
 
 function onUsersOnline(e: UsersOnlineEvent) {
@@ -36,14 +70,14 @@ function onUsersOnline(e: UsersOnlineEvent) {
   const current = diffPair[0];
   const next = diffPair[1];
 
-  users.set(areas.my().name, e.users);
+  users.set(areas.myName(), e.users);
 
   for (let i = 0; i < current.length; i++) {
     const name = current[i];
 
-    const cUid = getUid(Cursor.name, name);
-    const sUid = getUid(Square.name, name);
-    const tUid = getUid(UserTile.name, name);
+    const cUid = getUid(Cursor.cname, name);
+    const sUid = getUid(Square.cname, name);
+    const tUid = getUid(UserTile.cname, name);
 
     ;(area.hasElem(cUid) && area.delElem(cUid));
     ;(area.hasElem(sUid) && area.delElem(sUid));
@@ -54,27 +88,7 @@ function onUsersOnline(e: UsersOnlineEvent) {
     const name = next[i];
     const user = users.getByName(name);
 
-    const cUid = getUid(Cursor.name, name);
-    if (!area.hasElem(cUid)) {
-      log.Print("create cursor", cUid);
-      const cursor = new Cursor(user.color);
-      cursor.setId(name);
-      cursor.create();
-      cursor.redraw();
-      area.addElem(cUid, cursor);
-    }
-
-    const sUid = getUid(Square.name, name);
-    if (!area.hasElem(sUid)) {
-      log.Print("create square", sUid);
-      const square = new Square();
-      square.setId(name);
-      square.create();
-      square.redraw();
-      area.addElem(sUid, square);
-    }
-
-    const tUid = getUid(UserTile.name, name);
+    const tUid = getUid(UserTile.cname, name);
     if (!area.hasElem(tUid)) {
       log.Print("create tile", tUid);
       const tile = new UserTile(user.color);
@@ -89,6 +103,8 @@ function onUsersOnline(e: UsersOnlineEvent) {
 export {
   onAuthOk,
   onMouseMove,
+  onSquareMove,
   onInitMouseCoords,
+  onInitSquareCoords,
   onUsersOnline,
 };

@@ -16,6 +16,10 @@ const C: Record<string, any> = {
   AUTH_OK_TYPE: 4,
 
   INIT_MOUSE_COORDS_TYPE: 5,
+
+  INIT_SQUARE_COORDS_TYPE: 7,
+
+  SQUARE_MOVE_TYPE: 8,
 };
 
 C.ENDIANNE = C.LITTLE_ENDIANNE;

@@ -1,8 +1,8 @@
 import C from './const';
 import log from '../modules/log';
 
-async function parseMouseMoveMessage(buf: any /* ArrayBuffer */): Promise<MouseMoveEvent> {
-  log.Print("parseMouseMoveMessage", "enter");
+async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEvent> {
+  log.Print("parseCoordsMessage", "enter");
 
   let offset = 0;
   const dv = new DataView(buf);
@@ -11,7 +11,7 @@ async function parseMouseMoveMessage(buf: any /* ArrayBuffer */): Promise<MouseM
   offset += C.SIZE_PREFIX_SIZE;
 
   if (nameSize === 0) {
-    throw new Error(`[parseMouseMoveMessage]: nameSize is 0`);
+    throw new Error(`[parseCoordsMessage]: nameSize is 0`);
   }
 
   const nameBytes = new Uint8Array(buf, offset, nameSize);
@@ -25,9 +25,9 @@ async function parseMouseMoveMessage(buf: any /* ArrayBuffer */): Promise<MouseM
   const yPos = dv.getFloat32(offset, C.ENDIANNE);
   offset += C.COORD_SIZE;
 
-  log.Print("parseMouseMoveMessage", "leave");
+  log.Print("parseCoordsMessage", "leave");
 
-  return { name, xPos, yPos } as MouseMoveEvent;
+  return { name, xPos, yPos } as CoordsEvent;
 }
 
 async function parseAuthOkMessage(message: any /* Blob */): Promise<AuthOkEvent> {
@@ -63,7 +63,7 @@ async function parseUsersOnlineMessage(buf: any /* ArrayBuffer */): Promise<User
 }
 
 export {
-  parseMouseMoveMessage,
+  parseCoordsMessage,
   parseAuthOkMessage,
   parseUsersOnlineMessage,
 };

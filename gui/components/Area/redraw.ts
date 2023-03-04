@@ -1,7 +1,7 @@
 import type { Area } from './index';
 import rtti from '../../rtti';
 import log from '../../modules/log';
-import cursors from '../../entities/cursors';
+import coords from '../../entities/coords';
 import error from '../../modules/error';
 
 function redraw(this: Area, piece: string, ...args: any[]) {
@@ -19,8 +19,8 @@ function redrawSingleCursor(this: Area, uid: Uid) {
   if (!rtti.isMovable(elem)) {
     throw error.wrongInterface("Area redrawSingleCursor", uid, "is not movable");
   }
-  const x = cursors.getX(uid);
-  const y = cursors.getY(uid);
+  const x = coords.getX(uid);
+  const y = coords.getY(uid);
   elem.move(x, y);
 }
 

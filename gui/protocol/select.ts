@@ -1,13 +1,15 @@
 import C from './const';
 import log from '../modules/log';
 import {
-  parseMouseMoveMessage,
+  parseCoordsMessage,
   parseAuthOkMessage,
   parseUsersOnlineMessage,
 } from './parser';
 import {
   onMouseMove,
+  onSquareMove,
   onInitMouseCoords,
+  onInitSquareCoords,
   onUsersOnline,
   onAuthOk,
 } from './handlers';
@@ -37,7 +39,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         log.Print("select", "mouse move");
 
         setTimeout(() => {
-          parseMouseMoveMessage(slice).then(onMouseMove);
+          parseCoordsMessage(slice).then(onMouseMove);
         }, 0); /* throw it in a loop */
         offset += size;
         break;
@@ -45,7 +47,23 @@ async function select(b: any /* another set of bytes have come... */ ) {
         log.Print("select", "init mouse coords");
 
         setTimeout(() => {
-          parseMouseMoveMessage(slice).then(onInitMouseCoords);
+          parseCoordsMessage(slice).then(onInitMouseCoords);
+        }, 0); /* throw it in a loop */
+        offset += size;
+        break;
+      case C.SQUARE_MOVE_TYPE:
+        log.Print("select", "square move");
+
+        setTimeout(() => {
+          parseCoordsMessage(slice).then(onSquareMove);
+        }, 0); /* throw it in a loop */
+        offset += size;
+        break;
+      case C.INIT_SQUARE_COORDS_TYPE:
+        log.Print("select", "init square coords");
+
+        setTimeout(() => {
+          parseCoordsMessage(slice).then(onInitSquareCoords);
         }, 0); /* throw it in a loop */
         offset += size;
         break;

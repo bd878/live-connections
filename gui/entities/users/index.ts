@@ -3,6 +3,7 @@ import error from '../../modules/error';
 import getColorFromUserName from '../../misc/getColorFromUserName';
 
 let users: Map<string, User> = new Map;
+let _myName: UserName | null = null;
 let _list: User[] = []; // fast iterate
 
 class User {
@@ -52,9 +53,25 @@ function getByName(name: UserName): User {
   return user;
 }
 
+function setMyName(name: UserName) {
+  _myName = name;
+}
+
+function myName(): UserName {
+  if (!_myName) throw error.failedToGet("users myName");
+  return _myName;
+}
+
+function me(): User {
+  return getByName(myName());
+}
+
 export default {
   make,
   create,
+  me,
+  myName,
+  setMyName,
   getByName,
   listNames,
   set,
