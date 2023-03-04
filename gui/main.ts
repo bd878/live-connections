@@ -1,29 +1,20 @@
-import { makeMouseMoveMessage } from './protocol/messages';
 import select from './protocol/select';
 import establish from './protocol/init';
 import socket from './net/socket';
 import log from './modules/log';
 import users from './entities/users';
 import areas from './entities/areas';
+import squares from './entities/squares';
 import Main from './components/Main';
 import Root from './components/Root';
-import debounce from './misc/debounce';
+import Square from './components/Square';
 import takeAreaName from './misc/takeAreaName';
 import findUserName from './misc/findUserName';
 import bindUserToArea from './misc/bindUserToArea';
+import attachListeners from './listeners';
 import setUrl from './misc/setUrl';
 import setRoot from './misc/setRoot';
-
-function trackMouseEvents() {
-  log.Print("main", "track mouse events");
-
-  document.addEventListener(
-    'mousemove',
-    debounce((event: any) => {
-      socket.send(makeMouseMoveMessage(event.clientX, event.clientY));
-    }),
-  );
-}
+import getUid from './misc/getUid';
 
 /* Waits for protocol message on socket */
 async function run() {
@@ -88,7 +79,8 @@ async function main() {
 
   log.Print("gui", "areaName, userName:", areaName, userName);
 
-  areas.make(areaName);
+  users.setMyName(userName);
+  areas.setMyName(areaName);
   socket.init(areaName, userName);
   await establish(areaName, userName);
 
@@ -96,7 +88,7 @@ async function main() {
   Main.create();
   Root.append(Main);
 
-  trackMouseEvents();
+  attachListeners()
 
   await run();
 }
