@@ -81,6 +81,13 @@ func (c *Client) ReadLoop() {
       message.SetUser(c.name)
 
       c.hub.broadcast <- message.Encode()
+    case squareMoveMessageType:
+      meta.Log().Debug(c.name, "received square move message")
+
+      message.SetArea(c.area)
+      message.SetUser(c.name)
+
+      c.hub.broadcast <- message.Encode()
     default:
       meta.Log().Warn("unknown event =", message.Type())
       break
@@ -168,7 +175,9 @@ func (c *Client) write(p []byte) error {
 
   n := len(c.send)
   for i := 0; i < n; i++ {
-    if _, err := w.Write(<-c.send); err != nil {
+    p = <-c.send
+    meta.Log().Debug("write n, p =", n, p)
+    if _, err := w.Write(p); err != nil {
       meta.Log().Warn("failed to write bytes")
       return err
     }
