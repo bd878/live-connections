@@ -17,12 +17,14 @@ function setMyUid(uid: Uid) {
 
 const inited = (): boolean => _inited;
 
+const isMyPressed = (): boolean => pressed;
 const setMyPressed = (): void => {pressed = true; log.Debug("squares setMyPressed", "1");};
 const setMyNotPressed = (): void => {pressed = false; log.Debug("squares setMyNotPressed", "0")};
 
 export default {
   inited,
   myUid,
+  isMyPressed,
   setMyPressed,
   setMyNotPressed,
   setMyUid,

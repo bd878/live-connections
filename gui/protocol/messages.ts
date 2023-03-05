@@ -2,8 +2,18 @@ import log from '../modules/log';
 import C from './const';
 
 function makeMouseMoveMessage(x: number, y: number): ABuffer {
-  log.Print("makeMouseMoveMessage", "x, y:", x, y);
+  log.Debug("makeMouseMoveMessage", "x, y:", x, y);
 
+  return makeCoordsMessage(x, y, C.MOUSE_MOVE_TYPE);
+}
+
+function makeSquareMoveMessage(x: number, y: number): ABuffer {
+  log.Debug("makeSquareMoveMessage", "x, y:", x, y);
+
+  return makeCoordsMessage(x, y, C.SQUARE_MOVE_TYPE);
+}
+
+function makeCoordsMessage(x: number, y: number, messageType: number): ABuffer {
   const messageSize = (
     C.TYPE_SIZE +  // type
     C.COORD_SIZE + // x-coord
@@ -17,7 +27,7 @@ function makeMouseMoveMessage(x: number, y: number): ABuffer {
   dv.setUint16(offset, messageSize, C.ENDIANNE);
   offset += C.SIZE_PREFIX_SIZE;
 
-  dv.setInt8(offset, C.MOUSE_MOVE_TYPE, C.ENDIANNE);
+  dv.setInt8(offset, messageType, C.ENDIANNE);
   offset += C.TYPE_SIZE;
 
   dv.setFloat32(offset, x, C.ENDIANNE);
@@ -80,4 +90,8 @@ async function makeAuthUserMessage(area: AreaName, user: UserName): Promise<ABuf
   return buffer;
 }
 
-export { makeMouseMoveMessage, makeAuthUserMessage };
+export {
+  makeMouseMoveMessage,
+  makeAuthUserMessage,
+  makeSquareMoveMessage,
+};

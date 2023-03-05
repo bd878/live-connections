@@ -4,13 +4,15 @@ import C from './const';
 /* TODO: rewrite on class to open
   multiple socket connections simultaneously */
 
-let conn: WebSocket | null = null; /* private */
+let conn: WebSocket | null = null;
 
-function onError(err: any) { /* private */
+let messagesBuffer: any[] = [];
+
+function onError(err: any) {
   console.error('[onError]: error on socket', err);
 }
 
-function onClose(event: any) { /* private */
+function onClose(event: any) {
   ;(event.wasClean
     ? log.Print('onClose', `Closed cleanly: code=${event.code} reason=${event.reason}`)
     : log.Print('onClose', "Connection died")
@@ -63,7 +65,7 @@ function waitOpen(): Promise<any> {
 function waitMessage(): Promise<void> {
   if (conn) {
     return new Promise(resolve => {
-      const onMessage = (event: any) => {
+      const onMessage = (event: any) => { // TODO: receive messages simultaneously, add buffer
         ;(conn && conn.removeEventListener('message', onMessage));
         resolve(event);
       };
