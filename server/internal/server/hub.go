@@ -29,12 +29,13 @@ func (h *Hub) Run() {
     select {
     case client := <-h.register:
       h.clients[client] = true
+      client.registered <- true
 
       h.broadcastClientsOnline()
     case client := <-h.unregister:
       if _, ok := h.clients[client]; ok {
         delete(h.clients, client)
-        close(client.send)
+        client.unregistered <- true
 
         h.broadcastClientsOnline()
       }

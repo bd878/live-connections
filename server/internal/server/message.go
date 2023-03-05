@@ -16,10 +16,9 @@ const (
   mouseMoveMessageType int8 = 2
   listClientsOnlineMessageType int8 = 3
   authOkMessageType int8 = 4
-  mouseInitMessageType int8 = 5
   textMessageType int8 = 6
-  squareMoveMessageType int8 = 9
-  squareInitMessageType int8 = 10
+  squareInitMessageType int8 = 7
+  squareMoveMessageType int8 = 8
 )
 
 type Message struct {
@@ -69,6 +68,10 @@ func (m *Message) Type() int8 {
   return m.messageType
 }
 
+func (m *Message) SetType(typ int8) {
+  m.messageType = typ
+}
+
 func (m *Message) SetArea(area string) {
   m.area = area
 }
@@ -81,14 +84,22 @@ func (m *Message) SetClients(clients []string) {
   m.clients = clients
 }
 
+func (m *Message) SetX(xPos float32) {
+  m.XPos = xPos
+}
+
+func (m *Message) SetY(yPos float32) {
+  m.YPos = yPos
+}
+
 func (m *Message) Decode() error {
   switch (m.Type()) {
   case authMessageType:
     return m.parseAuthMessage()
   case mouseMoveMessageType:
-    return m.parseMoveMessage()
+    return m.parseCoordsMessage()
   case squareMoveMessageType:
-    return m.parseMoveMessage()
+    return m.parseCoordsMessage()
   }
   return nil
 }
@@ -100,9 +111,11 @@ func (m *Message) Encode() []byte {
   case textMessageType:
     return m.encodeTextMessage()
   case mouseMoveMessageType:
-    return m.encodeMoveMessage()
+    return m.encodeCoordsMessage()
+  case squareInitMessageType:
+    return m.encodeCoordsMessage()
   case squareMoveMessageType:
-    return m.encodeMoveMessage()
+    return m.encodeCoordsMessage()
   case listClientsOnlineMessageType:
     return m.encodeClientsOnlineMessage()
   }
@@ -146,8 +159,8 @@ func (m *Message) parseAuthMessage() error {
 }
 
 // XPos + YPos
-func (m *Message) parseMoveMessage() error {
-  meta.Log().Debug("parse move message")
+func (m *Message) parseCoordsMessage() error {
+  meta.Log().Debug("parse coords message")
 
   mr := bytes.NewReader(m.raw)
 
@@ -191,12 +204,12 @@ func (m *Message) encodeTextMessage() []byte {
 }
 
 // totalSize + type + userSize + userBytes + XPos + YPos
-func (m *Message) encodeMoveMessage() []byte {
-  meta.Log().Debug("encode move message")
+func (m *Message) encodeCoordsMessage() []byte {
+  meta.Log().Debug("encode coords message")
 
   typeBytes := new(bytes.Buffer)
   if err := binary.Write(typeBytes, enc, m.messageType); err != nil {
-    meta.Log().Warn("error writing move type")
+    meta.Log().Warn("error writing coords type")
     return nil
   }
 

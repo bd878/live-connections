@@ -59,6 +59,7 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
 
   client := NewClient(conn, hub, area, user)
   go client.ReadLoop()
+  go client.LifecycleLoop()
   go client.WriteLoop()
 }
 

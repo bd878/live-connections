@@ -18,7 +18,11 @@ const writeWait = 10 * time.Second
 type Client struct {
   conn *ws.Conn
   hub *Hub
+
   send chan []byte
+
+  registered chan bool
+  unregistered chan bool
 
   area string
   name string
@@ -34,6 +38,8 @@ func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
     hub: hub,
     area: area,
     name: name,
+    registered: make(chan bool),
+    unregistered: make(chan bool),
     send: make(chan []byte, 256),
   }
 }
@@ -82,6 +88,38 @@ func (c *Client) ReadLoop() {
   }
 
   meta.Log().Debug(c.name, "exit reading loop")
+}
+
+func (c *Client) LifecycleLoop() {
+  meta.Log().Debug(c.name, "launch lifecycle loop")
+
+  var closed bool = false
+  for {
+    select {
+    case <-c.registered:
+      meta.Log().Debug(c.name, "client registered")
+      m := NewMessage()
+      m.SetType(squareInitMessageType)
+      m.SetArea(c.area)
+      m.SetUser(c.name)
+      m.SetX(0)
+      m.SetY(0)
+
+      c.hub.broadcast <- m.Encode()
+    case <-c.unregistered:
+      meta.Log().Debug(c.name, "client unregistered")
+      close(c.send)
+      close(c.registered)
+      close(c.unregistered)
+      closed = true
+    }
+
+    if closed {
+      break;
+    }
+  }
+
+  meta.Log().Debug(c.name, "exit lifecycle loop")
 }
 
 func (c *Client) WriteLoop() {
