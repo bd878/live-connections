@@ -1,12 +1,10 @@
 import main from "./main";
 import Log, { setMode } from "./modules/log";
 
-const log = new Log('gui');
+const log = new Log('gui init');
 
 function init() {
   setMode('warn');
-
-  log.Sub("init");
 
   if (!window['WebSocket']) {
     log.Fail("browser does not support WebSockets");

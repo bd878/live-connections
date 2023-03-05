@@ -23,18 +23,20 @@ async function run() {
   log.Debug("run");
 
   let resolve: any, reject: any;
-  const p = new Promise((r, j) => {
+  const _1 = new Promise((r, j) => {
     resolve = r;
     reject = j;
   });
 
   try {
     while (1) {
-      const message = await socket.waitMessage();
+      const messages = await socket.waitMessages();
 
       log.Debug("on message");
 
-      select(message);
+      for (let i = 0; i < messages.length; i++) {
+        select(messages[i]);
+      }
     }
 
     ;(resolve && resolve(true));

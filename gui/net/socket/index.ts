@@ -9,6 +9,7 @@ const log = new Log("net/socket");
 let conn: WebSocket | null = null;
 
 let messagesBuffer: any[] = [];
+let resolver: ((bufs: any[]) => void) | null = null;
 
 function onError(err: any) {
   console.error('[onError]: error on socket', err);
@@ -21,6 +22,41 @@ function onClose(event: any) {
   );
 }
 
+function onOpen(event: any) {
+  if (conn) {
+    conn.addEventListener("message", onMessage);
+  } else {
+    log.Fail("cannot bind message listener, conn is not set");
+  }
+}
+
+function onMessage(event: any) {
+  messagesBuffer.push(event);
+
+  if (resolver) {
+    const buffer = messagesBuffer;
+    messagesBuffer = [];
+    resolver(buffer);
+    resolver = null;
+  }
+}
+
+function waitMessages(): Promise<any[]> {
+  if (conn) {
+    return new Promise(resolve => {
+      if (messagesBuffer.length > 0) {
+        const buffer = messagesBuffer;
+        messagesBuffer = [];
+        resolve(buffer);
+      } else {
+        resolver = resolve;
+      }
+    });
+  } else {
+    return Promise.reject();
+  }
+}
+
 function init(areaName: AreaName, userName: UserName) {
   log.Debug("init");
 
@@ -28,6 +64,7 @@ function init(areaName: AreaName, userName: UserName) {
 
   conn.addEventListener('error', onError);
   conn.addEventListener('close', onClose);
+  conn.addEventListener('open', onOpen);
 }
 
 function isReady(): boolean {
@@ -64,22 +101,8 @@ function waitOpen(): Promise<any> {
   }
 }
 
-function waitMessage(): Promise<void> {
-  if (conn) {
-    return new Promise(resolve => {
-      const onMessage = (event: any) => { // TODO: receive messages simultaneously, add buffer
-        ;(conn && conn.removeEventListener('message', onMessage));
-        resolve(event);
-      };
-      ;(conn && conn.addEventListener('message', onMessage));
-    });
-  } else {
-    return Promise.reject();
-  }
-}
-
 export default {
-  waitMessage,
+  waitMessages,
   waitOpen,
   send,
   isReady,
