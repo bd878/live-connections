@@ -30,22 +30,9 @@ function onMouseMove(e: CoordsEvent) {
 
 function onSquareMove(e: CoordsEvent) {
   log.Print("onSquareMove", "e =", e);
-}
 
-function onInitMouseCoords(e: CoordsEvent) {
-  log.Print("onInitMouseCoords", "e =", e);
-
-  const cUid = getUid(Cursor.cname, e.name);
-  if (!area.hasElem(cUid)) {
-    log.Print("create cursor", cUid);
-
-    const user = users.getByName(e.name);
-    const cursor = new Cursor(user.color);
-    cursor.setId(e.name);
-    cursor.create();
-    cursor.redraw();
-    area.addElem(cUid, cursor);
-  }
+  coords.set(getUid(Square.cname, e.name), e.xPos, e.yPos);
+  area.redraw('square', getUid(Square.cname, e.name));
 }
 
 function onInitSquareCoords(e: CoordsEvent) {
@@ -62,6 +49,9 @@ function onInitSquareCoords(e: CoordsEvent) {
     square.create();
     square.redraw();
     area.addElem(sUid, square);
+
+    coords.set(sUid, e.xPos, e.yPos);
+    area.redraw('square', sUid);
   }
 }
 
@@ -97,6 +87,17 @@ function onUsersOnline(e: UsersOnlineEvent) {
       tile.redraw();
       usersList.addElem(tUid, tile);
     }
+
+    const cUid = getUid(Cursor.cname, name);
+    if (!area.hasElem(cUid)) {
+      log.Print("create cursor", cUid);
+
+      const cursor = new Cursor(user.color);
+      cursor.setId(name);
+      cursor.create();
+      cursor.redraw();
+      area.addElem(cUid, cursor);
+    }
   }
 }
 
@@ -104,7 +105,6 @@ export {
   onAuthOk,
   onMouseMove,
   onSquareMove,
-  onInitMouseCoords,
   onInitSquareCoords,
   onUsersOnline,
 };

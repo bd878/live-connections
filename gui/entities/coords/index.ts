@@ -40,13 +40,13 @@ function set(uid: Uid, xPos: number, yPos: number) {
 
 function getX(uid: Uid): number {
   const xPos = coordsX.get(uid);
-  if (!xPos) throw error.failedToGet("coords getX", uid);
+  if (xPos === undefined) throw error.failedToGet("coords getX", uid);
   return xPos;
 }
 
 function getY(uid: Uid): number {
   const yPos = coordsY.get(uid);
-  if (!yPos) throw error.failedToGet("coords getY", uid);
+  if (yPos === undefined) throw error.failedToGet("coords getY", uid);
   return yPos;
 }
 

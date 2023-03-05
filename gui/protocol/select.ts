@@ -8,7 +8,6 @@ import {
 import {
   onMouseMove,
   onSquareMove,
-  onInitMouseCoords,
   onInitSquareCoords,
   onUsersOnline,
   onAuthOk,
@@ -40,14 +39,6 @@ async function select(b: any /* another set of bytes have come... */ ) {
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);
-        }, 0); /* throw it in a loop */
-        offset += size;
-        break;
-      case C.INIT_MOUSE_COORDS_TYPE:
-        log.Print("select", "init mouse coords");
-
-        setTimeout(() => {
-          parseCoordsMessage(slice).then(onInitMouseCoords);
         }, 0); /* throw it in a loop */
         offset += size;
         break;

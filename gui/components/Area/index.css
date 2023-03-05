@@ -1,6 +1,5 @@
 .area {
-  width: 0px;
-  height: 0px;
-  background-color: orange;
+  width: calc(100% - 20px);
+  height: calc(100% - 20px);
   position: absolute;
 }
