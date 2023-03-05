@@ -1,20 +1,22 @@
 import main from "./main";
-import log from "./modules/log";
+import Log, { setMode } from "./modules/log";
+
+const log = new Log('gui');
 
 function init() {
-  log.mode = 'debug';
+  setMode('debug');
 
-  log.Print("gui", "init");
+  log.Sub("init");
 
   if (!window['WebSocket']) {
-    console.error("[init]: browser does not support WebSockets");
+    log.Fail("browser does not support WebSockets");
     return;
   }
 
   try {
     main();
   } catch (e) {
-    console.error("[init]: failed to run app", e);
+    log.Fail("failed to run app", e);
   }
 }
 

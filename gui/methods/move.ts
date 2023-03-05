@@ -1,5 +1,5 @@
 import error from '../modules/error';
-import log from '../modules/log';
+import { log } from '../modules/log';
 
 /* public */
 function move(this: Elem & Moveable, x: number, y: number): void {
@@ -7,7 +7,7 @@ function move(this: Elem & Moveable, x: number, y: number): void {
     throw error.noElementCreated(this.getName());
   }
 
-  log.Print("move", `name, x, y: ${this.getName()}, ${x}, ${y}`);
+  log.Debug("move", `name, x, y: ${this.getName()}, ${x}, ${y}`);
 
   this.root.style.transform = `
     translate3D(

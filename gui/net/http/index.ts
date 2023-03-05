@@ -1,4 +1,4 @@
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 
 async function get(path: string): Promise<any> {
   const response = await fetch(HTTP_PROTOCOL + BACKEND_URL + path);
@@ -9,7 +9,7 @@ async function get(path: string): Promise<any> {
   try {
     return response;
   } catch (e: any) {
-    log.Print("net get", "error occured while retrieving response body text");
+    log.Debug("net get", "error occured while retrieving response body text");
     throw new Error(e);
   }
 }
@@ -23,7 +23,7 @@ async function post(path: string, options: Record<string, any>): Promise<any> {
   try {
     return response;
   } catch (e: any) {
-    log.Print("net post", "error occured while retrieving response body text");
+    log.Debug("net post", "error occured while retrieving response body text");
     throw new Error(e);
   }
 }

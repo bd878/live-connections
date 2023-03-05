@@ -1,6 +1,6 @@
 import type { Area } from './index';
 import rtti from '../../rtti';
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 import coords from '../../entities/coords';
 import error from '../../modules/error';
 
@@ -13,7 +13,7 @@ function redraw(this: Area, piece: string, ...args: any[]) {
 }
 
 function redrawCoords(this: Area, uid: Uid) {
-  log.Print("redrawCoords", uid);
+  log.Debug("redrawCoords", uid);
   if (!this.hasElem(uid)) {
     throw error.noElementCreated("Area redrawCoords");
   }

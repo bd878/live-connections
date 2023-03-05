@@ -1,4 +1,4 @@
-import log from '../modules/log';
+import { log } from '../modules/log';
 import C from './const';
 
 function makeMouseMoveMessage(x: number, y: number): ABuffer {

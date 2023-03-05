@@ -1,7 +1,7 @@
 import select from './protocol/select';
 import establish from './protocol/init';
 import socket from './net/socket';
-import log from './modules/log';
+import Log from './modules/log';
 import users from './entities/users';
 import areas from './entities/areas';
 import squares from './entities/squares';
@@ -16,9 +16,11 @@ import setUrl from './misc/setUrl';
 import setRoot from './misc/setRoot';
 import getUid from './misc/getUid';
 
+const log = new Log('main');
+
 /* Waits for protocol message on socket */
 async function run() {
-  log.Print("main", "run");
+  log.Debug("main", "run");
 
   let resolve: any, reject: any;
   const p = new Promise((r, j) => {
@@ -30,21 +32,21 @@ async function run() {
     while (1) {
       const message = await socket.waitMessage();
 
-      log.Print("run", "on message");
+      log.Debug("run", "on message");
 
       select(message);
     }
 
     ;(resolve && resolve(true));
   } catch (e) {
-    log.Print("run", "failed to run");
+    log.Debug("run", "failed to run");
     ;(reject && reject(e));
   }
 }
 
 /* Applies to server for new area allocation */
 async function proceedNewArea(): Promise<AreaName> {
-  log.Print("gui", "proceed new area");
+  log.Debug("gui", "proceed new area");
 
   const areaName = await areas.create();
   setUrl(`/${areaName}`);
@@ -53,7 +55,7 @@ async function proceedNewArea(): Promise<AreaName> {
 
 /* Applies to server for new user registration */
 async function proceedNewUser(areaName: AreaName): Promise<UserName> {
-  log.Print("gui", "proceed new user");
+  log.Debug("gui", "proceed new user");
 
   const userName = await users.create(areaName);
   bindUserToArea(areaName, userName);
@@ -62,7 +64,7 @@ async function proceedNewUser(areaName: AreaName): Promise<UserName> {
 
 /* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
-  log.Print("gui", "main");
+  log.Debug("gui", "main");
 
   let userName;
   let areaName = takeAreaName(window.location.pathname);
@@ -77,7 +79,7 @@ async function main() {
     userName = await proceedNewUser(areaName)
   }
 
-  log.Print("gui", "areaName, userName:", areaName, userName);
+  log.Debug("gui", "areaName, userName:", areaName, userName);
 
   users.setMyName(userName);
   areas.setMyName(areaName);

@@ -1,5 +1,5 @@
 import http from '../../net/http';
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 import rtti from '../../rtti';
 
 async function create(areaName: AreaName): Promise<UserName> {
@@ -16,7 +16,7 @@ async function create(areaName: AreaName): Promise<UserName> {
     throw new Error(`[create User]: response text is not area name: ${userName}`);
   }
 
-  log.Print("User create", "userName:", userName);
+  log.Debug("User create", "userName:", userName);
   return userName;
 }
 

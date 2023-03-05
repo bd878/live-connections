@@ -1,5 +1,5 @@
 import error from '../../modules/error';
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 
 let _inited: boolean = false;
 let pressed: boolean = false;

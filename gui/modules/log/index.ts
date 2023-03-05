@@ -1,28 +1,60 @@
-const log = {
-  mode: 'silent',
+type LogMode = 'silent' | 'debug' | 'warn';
 
-  _isDebug() { return this.mode === 'debug'; },
-  _isSilent() { return this.mode === 'silent'; },
-  _isWarn() { return this.mode === 'warn'; },
+let mode: LogMode = 'silent';
 
-  Debug(entity: string, message: string, ...args: any): void {
-    log.Print(entity, message, ...args);
-  },
+const isDebug = (): boolean => { return mode === 'debug'; };
+const isSilent = (): boolean => { return mode === 'silent'; };
+const isWarn = (): boolean => { return mode === 'warn'; };
 
-  Fail(entity: string, message: string, ...args: any): void {
-    log.Print(entity, message, ...args);
-  },
+const setMode = (m: LogMode) => { mode = m; };
 
-  Warn(entity: string, message: string, ...args: any): void {
-    log.Print(entity, message, ...args);
-  },
+class Log {
+  sub: string = '';
 
-  Print(entity: string, message: string, ...args: any): void {
-    ;(
-      (this._isDebug() || this._isWarn()) &&
-      (console.log(`[${entity}]:`, message, ...args))
-    );
+  constructor(public prefix: string = '') {}
+
+  Sub(sub: string) {
+    this.sub = sub;
+  }
+
+  Debug(entity: string, ...args: any): void {
+    if (!isSilent() && (isDebug() || isWarn())) {
+      this.print(entity, ...args);
+    }
+  }
+
+  Fail(entity: string, ...args: any): void {
+    if (!isSilent()) {
+      this.print(entity, ...args);
+    }
+  }
+
+  Warn(entity: string, ...args: any): void {
+    if (!isSilent() && isWarn()) {
+      this.print(entity, ...args);
+    }
+  }
+
+  print(entity: string, ...args: any): void {
+    let start: string = '';
+
+    if (this.prefix) {
+      start = `[${this.prefix}`;
+    } else if (entity) {
+      start = `[${entity}`;
+    }
+
+    if (this.sub) {
+      start += ` ${this.sub}]`;
+    } else if (start) {
+      start += ']';
+    }
+
+    console.log(start, entity, ...args);
   }
 }
 
-export default log;
+const log = new Log();
+
+export default Log;
+export { log, setMode };

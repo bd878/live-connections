@@ -1,4 +1,4 @@
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 import C from './const';
 
 /* TODO: rewrite on class to open
@@ -14,13 +14,13 @@ function onError(err: any) {
 
 function onClose(event: any) {
   ;(event.wasClean
-    ? log.Print('onClose', `Closed cleanly: code=${event.code} reason=${event.reason}`)
-    : log.Print('onClose', "Connection died")
+    ? log.Debug('onClose', `Closed cleanly: code=${event.code} reason=${event.reason}`)
+    : log.Debug('onClose', "Connection died")
   );
 }
 
 function init(areaName: AreaName, userName: UserName) {
-  log.Print("socket", "init");
+  log.Debug("socket", "init");
 
   conn = new WebSocket(SOCKET_PROTOCOL + BACKEND_URL + SOCKET_PATH + "/" + areaName + "/" + userName);
 
@@ -42,7 +42,7 @@ function send(message: any): void {
   }
 
   if (conn.readyState === C.CONNECTING) {
-    log.Print('Socket send', 'still in connecting state');
+    log.Debug('Socket send', 'still in connecting state');
   } else {
     conn.send(message);
   }

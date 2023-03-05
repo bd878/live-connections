@@ -1,5 +1,5 @@
 import http from '../../net/http';
-import log from '../../modules/log';
+import { log } from '../../modules/log';
 import rtti from '../../rtti';
 
 async function create(): Promise<AreaName> {
@@ -9,7 +9,7 @@ async function create(): Promise<AreaName> {
     throw new Error(`[create Area]: response text is not area name: ${areaName}`);
   }
 
-  log.Print("Area create", "areaName:", areaName);
+  log.Debug("Area create", "areaName:", areaName);
   return areaName;
 }
 

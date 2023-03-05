@@ -1,5 +1,5 @@
 import C from './const';
-import log from '../modules/log';
+import { log } from '../modules/log';
 import {
   parseCoordsMessage,
   parseAuthOkMessage,
@@ -35,7 +35,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
 
     switch (type) {
       case C.MOUSE_MOVE_TYPE:
-        log.Print("select", "mouse move");
+        log.Debug("select", "mouse move");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);
@@ -43,7 +43,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.SQUARE_MOVE_TYPE:
-        log.Print("select", "square move");
+        log.Debug("select", "square move");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onSquareMove);
@@ -51,7 +51,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.INIT_SQUARE_COORDS_TYPE:
-        log.Print("select", "init square coords");
+        log.Debug("select", "init square coords");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onInitSquareCoords);
@@ -59,7 +59,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.AUTH_OK_TYPE:
-        log.Print("select", "auth ok");
+        log.Debug("select", "auth ok");
 
         const message = new Blob([slice]);
         setTimeout(() => {
@@ -68,7 +68,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
-        log.Print("select", "users online");
+        log.Debug("select", "users online");
 
         setTimeout(() => {
           parseUsersOnlineMessage(slice).then(onUsersOnline);
@@ -76,7 +76,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       default:
-        log.Print("select", "unknown type =", type);
+        log.Debug("select", "unknown type =", type);
         return;
     }
   }

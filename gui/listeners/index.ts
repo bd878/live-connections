@@ -1,4 +1,4 @@
-import log from '../modules/log';
+import { log } from '../modules/log';
 import error from '../modules/error';
 import { isAccessible } from '../rtti';
 import socket from '../net/socket';
