@@ -32,23 +32,31 @@ func NewLogWriter(prefix string, degree string) *LogWriter {
 }
 
 func Log() *LogWriter {
-  return NewLogWriter("", "debug")
+  return NewLogWriter("", "warn")
 }
 
 func (l *LogWriter) Info(text ...any) {
-  log.Println(text...)
+  if l.degree != "silent" {
+    log.Println(text...)
+  }
 }
 
 func (l *LogWriter) Debug(text ...any) {
-  log.Println(text...)
+  if l.degree != "silent" && (l.degree == "debug") {
+    log.Println(text...)
+  }
 }
 
 func (l *LogWriter) Warn(text ...any) {
-  log.Println(text...)
+  if l.degree != "silent" && (l.degree == "debug" || l.degree == "warn") {
+    log.Println(text...)
+  }
 }
 
 func (l *LogWriter) Error(text ...any) {
-  log.Println(text...)
+  if l.degree != "silent" && (l.degree == "debug" || l.degree == "warn" || l.degree == "fatal") {
+    log.Println(text...)
+  }
 }
 
 func (l *LogWriter) Fatal(text ...any) {
