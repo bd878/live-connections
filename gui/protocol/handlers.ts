@@ -1,6 +1,6 @@
 import error from '../modules/error';
 import socket from '../net/socket';
-import { log } from '../modules/log';
+import Log from '../modules/log';
 import area from '../components/Area';
 import users from '../entities/users';
 import areas from '../entities/areas';
@@ -13,34 +13,36 @@ import UserTile from '../components/UserTile';
 import diff from '../misc/diff';
 import getUid from '../misc/getUid';
 
+const log = new Log("handlers");
+
 /*
  * External handlers
  */
 
 function onAuthOk(e: AuthOkEvent) {
-  ;(e.text === "ok" && log.Debug("onAuthOk", "set token:", e));
+  ;(e.text === "ok" && log.Debug("set token:", e));
 }
 
 function onMouseMove(e: CoordsEvent) {
-  log.Debug("onMouseMove", "e =", e);
+  log.Debug("e =", e);
 
   coords.set(getUid(Cursor.cname, e.name), e.xPos, e.yPos);
   area.redraw('cursor', getUid(Cursor.cname, e.name));
 }
 
 function onSquareMove(e: CoordsEvent) {
-  log.Debug("onSquareMove", "e =", e);
+  log.Debug("e =", e);
 
   coords.set(getUid(Square.cname, e.name), e.xPos, e.yPos);
   area.redraw('square', getUid(Square.cname, e.name));
 }
 
 function onInitSquareCoords(e: CoordsEvent) {
-  log.Debug("onInitSquareCoords", "e =", e);
+  log.Debug("e =", e);
 
   const sUid = getUid(Square.cname, e.name);
   if (!area.hasElem(sUid)) {
-    log.Debug("create square", sUid);
+    log.Debug("create square =", sUid);
 
     ;((users.myName() === e.name) && squares.setMyUid(sUid));
 
@@ -80,7 +82,7 @@ function onUsersOnline(e: UsersOnlineEvent) {
 
     const tUid = getUid(UserTile.cname, name);
     if (!area.hasElem(tUid)) {
-      log.Debug("create tile", tUid);
+      log.Debug("create tile =", tUid);
       const tile = new UserTile(user.color);
       tile.setId(name);
       tile.create();
@@ -90,7 +92,7 @@ function onUsersOnline(e: UsersOnlineEvent) {
 
     const cUid = getUid(Cursor.cname, name);
     if (!area.hasElem(cUid)) {
-      log.Debug("create cursor", cUid);
+      log.Debug("create cursor =", cUid);
 
       const cursor = new Cursor(user.color);
       cursor.setId(name);

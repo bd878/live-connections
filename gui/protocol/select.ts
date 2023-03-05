@@ -1,5 +1,5 @@
 import C from './const';
-import { log } from '../modules/log';
+import Log from '../modules/log';
 import {
   parseCoordsMessage,
   parseAuthOkMessage,
@@ -12,6 +12,8 @@ import {
   onUsersOnline,
   onAuthOk,
 } from './handlers';
+
+const log = new Log("protocol/select");
 
 async function select(b: any /* another set of bytes have come... */ ) {
   let buffer = await b.data.arrayBuffer();
@@ -35,7 +37,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
 
     switch (type) {
       case C.MOUSE_MOVE_TYPE:
-        log.Debug("select", "mouse move");
+        log.Debug("mouse move");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);
@@ -43,7 +45,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.SQUARE_MOVE_TYPE:
-        log.Debug("select", "square move");
+        log.Debug("square move");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onSquareMove);
@@ -51,7 +53,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.INIT_SQUARE_COORDS_TYPE:
-        log.Debug("select", "init square coords");
+        log.Debug("init square coords");
 
         setTimeout(() => {
           parseCoordsMessage(slice).then(onInitSquareCoords);
@@ -59,7 +61,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.AUTH_OK_TYPE:
-        log.Debug("select", "auth ok");
+        log.Debug("auth ok");
 
         const message = new Blob([slice]);
         setTimeout(() => {
@@ -68,7 +70,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
-        log.Debug("select", "users online");
+        log.Debug("users online");
 
         setTimeout(() => {
           parseUsersOnlineMessage(slice).then(onUsersOnline);
@@ -76,7 +78,7 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       default:
-        log.Debug("select", "unknown type =", type);
+        log.Debug("unknown type =", type);
         return;
     }
   }

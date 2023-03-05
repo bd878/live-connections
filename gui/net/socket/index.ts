@@ -1,5 +1,7 @@
-import { log } from '../../modules/log';
+import Log from '../../modules/log';
 import C from './const';
+
+const log = new Log("net/socket");
 
 /* TODO: rewrite on class to open
   multiple socket connections simultaneously */
@@ -14,13 +16,13 @@ function onError(err: any) {
 
 function onClose(event: any) {
   ;(event.wasClean
-    ? log.Debug('onClose', `Closed cleanly: code=${event.code} reason=${event.reason}`)
-    : log.Debug('onClose', "Connection died")
+    ? log.Debug(`Closed cleanly: code=${event.code} reason=${event.reason}`)
+    : log.Debug("Connection died")
   );
 }
 
 function init(areaName: AreaName, userName: UserName) {
-  log.Debug("socket", "init");
+  log.Debug("init");
 
   conn = new WebSocket(SOCKET_PROTOCOL + BACKEND_URL + SOCKET_PATH + "/" + areaName + "/" + userName);
 
@@ -42,7 +44,7 @@ function send(message: any): void {
   }
 
   if (conn.readyState === C.CONNECTING) {
-    log.Debug('Socket send', 'still in connecting state');
+    log.Debug('still in connecting state');
   } else {
     conn.send(message);
   }

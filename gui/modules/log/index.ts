@@ -18,7 +18,13 @@ class Log {
   }
 
   Debug(entity: string, ...args: any): void {
-    if (!isSilent() && (isDebug() || isWarn())) {
+    if (!isSilent() && isDebug()) {
+      this.print(entity, ...args);
+    }
+  }
+
+  Warn(entity: string, ...args: any): void {
+    if (!isSilent() && (isWarn() || isDebug())) {
       this.print(entity, ...args);
     }
   }
@@ -29,8 +35,8 @@ class Log {
     }
   }
 
-  Warn(entity: string, ...args: any): void {
-    if (!isSilent() && isWarn()) {
+  Info(entity: string, ...args: any): void {
+    if (!isSilent()) {
       this.print(entity, ...args);
     }
   }

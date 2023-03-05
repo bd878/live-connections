@@ -1,25 +1,27 @@
 import { makeAuthUserMessage } from './messages';
-import { log } from '../modules/log';
+import Log from '../modules/log';
 import socket from '../net/socket';
 
+const log = new Log("gui/protocol");
+
 async function authUser(areaName: AreaName, userName: UserName) {
-  log.Debug("authUser", "auth user");
+  log.Debug("auth user");
 
   const authMessage = await makeAuthUserMessage(areaName, userName);
   socket.send(authMessage);
 }
 
 async function establish(areaName: AreaName, userName: UserName) {
-  log.Debug("establish", "establish");
+  log.Debug("establish");
 
   await socket.waitOpen();
   await authUser(areaName, userName);
 
   // run
-  log.Debug("establish", "socket is running..."); // DEBUG
+  log.Info("socket is running..."); // DEBUG
 
   if (!socket.isReady()) {
-    log.Debug("establish", "error on message handling");
+    log.Fail("error on message handling");
     throw new Error("socket is not ready");
   }
 }

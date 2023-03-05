@@ -20,7 +20,7 @@ const log = new Log('main');
 
 /* Waits for protocol message on socket */
 async function run() {
-  log.Debug("main", "run");
+  log.Debug("run");
 
   let resolve: any, reject: any;
   const p = new Promise((r, j) => {
@@ -32,21 +32,21 @@ async function run() {
     while (1) {
       const message = await socket.waitMessage();
 
-      log.Debug("run", "on message");
+      log.Debug("on message");
 
       select(message);
     }
 
     ;(resolve && resolve(true));
   } catch (e) {
-    log.Debug("run", "failed to run");
+    log.Fail("failed to run");
     ;(reject && reject(e));
   }
 }
 
 /* Applies to server for new area allocation */
 async function proceedNewArea(): Promise<AreaName> {
-  log.Debug("gui", "proceed new area");
+  log.Debug("proceed new area");
 
   const areaName = await areas.create();
   setUrl(`/${areaName}`);
@@ -55,7 +55,7 @@ async function proceedNewArea(): Promise<AreaName> {
 
 /* Applies to server for new user registration */
 async function proceedNewUser(areaName: AreaName): Promise<UserName> {
-  log.Debug("gui", "proceed new user");
+  log.Debug("proceed new user");
 
   const userName = await users.create(areaName);
   bindUserToArea(areaName, userName);
@@ -64,7 +64,7 @@ async function proceedNewUser(areaName: AreaName): Promise<UserName> {
 
 /* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
-  log.Debug("gui", "main");
+  log.Debug("main");
 
   let userName;
   let areaName = takeAreaName(window.location.pathname);
@@ -79,7 +79,7 @@ async function main() {
     userName = await proceedNewUser(areaName)
   }
 
-  log.Debug("gui", "areaName, userName:", areaName, userName);
+  log.Debug("areaName, userName:", areaName, userName);
 
   users.setMyName(userName);
   areas.setMyName(areaName);

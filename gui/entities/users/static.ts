@@ -17,6 +17,7 @@ async function create(areaName: AreaName): Promise<UserName> {
   }
 
   log.Debug("User create", "userName:", userName);
+
   return userName;
 }
 

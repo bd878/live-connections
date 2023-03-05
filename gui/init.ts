@@ -4,7 +4,7 @@ import Log, { setMode } from "./modules/log";
 const log = new Log('gui');
 
 function init() {
-  setMode('debug');
+  setMode('warn');
 
   log.Sub("init");
 

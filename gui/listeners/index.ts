@@ -1,4 +1,4 @@
-import { log } from '../modules/log';
+import Log from '../modules/log';
 import error from '../modules/error';
 import { isAccessible } from '../rtti';
 import socket from '../net/socket';
@@ -9,6 +9,8 @@ import {
   makeMouseMoveMessage,
   makeSquareMoveMessage,
 } from '../protocol/messages';
+
+const log = new Log("listeners");
 
 let shiftX: number = 0;
 let shiftY: number = 0;
@@ -25,6 +27,8 @@ function computeMoveCoords(pageX: number, pageY: number): [number, number] {
 }
 
 function getMySquareNode(): HTMLElement {
+  log.Sub("getMySquareNode");
+
   if (squares.inited()) {
     const uid = squares.myUid();
     if (area.hasElem(uid)) {
@@ -32,22 +36,24 @@ function getMySquareNode(): HTMLElement {
       if (isAccessible(node)) {
         return node.get();
       } else {
-        log.Warn("trackMousePress getMySquareNode", uid, "not accessible");
+        log.Warn(uid, "not accessible");
       }
     } else {
-      log.Warn("trackMousePress getMySquareNode", "area has not my square uid:", uid)
+      log.Warn("area has not my square uid:", uid)
     }
   } else {
-    log.Warn("trackMousePress getMySquareNode", "squares are not inited yet");
+    log.Warn("squares are not inited yet");
   }
 
-  throw error.failedToGet("trackMousePress getMySquareNode", "no my square");
+  throw error.failedToGet("no my square");
 }
 
 function onMouseDown(event: any) {
+  log.Sub("onMouseDown");
+
   const node = getMySquareNode();
   if (node.contains(event.target)) {
-    log.Debug("listeners onMouseDown", "square node contains event target");
+    log.Debug("square node contains event target");
 
     squares.setMyPressed();
     initDragging(event.clientX, event.clientY, node);
@@ -56,8 +62,10 @@ function onMouseDown(event: any) {
 }
 
 function onMouseUp(event: any) {
+  log.Sub("onMouseUp");
+
   if (squares.isMyPressed()) {
-    log.Debug("listeners onMouseUp", "my square is pressed");
+    log.Debug("my square is pressed");
 
     squares.setMyNotPressed();
     const node = getMySquareNode();
@@ -74,14 +82,10 @@ const onMouseMove = debounce((event: any) => {
 });
 
 function trackMouseMove() {
-  log.Debug("main", "track mouse moves");
-
   document.addEventListener('mousemove', onMouseMove);
 }
 
 function trackMousePress() {
-  log.Debug("main", "track mouse moves");
-
   document.addEventListener('mousedown', onMouseDown);
   document.addEventListener('mouseup', onMouseUp);
 }
