@@ -3,10 +3,10 @@ import has from '../../methods/has';
 import write from '../../methods/write';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
-import getElem from '../../methods/getElem';
 import getName from '../../methods/getName';
 import addElemChild from '../../methods/addElemChild';
 import delElemChild from '../../methods/delElemChild';
+import getElem from './getElem';
 import free from './free';
 
 class Area implements

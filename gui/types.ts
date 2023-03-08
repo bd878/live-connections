@@ -48,6 +48,7 @@ type UsersOnlineEvent = {
 };
 
 type TextInputEvent = {
+  name: string;
   text: string;
 }
 
@@ -60,7 +61,7 @@ interface Settable {
 }
 
 interface Creatable {
-  create(): HTMLElement;
+  create(id: Id): HTMLElement;
 }
 
 interface Deletable {

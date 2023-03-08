@@ -74,6 +74,13 @@ func (c *Client) ReadLoop() {
 
       c.hub.register <- c
       defer c.unregister()
+    case textInputMessageType:
+      meta.Log().Debug(c.name, "received text input message")
+
+      message.SetArea(c.area)
+      message.SetUser(c.name)
+
+      c.hub.broadcast <- message.Encode()
     case mouseMoveMessageType:
       meta.Log().Debug(c.name, "received mouse move message")
 

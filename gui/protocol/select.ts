@@ -3,6 +3,7 @@ import Log from '../modules/log';
 import {
   parseCoordsMessage,
   parseAuthOkMessage,
+  parseTextInputMessage,
   parseUsersOnlineMessage,
 } from './parser';
 import {
@@ -11,6 +12,7 @@ import {
   onInitSquareCoords,
   onUsersOnline,
   onAuthOk,
+  onTextInput,
 } from './handlers';
 
 const log = new Log("protocol/select");
@@ -52,6 +54,12 @@ async function select(b: any /* another set of bytes have come... */ ) {
         }, 0); /* throw it in a loop */
         offset += size;
         break;
+      case C.TEXT_INPUT_TYPE:
+        log.Debug("text input");
+
+        setTimeout(() => {
+          parseTextInputMessage(slice).then(onTextInput);
+        });
       case C.INIT_SQUARE_COORDS_TYPE:
         log.Debug("init square coords");
 

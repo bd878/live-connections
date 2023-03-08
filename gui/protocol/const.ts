@@ -20,6 +20,8 @@ const C: Record<string, any> = {
   INIT_SQUARE_COORDS_TYPE: 7,
 
   SQUARE_MOVE_TYPE: 8,
+
+  TEXT_INPUT_TYPE: 9,
 };
 
 C.ENDIANNE = C.LITTLE_ENDIANNE;

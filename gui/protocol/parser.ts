@@ -36,6 +36,11 @@ async function parseAuthOkMessage(message: any /* Blob */): Promise<AuthOkEvent>
   return { text };
 }
 
+async function parseTextInputMessage(message: any /* Blob */): Promise<TextInputEvent> {
+  const text: string = await message.text();
+  return { text, name: '' };
+}
+
 async function parseUsersOnlineMessage(buf: any /* ArrayBuffer */): Promise<UsersOnlineEvent> {
   log.Debug("parseUsersOnlineMessage");
 
@@ -67,4 +72,5 @@ export {
   parseCoordsMessage,
   parseAuthOkMessage,
   parseUsersOnlineMessage,
+  parseTextInputMessage,
 };

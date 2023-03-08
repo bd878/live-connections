@@ -3,10 +3,10 @@ import UsersList from '../UsersList';
 import create from '../../methods/create';
 import append from '../../methods/append';
 
-function createUsersPanel(this: UsersPanel): HTMLElement {
-  UsersList.create();
+function createUsersPanel(this: UsersPanel, id: Id = ''): HTMLElement {
+  UsersList.create(id);
 
-  const result = create.call(this);
+  const result = create.call(this, id);
   append.call(this, UsersList);
 
   return result;

@@ -2,11 +2,15 @@ import get from '../../methods/get';
 import has from '../../methods/has';
 import move from '../../methods/move';
 import free from '../../methods/free';
-import create from '../../methods/create';
 import setId from '../../methods/setId';
 import getUid from '../../methods/getUid';
 import getName from '../../methods/getName';
+import hasElem from '../../methods/hasElem';
+import getElem from '../../methods/getElem';
+import delElemChild from '../../methods/delElemChild';
+import addElemChild from '../../methods/addElemChild';
 import redraw from '../../methods/redrawBg';
+import create from './create';
 
 class Square implements
   Elem,
@@ -16,7 +20,8 @@ class Square implements
   Styleable,
   Redrawable,
   Identifable,
-  Colored
+  Colored,
+  Containable
 {
   static cname: string = "Square";
 
@@ -24,9 +29,13 @@ class Square implements
   id: string = '';
   CSSClass: string = "square";
 
+  container: BaseContainer;
+
   getName = getName;
 
-  constructor(public color: string = '') {}
+  constructor(public color: string = '') {
+    this.container = new Map();
+  }
 
   get = get;
   has = has;
@@ -35,6 +44,11 @@ class Square implements
   move = move;
 
   redraw = redraw;
+
+  hasElem = hasElem;
+  getElem = getElem;
+  addElem = addElemChild;
+  delElem = delElemChild;
 
   setId = setId;
   getUid = getUid;

@@ -4,11 +4,11 @@ import UsersPanel from '../UsersPanel';
 import create from '../../methods/create';
 import append from '../../methods/append';
 
-function createMain(this: Main): HTMLElement {
-  UsersPanel.create();
-  Area.create();
+function createMain(this: Main, id: Id = ''): HTMLElement {
+  UsersPanel.create(id);
+  Area.create(id);
 
-  const result = create.call(this);
+  const result = create.call(this, id);
   append.call(this, UsersPanel);
   append.call(this, Area);
 

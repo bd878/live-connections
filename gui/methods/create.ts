@@ -2,10 +2,18 @@ import addCSSClass from './addCSSClass';
 import getUid from '../misc/getUid';
 import { isStyleable, isIdentifable } from '../rtti';
 
-function create(this: Elem): HTMLElement {
+function create(this: Elem, id: Id = ''): HTMLElement {
   this.root = document.createElement("div");
-  ;(isStyleable(this) && addCSSClass.call(this, this.CSSClass));
-  ;(isIdentifable(this) && (this.root.id = getUid(this.getName(), this.id)));
+
+  if (isStyleable(this)) {
+    addCSSClass.call(this, this.CSSClass);
+  }
+
+  if (isIdentifable(this)) {
+    this.setId(id);
+    this.root.id = this.getUid();
+  }
+
   return this.root;
 }
 

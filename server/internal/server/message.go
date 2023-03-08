@@ -19,6 +19,7 @@ const (
   textMessageType int8 = 6
   squareInitMessageType int8 = 7
   squareMoveMessageType int8 = 8
+  textInputMessageType int8 = 9
 )
 
 type Message struct {
@@ -100,6 +101,8 @@ func (m *Message) Decode() error {
     return m.parseCoordsMessage()
   case squareMoveMessageType:
     return m.parseCoordsMessage()
+  case textInputMessageType:
+    return m.parseTextMessage()
   }
   return nil
 }
@@ -109,6 +112,8 @@ func (m *Message) Encode() []byte {
   case authMessageType:
     return m.encodeTextMessage()
   case textMessageType:
+    return m.encodeTextMessage()
+  case textInputMessageType:
     return m.encodeTextMessage()
   case mouseMoveMessageType:
     return m.encodeCoordsMessage()
@@ -177,6 +182,11 @@ func (m *Message) parseCoordsMessage() error {
   return nil
 }
 
+func (m *Message) parseTextMessage() []byte {
+  meta.Log().Debug("parse text message")
+}
+
+// TODO: add userSize + userBytes
 // totalSize + type + text message
 func (m *Message) encodeTextMessage() []byte {
   meta.Log().Debug("encode text message")
