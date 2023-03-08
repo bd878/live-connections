@@ -4,6 +4,7 @@ import move from '../../methods/move';
 import free from '../../methods/free';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
+import getUid from '../../methods/getUid';
 import getName from '../../methods/getName';
 import redraw from '../../methods/redrawBg';
 
@@ -36,6 +37,7 @@ class Square implements
   redraw = redraw;
 
   setId = setId;
+  getUid = getUid;
 }
 
 export default Square;

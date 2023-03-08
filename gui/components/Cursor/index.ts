@@ -5,6 +5,7 @@ import setId from '../../methods/setId';
 import getName from '../../methods/getName';
 import create from '../../methods/create';
 import redraw from '../../methods/redrawBg';
+import getUid from '../../methods/getUid';
 
 class Cursor implements
   Elem,
@@ -34,6 +35,7 @@ class Cursor implements
   redraw = redraw;
 
   setId = setId;
+  getUid = getUid;
 }
 
 export default Cursor;

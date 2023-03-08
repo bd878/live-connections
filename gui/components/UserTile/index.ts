@@ -3,6 +3,7 @@ import has from '../../methods/has';
 import getName from '../../methods/getName';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
+import getUid from '../../methods/getUid';
 import redraw from '../../methods/redrawBg';
 
 class UserTile implements
@@ -31,6 +32,7 @@ class UserTile implements
   redraw = redraw;
 
   setId = setId;
+  getUid = getUid;
 }
 
 export default UserTile;

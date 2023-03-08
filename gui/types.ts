@@ -91,6 +91,7 @@ interface Redrawable {
 interface Identifable {
   id: Id;
   setId(id: Id): void;
+  getUid(): Uid;
 }
 
 interface Containable<C extends BaseContainer = BaseContainer> {
