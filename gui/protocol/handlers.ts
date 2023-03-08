@@ -26,15 +26,19 @@ function onAuthOk(e: AuthOkEvent) {
 function onMouseMove(e: CoordsEvent) {
   log.Debug("e =", e);
 
-  coords.set(getUid(Cursor.cname, e.name), e.xPos, e.yPos);
-  area.redraw('cursor', getUid(Cursor.cname, e.name));
+  const cursor = area.getCursorElem(getUid(Cursor.cname, e.name));
+  cursor.move(e.xPos, e.yPos);
 }
 
 function onSquareMove(e: CoordsEvent) {
   log.Debug("e =", e);
 
-  coords.set(getUid(Square.cname, e.name), e.xPos, e.yPos);
-  area.redraw('square', getUid(Square.cname, e.name));
+  const square = area.getSquareElem(getUid(Square.cname, e.name));
+  square.move(e.xPos, e.yPos);
+}
+
+function onTextInput(e: TextInputEvent) {
+  log.Debug("e =", e);
 }
 
 function onInitSquareCoords(e: CoordsEvent) {
@@ -52,8 +56,7 @@ function onInitSquareCoords(e: CoordsEvent) {
     square.redraw();
     area.addElem(sUid, square);
 
-    coords.set(sUid, e.xPos, e.yPos);
-    area.redraw('square', sUid);
+    square.move(e.xPos, e.yPos);
   }
 }
 
@@ -109,4 +112,5 @@ export {
   onSquareMove,
   onInitSquareCoords,
   onUsersOnline,
+  onTextInput,
 };

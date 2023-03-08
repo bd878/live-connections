@@ -7,7 +7,6 @@ import getElem from '../../methods/getElem';
 import getName from '../../methods/getName';
 import addElemChild from '../../methods/addElemChild';
 import delElemChild from '../../methods/delElemChild';
-import redraw from './redraw';
 import free from './free';
 
 class Area implements
@@ -17,8 +16,7 @@ class Area implements
   Accessible,
   Writable,
   Styleable,
-  Containable,
-  Redrawable
+  Containable
 {
   static cname: string = "Area";
 
@@ -38,8 +36,6 @@ class Area implements
   create = create;
   free = free;
   write = write;
-
-  redraw = redraw;
 
   hasElem = hasElem;
   getElem = getElem;
