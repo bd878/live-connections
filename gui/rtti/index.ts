@@ -5,6 +5,7 @@ export const isMovable = (elem: any): elem is Moveable => elem ? typeof elem.mov
 export const isRedrawable = (elem: any): elem is Redrawable => elem ? typeof elem.redraw === 'function' : false;
 export const isAccessible = (elem: any): elem is Accessible => elem ? typeof elem.get === 'function' : false;
 export const isIdentifable = (elem: any): elem is Identifable => elem ? typeof elem.setId === 'function' : false;
+export const isDeletable = (elem: any): elem is Deletable => elem ? typeof elem.free === 'function' : false;
 
 export default {
   isAreaName,
@@ -14,4 +15,5 @@ export default {
   isAccessible,
   isRedrawable,
   isIdentifable,
+  isDeletable,
 };

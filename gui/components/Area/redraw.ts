@@ -4,11 +4,13 @@ import { log } from '../../modules/log';
 import coords from '../../entities/coords';
 import error from '../../modules/error';
 
-function redraw(this: Area, piece: string, ...args: any[]) {
-  if (piece === 'cursor' && args[0]) {
-    redrawCoords.call(this, args[0]);
-  } else if (piece === 'square' && args[0]) {
-    redrawCoords.call(this, args[0]);
+function redraw(this: Area, ...args: any[]) {
+  const piece = args[0];
+  const uid = args[1];
+  if (piece === 'cursor' && uid) {
+    redrawCoords.call(this, uid);
+  } else if (piece === 'square' && uid) {
+    redrawCoords.call(this, uid);
   }
 }
 

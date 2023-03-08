@@ -1,3 +1,4 @@
+import { isDeletable } from '../rtti';
 import error from '../modules/error';
 
 function delElem(this: Elem & Containable, uid: Uid) {
@@ -10,6 +11,8 @@ function delElem(this: Elem & Containable, uid: Uid) {
   }
 
   if (this.container instanceof Map) {
+    const elem = this.getElem(uid);
+    ;(isDeletable(elem) && elem.free());
     this.container.delete(uid);
     return;
   }

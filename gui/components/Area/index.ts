@@ -8,10 +8,12 @@ import getName from '../../methods/getName';
 import addElemChild from '../../methods/addElemChild';
 import delElemChild from '../../methods/delElemChild';
 import redraw from './redraw';
+import free from './free';
 
 class Area implements
   Elem,
   Creatable,
+  Deletable,
   Accessible,
   Writable,
   Styleable,
@@ -34,6 +36,7 @@ class Area implements
   get = get;
   has = has;
   create = create;
+  free = free;
   write = write;
 
   redraw = redraw;

@@ -1,6 +1,6 @@
 import error from '../modules/error';
 
-function redrawBg(this: Elem & Colored, piece: string = '') {
+function redrawBg(this: Elem & Colored) {
   if (!this.root) {
     throw error.noElementCreated(this.getName());
   }

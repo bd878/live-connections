@@ -1,6 +1,7 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
 import move from '../../methods/move';
+import free from '../../methods/free';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
 import getName from '../../methods/getName';
@@ -29,6 +30,7 @@ class Square implements
   get = get;
   has = has;
   create = create;
+  free = free;
   move = move;
 
   redraw = redraw;

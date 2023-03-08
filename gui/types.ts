@@ -47,6 +47,10 @@ type UsersOnlineEvent = {
   users: UserName[];
 };
 
+type TextInputEvent = {
+  text: string;
+}
+
 interface Appendable {
   append(I: Elem): void;
 }
@@ -57,6 +61,10 @@ interface Settable {
 
 interface Creatable {
   create(): HTMLElement;
+}
+
+interface Deletable {
+  free(): boolean;
 }
 
 interface Writable {
@@ -77,7 +85,7 @@ interface Colored {
 }
 
 interface Redrawable {
-  redraw(piece: string, ...args: any[]): void;
+  redraw(...args: any[]): void;
 }
 
 interface Identifable {

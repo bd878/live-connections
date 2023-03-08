@@ -3,7 +3,11 @@ import error from '../../modules/error';
 
 let _myName: AreaName | null = null;
 
-function setMyName(areaName: string) {
+function removeMe() {
+  _myName = null;
+}
+
+function setMyName(areaName: AreaName) {
   _myName = areaName;
 }
 
@@ -16,4 +20,5 @@ export default {
   create,
   setMyName,
   myName,
+  removeMe,
 };
