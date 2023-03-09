@@ -61,6 +61,7 @@ interface Settable {
 }
 
 interface Creatable {
+  rootName?: string; // TODO: assign root div name to each component
   create(id: Id): HTMLElement;
 }
 

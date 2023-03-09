@@ -11,10 +11,13 @@ import Square from './components/Square';
 import takeAreaName from './misc/takeAreaName';
 import findUserName from './misc/findUserName';
 import bindUserToArea from './misc/bindUserToArea';
-import attachListeners from './listeners';
 import setUrl from './misc/setUrl';
 import setRoot from './misc/setRoot';
 import getUid from './misc/getUid';
+import {
+  trackMouseMove,
+  trackMousePress,
+} from './listeners';
 
 const log = new Log('main');
 
@@ -34,6 +37,7 @@ async function run() {
 
       log.Debug("on message");
 
+      // TODO: middleware pattern
       for (let i = 0; i < messages.length; i++) {
         select(messages[i]);
       }
@@ -92,7 +96,8 @@ async function main() {
   Main.create();
   Root.append(Main);
 
-  attachListeners()
+  trackMouseMove();
+  trackMousePress();
 
   await run();
 }

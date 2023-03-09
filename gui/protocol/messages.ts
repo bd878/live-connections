@@ -13,6 +13,10 @@ function makeSquareMoveMessage(x: number, y: number): ABuffer {
   return makeCoordsMessage(x, y, C.SQUARE_MOVE_TYPE);
 }
 
+async function makeTextInputMessage(area: AreaName, user: UserName, text: string): Promise<ABuffer> {
+
+}
+
 function makeCoordsMessage(x: number, y: number, messageType: number): ABuffer {
   const messageSize = (
     C.TYPE_SIZE +  // type
@@ -94,4 +98,5 @@ export {
   makeMouseMoveMessage,
   makeAuthUserMessage,
   makeSquareMoveMessage,
+  makeTextInputMessage,
 };

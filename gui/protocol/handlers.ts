@@ -13,8 +13,11 @@ import UserTile from '../components/UserTile';
 import diff from '../misc/diff';
 import getUid from '../misc/getUid';
 import {
+  trackTextInput,
+} from '../listeners';
+import {
   isContainable,
-  isRedrawable
+  isRedrawable,
 } from '../rtti';
 
 const log = new Log("handlers");
@@ -71,6 +74,10 @@ function onInitSquareCoords(e: CoordsEvent) {
 
     if (users.myName() === e.name) {
       squares.setMyUid(sUid);
+
+      // TODO: once middleware is setup, refactor
+      const myTextara = square.getElem(getUid(TextArea.cname, e.name));
+      trackTextInput(myTextara);
     }
 
     square.move(e.xPos, e.yPos);

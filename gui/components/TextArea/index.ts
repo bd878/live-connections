@@ -1,9 +1,9 @@
 import get from '../../methods/get';
 import has from '../../methods/has';
-import create from '../../methods/create';
 import setId from '../../methods/setId';
 import getUid from '../../methods/getUid';
 import getName from '../../methods/getName';
+import create from '../../methods/create';
 import redraw from './redraw';
 
 class TextArea implements
@@ -17,7 +17,7 @@ class TextArea implements
   static cname: string = "TextArea";
 
   root: HTMLElement | null = null;
-  textarea: HTMLElement | null = null;
+  rootName: string | undefined = "textarea";
   id: string = '';
   CSSClass: string = "textarea";
 

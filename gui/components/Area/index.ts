@@ -21,6 +21,7 @@ class Area implements
   static cname: string = "Area";
 
   root: HTMLElement | null = null;
+  rootName: string | undefined;
   CSSClass: string = "area";
 
   container: BaseContainer;

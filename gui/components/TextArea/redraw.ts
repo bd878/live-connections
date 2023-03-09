@@ -3,8 +3,8 @@ import error from '../../modules/error';
 
 function redraw(this: TextArea, ...args: any[]) {
   const text = args[0];
-  if (!this.textarea) throw error.noElementCreated("textarea/redraw", "no textarea");
-  this.textarea = text;
+  if (!this.root) throw error.noElementCreated("textarea/redraw", "no root");
+  this.root.textContent = text;
 }
 
 export default redraw;

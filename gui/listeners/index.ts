@@ -81,6 +81,10 @@ const onMouseMove = debounce((event: any) => {
   }
 });
 
+const onTextAreaInput = debounce((event: any) => {
+  log.Debug("on textarea input:", event);
+});
+
 function trackMouseMove() {
   document.addEventListener('mousemove', onMouseMove);
 }
@@ -90,9 +94,12 @@ function trackMousePress() {
   document.addEventListener('mouseup', onMouseUp);
 }
 
-function attach() {
-  trackMouseMove();
-  trackMousePress();
-};
+function trackTextInput(elem: Elem & Accessible) {
+  elem.get().addEventListener("input", onTextAreaInput);
+}
 
-export default attach;
+export {
+  trackTextInput,
+  trackMouseMove,
+  trackMousePress,
+};

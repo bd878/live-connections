@@ -54,7 +54,7 @@ func (c *Client) ReadLoop() {
     }
 
     message := NewMessage()
-    meta.Log().Info(c.name, "received new message")
+    meta.Log().Debug(c.name, "received new message")
     if _, err := message.ReadFrom(r); err != nil {
       meta.Log().Warn(c.name, "failed to read message", err)
       break

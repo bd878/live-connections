@@ -182,8 +182,9 @@ func (m *Message) parseCoordsMessage() error {
   return nil
 }
 
-func (m *Message) parseTextMessage() []byte {
+func (m *Message) parseTextMessage() error {
   meta.Log().Debug("parse text message")
+  return nil
 }
 
 // TODO: add userSize + userBytes
