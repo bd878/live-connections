@@ -1,7 +1,4 @@
 import error from '../../modules/error';
-import Log from '../../modules/log';
-
-const log = new Log("entities/squares");
 
 let _inited: boolean = false;
 let pressed: boolean = false;
@@ -20,8 +17,8 @@ function setMyUid(uid: Uid) {
 const inited = (): boolean => _inited;
 
 const isMyPressed = (): boolean => pressed;
-const setMyPressed = (): void => {pressed = true; log.Debug("setMyPressed", "1");};
-const setMyNotPressed = (): void => {pressed = false; log.Debug("setMyNotPressed", "0")};
+const setMyPressed = (): void => {pressed = true;};
+const setMyNotPressed = (): void => {pressed = false;};
 
 export default {
   inited,

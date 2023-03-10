@@ -1,11 +1,6 @@
 import C from './const';
-import Log from '../modules/log';
-
-const log = new Log("protocol/parser");
 
 async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEvent> {
-  log.Debug("parseCoordsMessage");
-
   let offset = 0;
   const dv = new DataView(buf);
 
@@ -13,7 +8,6 @@ async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEve
   offset += C.SIZE_PREFIX_SIZE;
 
   if (nameSize === 0) {
-    log.Fail("nameSize is 0");
     throw new Error(`[parseCoordsMessage]: nameSize is 0`);
   }
 
@@ -42,8 +36,6 @@ async function parseTextInputMessage(message: any /* Blob */): Promise<TextInput
 }
 
 async function parseUsersOnlineMessage(buf: any /* ArrayBuffer */): Promise<UsersOnlineEvent> {
-  log.Debug("parseUsersOnlineMessage");
-
   let offset = 0;
   const dv = new DataView(buf);
 
@@ -62,8 +54,6 @@ async function parseUsersOnlineMessage(buf: any /* ArrayBuffer */): Promise<User
 
     users.push(name);
   }
-
-  log.Debug("parseUsersOnlineMessage");
 
   return { users };
 }

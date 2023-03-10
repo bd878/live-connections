@@ -5,8 +5,6 @@ import socket from '../net/socket';
 const log = new Log("gui/protocol");
 
 async function authUser(areaName: AreaName, userName: UserName) {
-  log.Debug("auth user");
-
   const authMessage = await makeAuthUserMessage(areaName, userName);
   socket.send(authMessage);
 }

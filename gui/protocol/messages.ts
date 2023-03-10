@@ -1,15 +1,10 @@
-import { log } from '../modules/log';
 import C from './const';
 
 function makeMouseMoveMessage(x: number, y: number): ABuffer {
-  log.Debug("makeMouseMoveMessage", "x, y:", x, y);
-
   return makeCoordsMessage(x, y, C.MOUSE_MOVE_TYPE);
 }
 
 function makeSquareMoveMessage(x: number, y: number): ABuffer {
-  log.Debug("makeSquareMoveMessage", "x, y:", x, y);
-
   return makeCoordsMessage(x, y, C.SQUARE_MOVE_TYPE);
 }
 

@@ -35,7 +35,7 @@ async function run() {
     while (1) {
       const messages = await socket.waitMessages();
 
-      log.Debug("on message");
+      log.Debug("messages", messages.length);
 
       // TODO: middleware pattern
       for (let i = 0; i < messages.length; i++) {
@@ -52,8 +52,6 @@ async function run() {
 
 /* Applies to server for new area allocation */
 async function proceedNewArea(): Promise<AreaName> {
-  log.Debug("proceed new area");
-
   const areaName = await areas.create();
   setUrl(`/${areaName}`);
   return areaName;
@@ -61,8 +59,6 @@ async function proceedNewArea(): Promise<AreaName> {
 
 /* Applies to server for new user registration */
 async function proceedNewUser(areaName: AreaName): Promise<UserName> {
-  log.Debug("proceed new user");
-
   const userName = await users.create(areaName);
   bindUserToArea(areaName, userName);
   return userName;
@@ -70,8 +66,6 @@ async function proceedNewUser(areaName: AreaName): Promise<UserName> {
 
 /* Initializes internal parts: area, user, socket, protocol etc. */
 async function main() {
-  log.Debug("main");
-
   let userName;
   let areaName = takeAreaName(window.location.pathname);
 
@@ -85,7 +79,8 @@ async function main() {
     userName = await proceedNewUser(areaName)
   }
 
-  log.Debug("areaName, userName:", areaName, userName);
+  log.Info("area:", areaName);
+  log.Info("me:", userName);
 
   users.setMyName(userName);
   areas.setMyName(areaName);

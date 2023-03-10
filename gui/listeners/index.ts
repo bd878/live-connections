@@ -27,8 +27,6 @@ function computeMoveCoords(pageX: number, pageY: number): [number, number] {
 }
 
 function getMySquareNode(): HTMLElement {
-  log.Sub("getMySquareNode");
-
   if (squares.inited()) {
     const uid = squares.myUid();
     if (area.hasElem(uid)) {
@@ -49,8 +47,6 @@ function getMySquareNode(): HTMLElement {
 }
 
 function onMouseDown(event: any) {
-  log.Sub("onMouseDown");
-
   const node = getMySquareNode();
   if (node.contains(event.target)) {
     log.Debug("square node contains event target");
@@ -62,8 +58,6 @@ function onMouseDown(event: any) {
 }
 
 function onMouseUp(event: any) {
-  log.Sub("onMouseUp");
-
   if (squares.isMyPressed()) {
     log.Debug("my square is pressed");
 

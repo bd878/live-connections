@@ -27,26 +27,20 @@ const log = new Log("handlers");
  */
 
 function onAuthOk(e: AuthOkEvent) {
-  ;(e.text === "ok" && log.Debug("set token:", e));
+  log.Debug("onAuthOk", e);
 }
 
 function onMouseMove(e: CoordsEvent) {
-  log.Debug("e =", e);
-
   const cursor = area.getElem(getUid(Cursor.cname, e.name));
   cursor.move(e.xPos, e.yPos);
 }
 
 function onSquareMove(e: CoordsEvent) {
-  log.Debug("e =", e);
-
   const square = area.getElem(getUid(Square.cname, e.name));
   square.move(e.xPos, e.yPos);
 }
 
 function onTextInput(e: TextInputEvent) {
-  log.Debug("e =", e);
-
   // TODO: const textarea = registry.getElem(getUid(TextArea.cname, e.name));
 
   if (users.myName() !== e.name) {
@@ -61,12 +55,10 @@ function onTextInput(e: TextInputEvent) {
 }
 
 function onInitSquareCoords(e: CoordsEvent) {
-  log.Debug("e =", e);
+  log.Debug("onInitSquareCoords", e);
 
   const sUid = getUid(Square.cname, e.name);
   if (!area.hasElem(sUid)) {
-    log.Debug("create square =", sUid);
-
     const square = new Square();
     square.create(e.name);
     square.redraw();
@@ -85,6 +77,8 @@ function onInitSquareCoords(e: CoordsEvent) {
 }
 
 function onUsersOnline(e: UsersOnlineEvent) {
+  log.Debug("onUsersOnline", e);
+
   const diffPair = diff(users.listNames(), e.users);
   const current = diffPair[0];
   const next = diffPair[1];
@@ -109,7 +103,6 @@ function onUsersOnline(e: UsersOnlineEvent) {
 
     const tUid = getUid(UserTile.cname, name);
     if (!area.hasElem(tUid)) {
-      log.Debug("create tile =", tUid);
       const tile = new UserTile(user.color);
       tile.create(name);
       tile.redraw();
@@ -118,8 +111,6 @@ function onUsersOnline(e: UsersOnlineEvent) {
 
     const cUid = getUid(Cursor.cname, name);
     if (!area.hasElem(cUid)) {
-      log.Debug("create cursor =", cUid);
-
       const cursor = new Cursor(user.color);
       cursor.create(name);
       cursor.redraw();

@@ -39,38 +39,28 @@ async function select(b: any /* another set of bytes have come... */ ) {
 
     switch (type) {
       case C.MOUSE_MOVE_TYPE:
-        log.Debug("mouse move");
-
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);
         }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.SQUARE_MOVE_TYPE:
-        log.Debug("square move");
-
         setTimeout(() => {
           parseCoordsMessage(slice).then(onSquareMove);
         }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.TEXT_INPUT_TYPE:
-        log.Debug("text input");
-
         setTimeout(() => {
           parseTextInputMessage(slice).then(onTextInput);
         });
       case C.INIT_SQUARE_COORDS_TYPE:
-        log.Debug("init square coords");
-
         setTimeout(() => {
           parseCoordsMessage(slice).then(onInitSquareCoords);
         }, 0); /* throw it in a loop */
         offset += size;
         break;
       case C.AUTH_OK_TYPE:
-        log.Debug("auth ok");
-
         const message = new Blob([slice]);
         setTimeout(() => {
           parseAuthOkMessage(message).then(onAuthOk);
@@ -78,8 +68,6 @@ async function select(b: any /* another set of bytes have come... */ ) {
         offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
-        log.Debug("users online");
-
         setTimeout(() => {
           parseUsersOnlineMessage(slice).then(onUsersOnline);
         }, 0); /* throw it in a loop */
