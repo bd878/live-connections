@@ -30,12 +30,18 @@ type Message struct {
   area string
   user string
 
-  XPos float32
-  YPos float32
+  xPos float32
+  yPos float32
 
   text string
 
   clients []string
+}
+
+type ClientCoords struct {
+  name string
+  xPos float32
+  yPos float32
 }
 
 func NewMessage() *Message {
@@ -86,11 +92,11 @@ func (m *Message) SetClients(clients []string) {
 }
 
 func (m *Message) SetX(xPos float32) {
-  m.XPos = xPos
+  m.xPos = xPos
 }
 
 func (m *Message) SetY(yPos float32) {
-  m.YPos = yPos
+  m.yPos = yPos
 }
 
 func (m *Message) Decode() error {
@@ -163,19 +169,19 @@ func (m *Message) parseAuthMessage() error {
   return nil
 }
 
-// XPos + YPos
+// xPos + yPos
 func (m *Message) parseCoordsMessage() error {
   meta.Log().Debug("parse coords message")
 
   mr := bytes.NewReader(m.raw)
 
-  if err := binary.Read(mr, enc, &m.XPos); err != nil {
+  if err := binary.Read(mr, enc, &m.xPos); err != nil {
     meta.Log().Warn("failed to read xPos =",  err)
     return err
   }
 
-  if err := binary.Read(mr, enc, &m.YPos); err != nil {
-    meta.Log().Warn("failed to read YPos =",  err)
+  if err := binary.Read(mr, enc, &m.yPos); err != nil {
+    meta.Log().Warn("failed to read yPos =",  err)
     return err
   }
 
@@ -214,7 +220,7 @@ func (m *Message) encodeTextMessage() []byte {
   return result.Bytes()
 }
 
-// totalSize + type + userSize + userBytes + XPos + YPos
+// totalSize + type + userSize + userBytes + xPos + yPos
 func (m *Message) encodeCoordsMessage() []byte {
   meta.Log().Debug("encode coords message")
 
@@ -237,12 +243,12 @@ func (m *Message) encodeCoordsMessage() []byte {
   }
 
   coordsBytes := new(bytes.Buffer)
-  if err := binary.Write(coordsBytes, enc, m.XPos); err != nil {
+  if err := binary.Write(coordsBytes, enc, m.xPos); err != nil {
     meta.Log().Warn("error writing y coord")
     return nil
   }
 
-  if err := binary.Write(coordsBytes, enc, m.YPos); err != nil {
+  if err := binary.Write(coordsBytes, enc, m.yPos); err != nil {
     meta.Log().Warn("error writing y coord")
     return nil
   }
@@ -268,7 +274,17 @@ func (m *Message) encodeCoordsMessage() []byte {
 
 func EncodeClientsOnline(clients []string) []byte {
   m := &Message{messageType: listClientsOnlineMessageType, clients: clients}
-  return m.encodeClientsOnlineMessage()
+  return m.Encode()
+}
+
+func EncodeSquareInit(c *ClientCoords) []byte {
+  m := &Message{
+    messageType: squareInitMessageType,
+    user: c.name,
+    xPos: c.xPos,
+    yPos: c.yPos,
+  }
+  return m.Encode()
 }
 
 // totalSize + type + usersCount + []{userSize + userBytes}

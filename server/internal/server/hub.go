@@ -30,14 +30,10 @@ func (h *Hub) Run() {
     case client := <-h.register:
       h.clients[client] = true
       client.registered <- true
-
-      h.broadcastClientsOnline()
     case client := <-h.unregister:
       if _, ok := h.clients[client]; ok {
         delete(h.clients, client)
         client.unregistered <- true
-
-        h.broadcastClientsOnline()
       }
     case bytes := <-h.broadcast:
       for client := range h.clients {
@@ -51,21 +47,23 @@ func (h *Hub) Run() {
   }
 }
 
-func (h *Hub) broadcastClientsOnline() {
-  meta.Log().Debug("broadcast clients online")
-
-  clientsOnline := h.ListClientsOnline()
-
-  if len(clientsOnline) > 0 {
-    encodedClients := EncodeClientsOnline(clientsOnline)
-    h.broadcast <- encodedClients
-  }
-}
-
 func (h *Hub) ListClientsOnline() []string {
   var names []string
   for client := range h.clients {
-    names = append(names, client.name)
+    names = append(names, client.Name())
   }
   return names
+}
+
+func (h *Hub) ListSquaresCoords() map[string](*ClientCoords) {
+  coords := make(map[string](*ClientCoords), len(h.clients))
+
+  for client := range h.clients {
+    coords[client.Name()] = &ClientCoords{
+      name: client.Name(),
+      xPos: client.SquareX(),
+      yPos: client.SquareY(),
+    }
+  }
+  return coords
 }

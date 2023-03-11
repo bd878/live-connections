@@ -26,6 +26,9 @@ type Client struct {
 
   area string
   name string
+
+  squareXPos float32
+  squareYPos float32
 }
 
 func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
@@ -42,6 +45,18 @@ func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
     unregistered: make(chan bool),
     send: make(chan []byte, 256),
   }
+}
+
+func (c *Client) Name() string {
+  return c.name
+}
+
+func (c *Client) SquareX() float32 {
+  return c.squareXPos
+}
+
+func (c *Client) SquareY() float32 {
+  return c.squareYPos
 }
 
 func (c *Client) ReadLoop() {
@@ -120,12 +135,25 @@ func (c *Client) LifecycleLoop() {
       m.SetY(0)
 
       c.hub.broadcast <- m.Encode()
+
+      clientsOnline := c.hub.ListClientsOnline()
+      c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
+
+      // TODO: load this client's coords
+
+      squaresCoords := c.hub.ListSquaresCoords()
+      for _, coords := range squaresCoords {
+        c.send <- EncodeSquareInit(coords)
+      }
     case <-c.unregistered:
       meta.Log().Debug(c.name, "client unregistered")
       close(c.send)
       close(c.registered)
       close(c.unregistered)
       closed = true
+
+      clientsOnline := c.hub.ListClientsOnline()
+      c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
     }
 
     if closed {

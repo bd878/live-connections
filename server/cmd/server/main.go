@@ -22,7 +22,7 @@ func main() {
   case "production":
     runProd()
   default:
-    log.Fatalf("unknown env:", env)
+    log.Fatal("unknown env:", env)
   }
 }
 
