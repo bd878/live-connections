@@ -42,41 +42,38 @@ async function select(b: any /* another set of bytes have come... */ ) {
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);
         }, 0); /* throw it in a loop */
-        offset += size;
         break;
       case C.SQUARE_MOVE_TYPE:
         setTimeout(() => {
           parseCoordsMessage(slice).then(onSquareMove);
         }, 0); /* throw it in a loop */
-        offset += size;
         break;
       case C.TEXT_INPUT_TYPE:
         setTimeout(() => {
           parseTextInputMessage(slice).then(onTextInput);
-        });
+        }, 0); /* throw it in a loop */
+        break;
       case C.INIT_SQUARE_COORDS_TYPE:
         setTimeout(() => {
           parseCoordsMessage(slice).then(onInitSquareCoords);
         }, 0); /* throw it in a loop */
-        offset += size;
         break;
       case C.AUTH_OK_TYPE:
-        const message = new Blob([slice]);
         setTimeout(() => {
-          parseAuthOkMessage(message).then(onAuthOk);
+          parseAuthOkMessage(new Blob([slice])).then(onAuthOk);
         }, 0); /* throw it in a loop */
-        offset += size;
         break;
       case C.USERS_ONLINE_TYPE:
         setTimeout(() => {
           parseUsersOnlineMessage(slice).then(onUsersOnline);
         }, 0); /* throw it in a loop */
-        offset += size;
         break;
       default:
         log.Debug("unknown type =", type);
         return;
     }
+
+    offset += size;
   }
 }
 

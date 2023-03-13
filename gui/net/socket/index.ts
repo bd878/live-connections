@@ -22,14 +22,6 @@ function onClose(event: any) {
   );
 }
 
-function onOpen(event: any) {
-  if (conn) {
-    conn.addEventListener("message", onMessage);
-  } else {
-    log.Fail("cannot bind message listener, conn is not set");
-  }
-}
-
 function onMessage(event: any) {
   messagesBuffer.push(event);
 
@@ -62,9 +54,9 @@ function init(areaName: AreaName, userName: UserName) {
 
   conn = new WebSocket(SOCKET_PROTOCOL + BACKEND_URL + SOCKET_PATH + "/" + areaName + "/" + userName);
 
-  conn.addEventListener('error', onError);
-  conn.addEventListener('close', onClose);
-  conn.addEventListener('open', onOpen);
+  conn.onmessage = onMessage;
+  conn.onerror = onError;
+  conn.onclose = onClose;
 }
 
 function isReady(): boolean {

@@ -7,7 +7,7 @@ import (
   "github.com/teralion/live-connections/server/internal/meta"
 )
 
-const MaxPayloadSize int64 = 2 << 10 // 1024 bytes
+const MaxPayloadSize int64 = 512
 
 const pongWait = 60 * time.Second
 
@@ -127,14 +127,6 @@ func (c *Client) LifecycleLoop() {
     select {
     case <-c.registered:
       meta.Log().Debug(c.name, "client registered")
-      m := NewMessage()
-      m.SetType(squareInitMessageType)
-      m.SetArea(c.area)
-      m.SetUser(c.name)
-      m.SetX(0)
-      m.SetY(0)
-
-      c.hub.broadcast <- m.Encode()
 
       clientsOnline := c.hub.ListClientsOnline()
       c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
@@ -143,7 +135,7 @@ func (c *Client) LifecycleLoop() {
 
       squaresCoords := c.hub.ListSquaresCoords()
       for _, coords := range squaresCoords {
-        c.send <- EncodeSquareInit(coords)
+        c.hub.broadcast <- EncodeSquareInit(coords)
       }
     case <-c.unregistered:
       meta.Log().Debug(c.name, "client unregistered")
@@ -206,16 +198,6 @@ func (c *Client) write(p []byte) error {
   if _, err := w.Write(p); err != nil {
     meta.Log().Warn("failed to write bytes")
     return err
-  }
-
-  n := len(c.send)
-  for i := 0; i < n; i++ {
-    p = <-c.send
-    meta.Log().Debug("write n, p =", n, p)
-    if _, err := w.Write(p); err != nil {
-      meta.Log().Warn("failed to write bytes")
-      return err
-    }
   }
 
   return nil

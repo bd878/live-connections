@@ -80,13 +80,16 @@ function onUsersOnline(e: UsersOnlineEvent) {
   log.Debug("onUsersOnline", e);
 
   const diffPair = diff(users.listNames(), e.users);
-  const current = diffPair[0];
-  const next = diffPair[1];
+  const leaved = diffPair[0];
+  const entered = diffPair[1];
+
+  log.Debug("leaved users:", leaved);
+  log.Debug("entered users:", entered);
 
   users.set(areas.myName(), e.users);
 
-  for (let i = 0; i < current.length; i++) {
-    const name = current[i];
+  for (let i = 0; i < leaved.length; i++) {
+    const name = leaved[i];
 
     const cUid = getUid(Cursor.cname, name);
     const sUid = getUid(Square.cname, name);
@@ -97,8 +100,8 @@ function onUsersOnline(e: UsersOnlineEvent) {
     ;(usersList.hasElem(tUid) && usersList.delElem(tUid));
   }
 
-  for (let i = 0; i < next.length; i++) {
-    const name = next[i];
+  for (let i = 0; i < entered.length; i++) {
+    const name = entered[i];
     const user = users.getByName(name);
 
     const tUid = getUid(UserTile.cname, name);
