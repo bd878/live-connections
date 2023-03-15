@@ -83,8 +83,8 @@ function onUsersOnline(e: UsersOnlineEvent) {
   const leaved = diffPair[0];
   const entered = diffPair[1];
 
-  log.Debug("leaved users:", leaved);
-  log.Debug("entered users:", entered);
+  log.Info("leaved users:", leaved);
+  log.Info("entered users:", entered);
 
   users.set(areas.myName(), e.users);
 

@@ -61,8 +61,8 @@ func (h *Hub) ListSquaresCoords() map[string](*ClientCoords) {
   for client := range h.clients {
     coords[client.Name()] = &ClientCoords{
       name: client.Name(),
-      xPos: client.SquareX(),
-      yPos: client.SquareY(),
+      XPos: client.SquareX(),
+      YPos: client.SquareY(),
     }
   }
   return coords

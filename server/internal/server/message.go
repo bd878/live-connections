@@ -30,8 +30,8 @@ type Message struct {
   area string
   user string
 
-  xPos float32
-  yPos float32
+  XPos float32
+  YPos float32
 
   text string
 
@@ -40,8 +40,8 @@ type Message struct {
 
 type ClientCoords struct {
   name string
-  xPos float32
-  yPos float32
+  XPos float32
+  YPos float32
 }
 
 func NewMessage() *Message {
@@ -91,12 +91,12 @@ func (m *Message) SetClients(clients []string) {
   m.clients = clients
 }
 
-func (m *Message) SetX(xPos float32) {
-  m.xPos = xPos
+func (m *Message) SetX(XPos float32) {
+  m.XPos = XPos
 }
 
-func (m *Message) SetY(yPos float32) {
-  m.yPos = yPos
+func (m *Message) SetY(YPos float32) {
+  m.YPos = YPos
 }
 
 func (m *Message) Decode() error {
@@ -169,19 +169,19 @@ func (m *Message) parseAuthMessage() error {
   return nil
 }
 
-// xPos + yPos
+// XPos + YPos
 func (m *Message) parseCoordsMessage() error {
   meta.Log().Debug("parse coords message")
 
   mr := bytes.NewReader(m.raw)
 
-  if err := binary.Read(mr, enc, &m.xPos); err != nil {
-    meta.Log().Warn("failed to read xPos =",  err)
+  if err := binary.Read(mr, enc, &m.XPos); err != nil {
+    meta.Log().Warn("failed to read XPos =",  err)
     return err
   }
 
-  if err := binary.Read(mr, enc, &m.yPos); err != nil {
-    meta.Log().Warn("failed to read yPos =",  err)
+  if err := binary.Read(mr, enc, &m.YPos); err != nil {
+    meta.Log().Warn("failed to read YPos =",  err)
     return err
   }
 
@@ -220,7 +220,7 @@ func (m *Message) encodeTextMessage() []byte {
   return result.Bytes()
 }
 
-// totalSize + type + userSize + userBytes + xPos + yPos
+// totalSize + type + userSize + userBytes + XPos + YPos
 func (m *Message) encodeCoordsMessage() []byte {
   meta.Log().Debug("encode coords message")
 
@@ -243,12 +243,12 @@ func (m *Message) encodeCoordsMessage() []byte {
   }
 
   coordsBytes := new(bytes.Buffer)
-  if err := binary.Write(coordsBytes, enc, m.xPos); err != nil {
+  if err := binary.Write(coordsBytes, enc, m.XPos); err != nil {
     meta.Log().Warn("error writing y coord")
     return nil
   }
 
-  if err := binary.Write(coordsBytes, enc, m.yPos); err != nil {
+  if err := binary.Write(coordsBytes, enc, m.YPos); err != nil {
     meta.Log().Warn("error writing y coord")
     return nil
   }
@@ -281,8 +281,8 @@ func EncodeSquareInit(c *ClientCoords) []byte {
   m := &Message{
     messageType: squareInitMessageType,
     user: c.name,
-    xPos: c.xPos,
-    yPos: c.yPos,
+    XPos: c.XPos,
+    YPos: c.YPos,
   }
   return m.Encode()
 }

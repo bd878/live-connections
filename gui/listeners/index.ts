@@ -53,7 +53,7 @@ function onMouseDown(event: any) {
 
     squares.setMyPressed();
     initDragging(event.clientX, event.clientY, node);
-    node.addEventListener('dragstart', disableDragStart);
+    node.ondragstart = disableDragStart;
   }
 }
 
@@ -63,7 +63,6 @@ function onMouseUp(event: any) {
 
     squares.setMyNotPressed();
     const node = getMySquareNode();
-    node.removeEventListener('dragstart', disableDragStart);
   }
 }
 

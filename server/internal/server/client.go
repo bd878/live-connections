@@ -29,6 +29,9 @@ type Client struct {
 
   squareXPos float32
   squareYPos float32
+
+  cursorXPos float32
+  cursorYPos float32
 }
 
 func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
@@ -102,12 +105,18 @@ func (c *Client) ReadLoop() {
       message.SetArea(c.area)
       message.SetUser(c.name)
 
+      c.cursorXPos = message.XPos
+      c.cursorYPos = message.YPos
+
       c.hub.broadcast <- message.Encode()
     case squareMoveMessageType:
       meta.Log().Debug(c.name, "received square move message")
 
       message.SetArea(c.area)
       message.SetUser(c.name)
+
+      c.squareXPos = message.XPos
+      c.squareYPos = message.YPos
 
       c.hub.broadcast <- message.Encode()
     default:
