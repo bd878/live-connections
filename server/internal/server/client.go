@@ -32,6 +32,8 @@ type Client struct {
 
   cursorXPos float32
   cursorYPos float32
+
+  textInput string
 }
 
 func NewClient(conn *ws.Conn, hub *Hub, area, name string) *Client {
@@ -97,6 +99,8 @@ func (c *Client) ReadLoop() {
 
       message.SetArea(c.area)
       message.SetUser(c.name)
+
+      c.textInput = message.text
 
       c.hub.broadcast <- message.Encode()
     case mouseMoveMessageType:

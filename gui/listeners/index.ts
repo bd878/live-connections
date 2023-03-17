@@ -8,9 +8,12 @@ import debounce from '../misc/debounce';
 import {
   makeMouseMoveMessage,
   makeSquareMoveMessage,
+  makeTextInputMessage,
 } from '../protocol/messages';
 
 const log = new Log("listeners");
+
+const cursorSize = 32;
 
 let shiftX: number = 0;
 let shiftY: number = 0;
@@ -24,6 +27,10 @@ function initDragging(clientX: number, clientY: number, node: HTMLElement) {
 
 function computeMoveCoords(pageX: number, pageY: number): [number, number] {
   return [pageX - shiftX, pageY - shiftY];
+}
+
+function computeMouseCoords(mouseX: number, mouseY: number): [number, number] {
+  return [mouseX - cursorSize, mouseY - cursorSize];
 }
 
 function getMySquareNode(): HTMLElement {
@@ -74,8 +81,9 @@ const onMouseMove = debounce((event: any) => {
   }
 });
 
-const onTextAreaInput = debounce((event: any) => {
-  log.Debug("on textarea input:", event);
+const onTextAreaInput = debounce(async (event: any) => {
+  const message = await makeTextInputMessage(event.target.value);
+  socket.send(message);
 });
 
 function trackMouseMove() {

@@ -1,4 +1,7 @@
+import Log from '../modules/log';
 import C from './const';
+
+const log = new Log("messages");
 
 function makeMouseMoveMessage(x: number, y: number): ABuffer {
   return makeCoordsMessage(x, y, C.MOUSE_MOVE_TYPE);
@@ -8,8 +11,38 @@ function makeSquareMoveMessage(x: number, y: number): ABuffer {
   return makeCoordsMessage(x, y, C.SQUARE_MOVE_TYPE);
 }
 
-async function makeTextInputMessage(area: AreaName, user: UserName, text: string): Promise<ABuffer> {
+// messageSize + type + textSize + text
+async function makeTextInputMessage(text: string): Promise<ABuffer> {
+  const textEncoded = new Blob([text], { type: "text/plain"});
+  const textBuffer = await textEncoded.arrayBuffer();
+  const typedText = new Uint8Array(textBuffer);
 
+  const messageSize = (
+    C.TYPE_SIZE + // type
+    C.SIZE_PREFIX_SIZE + // text size
+    textEncoded.size // text
+  );
+
+  const buffer = new ArrayBuffer(C.SIZE_PREFIX_SIZE + messageSize);
+  const dv: any = new DataView(buffer);
+
+  // message
+  let offset = 0;
+  dv.setUint16(offset, messageSize, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  dv.setInt8(offset, C.TEXT_INPUT_TYPE, C.ENDIANNE);
+  offset += C.TYPE_SIZE;
+
+  // text
+  dv.setUint16(offset, textEncoded.size, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  for (let i = 0; i < typedText.length; i++, offset++) {
+    dv.setUint8(offset, typedText[i], C.ENDIANNE);
+  }
+
+  return buffer;
 }
 
 function makeCoordsMessage(x: number, y: number, messageType: number): ABuffer {

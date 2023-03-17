@@ -43,6 +43,8 @@ function onSquareMove(e: CoordsEvent) {
 function onTextInput(e: TextInputEvent) {
   // TODO: const textarea = registry.getElem(getUid(TextArea.cname, e.name));
 
+  log.Debug("onTextInput", e);
+
   if (users.myName() !== e.name) {
     const square = area.getElem(getUid(Square.cname, e.name));
     if (isContainable(square)) {
