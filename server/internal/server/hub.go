@@ -67,3 +67,15 @@ func (h *Hub) ListSquaresCoords() map[string](*ClientCoords) {
   }
   return coords
 }
+
+func (h *Hub) ListTextsInputs() map[string](*ClientText) {
+  texts := make(map[string](*ClientText), len(h.clients))
+
+  for client := range h.clients {
+    texts[client.Name()] = &ClientText{
+      name: client.Name(),
+      text: client.TextInput(),
+    }
+  }
+  return texts
+}

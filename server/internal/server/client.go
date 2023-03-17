@@ -64,6 +64,10 @@ func (c *Client) SquareY() float32 {
   return c.squareYPos
 }
 
+func (c *Client) TextInput() string {
+  return c.textInput
+}
+
 func (c *Client) ReadLoop() {
   meta.Log().Debug(c.name, "launch reading loop")
   for {
@@ -147,8 +151,13 @@ func (c *Client) LifecycleLoop() {
       // TODO: load this client's coords
 
       squaresCoords := c.hub.ListSquaresCoords()
-      for _, coords := range squaresCoords {
-        c.hub.broadcast <- EncodeSquareInit(coords)
+      for _, clientCoords := range squaresCoords {
+        c.hub.broadcast <- EncodeSquareInit(clientCoords)
+      }
+
+      inputTexts := c.hub.ListTextsInputs()
+      for _, clientText := range inputTexts {
+        c.hub.broadcast <- EncodeTextInputInit(clientText)
       }
     case <-c.unregistered:
       meta.Log().Debug(c.name, "client unregistered")

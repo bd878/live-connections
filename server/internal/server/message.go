@@ -43,6 +43,11 @@ type ClientCoords struct {
   YPos float32
 }
 
+type ClientText struct {
+  name string
+  text string
+}
+
 func NewMessage() *Message {
   return &Message{}
 }
@@ -353,6 +358,15 @@ func EncodeSquareInit(c *ClientCoords) []byte {
     user: c.name,
     XPos: c.XPos,
     YPos: c.YPos,
+  }
+  return m.Encode()
+}
+
+func EncodeTextInputInit(c *ClientText) []byte {
+  m := &Message{
+    messageType: textInputMessageType,
+    user: c.name,
+    text: c.text,
   }
   return m.Encode()
 }
