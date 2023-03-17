@@ -49,7 +49,7 @@ function set(area: AreaName, list: string[]) {
 
 function getByName(name: UserName): User {
   const user = users.get(name);
-  if (!user) throw error.failedToGet("users getByName", name);
+  if (!user) throw error.failedToGet("users.getByName", name);
   return user;
 }
 
@@ -58,7 +58,7 @@ function setMyName(name: UserName) {
 }
 
 function myName(): UserName {
-  if (!_myName) throw error.failedToGet("users myName");
+  if (!_myName) throw error.failedToGet("users.myName");
   return _myName;
 }
 

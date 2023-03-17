@@ -12,6 +12,7 @@ import Square from '../components/Square';
 import UserTile from '../components/UserTile';
 import diff from '../misc/diff';
 import getUid from '../misc/getUid';
+import getColorFromUserName from '../misc/getColorFromUserName';
 import {
   trackTextInput,
 } from '../listeners';
@@ -27,7 +28,7 @@ const log = new Log("handlers");
  */
 
 function onAuthOk(e: AuthOkEvent) {
-  log.Debug("onAuthOk", e);
+  log.Info("onAuthOk", e);
 }
 
 function onMouseMove(e: CoordsEvent) {
@@ -57,11 +58,11 @@ function onTextInput(e: TextInputEvent) {
 }
 
 function onInitSquareCoords(e: CoordsEvent) {
-  log.Debug("onInitSquareCoords", e);
+  log.Info("onInitSquareCoords", e);
 
   const sUid = getUid(Square.cname, e.name);
   if (!area.hasElem(sUid)) {
-    const square = new Square();
+    const square = new Square(getColorFromUserName(e.name));
     square.create(e.name);
     square.redraw();
     area.addElem(sUid, square);
@@ -79,7 +80,7 @@ function onInitSquareCoords(e: CoordsEvent) {
 }
 
 function onUsersOnline(e: UsersOnlineEvent) {
-  log.Debug("onUsersOnline", e);
+  log.Info("onUsersOnline", e);
 
   const diffPair = diff(users.listNames(), e.users);
   const leaved = diffPair[0];
