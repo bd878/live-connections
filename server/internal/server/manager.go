@@ -48,7 +48,7 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
   var hub *Hub
   if m.hubs[area] == nil {
     meta.Log().Debug("no hub is running, creating")
-    hub = NewHub(area)
+    hub = NewHub(m.disk)
     m.hubs[area] = hub
 
     go hub.Run()

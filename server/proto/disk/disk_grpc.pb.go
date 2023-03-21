@@ -291,8 +291,8 @@ var _UserManager_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SquareManagerClient interface {
-	Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*WriteSquareResponse, error)
-	Read(ctx context.Context, in *ReadSquareRequest, opts ...grpc.CallOption) (*Coords, error)
+	Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Coords, error)
 }
 
 type squareManagerClient struct {
@@ -303,8 +303,8 @@ func NewSquareManagerClient(cc grpc.ClientConnInterface) SquareManagerClient {
 	return &squareManagerClient{cc}
 }
 
-func (c *squareManagerClient) Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*WriteSquareResponse, error) {
-	out := new(WriteSquareResponse)
+func (c *squareManagerClient) Write(ctx context.Context, in *WriteSquareRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	out := new(EmptyResponse)
 	err := c.cc.Invoke(ctx, "/disk.SquareManager/Write", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -312,7 +312,7 @@ func (c *squareManagerClient) Write(ctx context.Context, in *WriteSquareRequest,
 	return out, nil
 }
 
-func (c *squareManagerClient) Read(ctx context.Context, in *ReadSquareRequest, opts ...grpc.CallOption) (*Coords, error) {
+func (c *squareManagerClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Coords, error) {
 	out := new(Coords)
 	err := c.cc.Invoke(ctx, "/disk.SquareManager/Read", in, out, opts...)
 	if err != nil {
@@ -325,8 +325,8 @@ func (c *squareManagerClient) Read(ctx context.Context, in *ReadSquareRequest, o
 // All implementations must embed UnimplementedSquareManagerServer
 // for forward compatibility
 type SquareManagerServer interface {
-	Write(context.Context, *WriteSquareRequest) (*WriteSquareResponse, error)
-	Read(context.Context, *ReadSquareRequest) (*Coords, error)
+	Write(context.Context, *WriteSquareRequest) (*EmptyResponse, error)
+	Read(context.Context, *ReadRequest) (*Coords, error)
 	mustEmbedUnimplementedSquareManagerServer()
 }
 
@@ -334,10 +334,10 @@ type SquareManagerServer interface {
 type UnimplementedSquareManagerServer struct {
 }
 
-func (UnimplementedSquareManagerServer) Write(context.Context, *WriteSquareRequest) (*WriteSquareResponse, error) {
+func (UnimplementedSquareManagerServer) Write(context.Context, *WriteSquareRequest) (*EmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
 }
-func (UnimplementedSquareManagerServer) Read(context.Context, *ReadSquareRequest) (*Coords, error) {
+func (UnimplementedSquareManagerServer) Read(context.Context, *ReadRequest) (*Coords, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
 func (UnimplementedSquareManagerServer) mustEmbedUnimplementedSquareManagerServer() {}
@@ -372,7 +372,7 @@ func _SquareManager_Write_Handler(srv interface{}, ctx context.Context, dec func
 }
 
 func _SquareManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadSquareRequest)
+	in := new(ReadRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -384,7 +384,7 @@ func _SquareManager_Read_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: "/disk.SquareManager/Read",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SquareManagerServer).Read(ctx, req.(*ReadSquareRequest))
+		return srv.(SquareManagerServer).Read(ctx, req.(*ReadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -400,6 +400,125 @@ var _SquareManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _SquareManager_Read_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "disk.proto",
+}
+
+// TextsManagerClient is the client API for TextsManager service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type TextsManagerClient interface {
+	Write(ctx context.Context, in *WriteTextRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Text, error)
+}
+
+type textsManagerClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTextsManagerClient(cc grpc.ClientConnInterface) TextsManagerClient {
+	return &textsManagerClient{cc}
+}
+
+func (c *textsManagerClient) Write(ctx context.Context, in *WriteTextRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/Write", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textsManagerClient) Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Text, error) {
+	out := new(Text)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/Read", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TextsManagerServer is the server API for TextsManager service.
+// All implementations must embed UnimplementedTextsManagerServer
+// for forward compatibility
+type TextsManagerServer interface {
+	Write(context.Context, *WriteTextRequest) (*EmptyResponse, error)
+	Read(context.Context, *ReadRequest) (*Text, error)
+	mustEmbedUnimplementedTextsManagerServer()
+}
+
+// UnimplementedTextsManagerServer must be embedded to have forward compatible implementations.
+type UnimplementedTextsManagerServer struct {
+}
+
+func (UnimplementedTextsManagerServer) Write(context.Context, *WriteTextRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Write not implemented")
+}
+func (UnimplementedTextsManagerServer) Read(context.Context, *ReadRequest) (*Text, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedTextsManagerServer) mustEmbedUnimplementedTextsManagerServer() {}
+
+// UnsafeTextsManagerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TextsManagerServer will
+// result in compilation errors.
+type UnsafeTextsManagerServer interface {
+	mustEmbedUnimplementedTextsManagerServer()
+}
+
+func RegisterTextsManagerServer(s *grpc.Server, srv TextsManagerServer) {
+	s.RegisterService(&_TextsManager_serviceDesc, srv)
+}
+
+func _TextsManager_Write_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WriteTextRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).Write(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/Write",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).Write(ctx, req.(*WriteTextRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextsManager_Read_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).Read(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/Read",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).Read(ctx, req.(*ReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _TextsManager_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "disk.TextsManager",
+	HandlerType: (*TextsManagerServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Write",
+			Handler:    _TextsManager_Write_Handler,
+		},
+		{
+			MethodName: "Read",
+			Handler:    _TextsManager_Read_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

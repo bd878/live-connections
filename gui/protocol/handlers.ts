@@ -46,13 +46,11 @@ function onTextInput(e: TextInputEvent) {
 
   log.Debug("onTextInput", e);
 
-  if (users.myName() !== e.name) {
-    const square = area.getElem(getUid(Square.cname, e.name));
-    if (isContainable(square)) {
-      const textarea = square.getElem(getUid(TextArea.cname, e.name));
-      if (isRedrawable(textarea)) {
-        textarea.redraw(e.text);
-      }
+  const square = area.getElem(getUid(Square.cname, e.name));
+  if (isContainable(square)) {
+    const textarea = square.getElem(getUid(TextArea.cname, e.name));
+    if (isRedrawable(textarea)) {
+      textarea.redraw(e.text);
     }
   }
 }

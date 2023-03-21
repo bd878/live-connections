@@ -32,7 +32,7 @@ func NewLogWriter(prefix string, degree string) *LogWriter {
 }
 
 func Log() *LogWriter {
-  return NewLogWriter("", "warn")
+  return NewLogWriter("", "debug")
 }
 
 func (l *LogWriter) Info(text ...any) {

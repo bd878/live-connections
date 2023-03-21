@@ -46,24 +46,9 @@ message User {
   string name = 1;
 }
 
-message MouseMoveCoords {
-  float xPos = 1;
-  float yPos = 2;
-}
-
-message TextInput {
-  string value = 1;
-}
-
-enum MessageType {
-  MOUSE_MOUVE = 0;
-  TEXT_INPUT = 1;
-}
-
 message ReadUserRequest {
   string area = 1;
   string name = 2;
-  MessageType messageType = 3;
 }
 
 message ReadUserResponse {
@@ -79,8 +64,8 @@ message AddUserResponse {
 }
 
 service SquareManager {
-  rpc Write(WriteSquareRequest) returns (WriteSquareResponse);
-  rpc Read(ReadSquareRequest) returns (Coords);
+  rpc Write(WriteSquareRequest) returns (EmptyResponse);
+  rpc Read(ReadRequest) returns (Coords);
 }
 
 message Coords {
@@ -95,9 +80,25 @@ message WriteSquareRequest {
   Coords coords = 3;
 }
 
-message WriteSquareResponse {}
+message EmptyResponse {}
 
-message ReadSquareRequest {
+message ReadRequest {
   string area = 1;
   string name = 2;
+}
+
+message Text {
+  string value = 1;
+}
+
+service TextsManager {
+  rpc Write(WriteTextRequest) returns (EmptyResponse);
+  rpc Read(ReadRequest) returns (Text);
+}
+
+message WriteTextRequest {
+  string area = 1;
+  string name = 2;
+
+  Text text = 3;
 }

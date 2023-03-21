@@ -20,6 +20,7 @@ type Disk struct {
   timeout time.Duration
   area disk.AreaManagerClient
   user disk.UserManagerClient
+  texts disk.TextsManagerClient
   square disk.SquareManagerClient
 }
 
@@ -53,12 +54,14 @@ func NewDisk() *Disk {
 
   area := disk.NewAreaManagerClient(conn)
   user := disk.NewUserManagerClient(conn)
+  texts := disk.NewTextsManagerClient(conn)
   square := disk.NewSquareManagerClient(conn)
 
   return &Disk{
     timeout: diskRequestTimeout,
     area: area,
     user: user,
+    texts: texts,
     square: square,
   }
 }
@@ -125,26 +128,50 @@ func (d *Disk) HasUser(area string, user string) bool {
   return resp.Result
 }
 
-func (d *Disk) WriteMouseCoords(area string, user string, xPos float32, yPos float32) {
+func (d *Disk) WriteSquareCoords(area, user string, XPos, YPos float32) {
   ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
   defer cancel()
 
-  coords := &disk.Coords{XPos: xPos, YPos: yPos}
+  coords := &disk.Coords{XPos: XPos, YPos: YPos}
   _, err := d.square.Write(ctx, &disk.WriteSquareRequest{Area: area, Name: user, Coords: coords})
   if err != nil {
     meta.Log().Fatal("square.Write failed: %v", err)
   }
 }
 
-func (d *Disk) ReadMouseCoords(area string, user string) (*Coords, error) {
+func (d *Disk) WriteText(area, user, value string) {
   ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
   defer cancel()
 
-  resp, err := d.square.Read(ctx, &disk.ReadSquareRequest{Area: area, Name: user})
+  text := &disk.Text{Value: value}
+  _, err := d.texts.Write(ctx, &disk.WriteTextRequest{Area: area, Name: user, Text: text})
+  if err != nil {
+    meta.Log().Fatal("text.Write failed: %v", err)
+  }
+}
+
+func (d *Disk) ReadSquareCoords(area, user string) (*Coords, error) {
+  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+  defer cancel()
+
+  resp, err := d.square.Read(ctx, &disk.ReadRequest{Area: area, Name: user})
   if err != nil {
     meta.Log().Warn("square.Read failed: %v", err)
     return nil, err
   }
 
   return &Coords{resp.XPos, resp.YPos}, nil
+}
+
+func (d *Disk) ReadText(area, user string) (string, error) {
+  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+  defer cancel()
+
+  resp, err := d.texts.Read(ctx, &disk.ReadRequest{Area: area, Name: user})
+  if err != nil {
+    meta.Log().Warn("text.Read failed: %v", err)
+    return "", err
+  }
+
+  return resp.Value, nil
 }

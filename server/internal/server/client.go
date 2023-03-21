@@ -56,6 +56,10 @@ func (c *Client) Name() string {
   return c.name
 }
 
+func (c *Client) Area() string {
+  return c.area
+}
+
 func (c *Client) SquareX() float32 {
   return c.squareXPos
 }
@@ -66,6 +70,15 @@ func (c *Client) SquareY() float32 {
 
 func (c *Client) TextInput() string {
   return c.textInput
+}
+
+func (c *Client) SetSquareCoords(XPos, YPos float32) {
+  c.squareXPos = XPos
+  c.squareYPos = YPos
+}
+
+func (c *Client) SetTextInput(text string) {
+  c.textInput = text
 }
 
 func (c *Client) ReadLoop() {
@@ -147,8 +160,6 @@ func (c *Client) LifecycleLoop() {
 
       clientsOnline := c.hub.ListClientsOnline()
       c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
-
-      // TODO: load this client's coords
 
       squaresCoords := c.hub.ListSquaresCoords()
       for _, clientCoords := range squaresCoords {

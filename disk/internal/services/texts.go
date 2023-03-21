@@ -14,26 +14,19 @@ import (
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
-const squareFileName = "square.state"
+const textsFileName = "text.state"
 
-type SquareServer struct {
-  pb.UnimplementedSquareManagerServer
+type TextsServer struct {
+  pb.UnimplementedTextsManagerServer
   Dir string
 }
 
-func NewSquareManagerServer(baseDir string) *SquareServer {
-  return &SquareServer{Dir: baseDir}
+func NewTextsManagerServer(baseDir string) *TextsServer {
+  return &TextsServer{Dir: baseDir}
 }
 
-// TODO: merge file handling with texts, R/W same logic
-func (s *SquareServer) Write(ctx context.Context, request *pb.WriteSquareRequest) (*pb.EmptyResponse, error) {
-  var (
-    p []byte
-    err error
-    storeFile *os.File
-  )
-
-  log.Println("write square coords =", request.Coords.XPos, request.Coords.YPos)
+func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (*pb.EmptyResponse, error) {
+  log.Println("write text =", request.Text.Value)
 
   if !utils.IsNameSafe(request.Area) {
     return nil, errors.New("area name not safe")
@@ -43,16 +36,17 @@ func (s *SquareServer) Write(ctx context.Context, request *pb.WriteSquareRequest
     return nil, errors.New("user name not safe")
   }
 
-  fp := filepath.Join(s.Dir, request.Area, request.Name, squareFileName)
+  fp := filepath.Join(s.Dir, request.Area, request.Name, textsFileName)
 
   log.Println("write coords in file =", fp)
 
-  if p, err = proto.Marshal(request.Coords); err != nil {
-    log.Println("failed to marshal coords")
+  p, err := proto.Marshal(request.Text)
+  if err != nil {
+    log.Println("failed to marshal text")
     return nil, err
   }
 
-  storeFile, err = os.OpenFile(
+  storeFile, err := os.OpenFile(
     fp,
     os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
     0644,
@@ -76,15 +70,7 @@ func (s *SquareServer) Write(ctx context.Context, request *pb.WriteSquareRequest
   return &pb.EmptyResponse{}, nil
 }
 
-func (s *SquareServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.Coords, error) {
-  var (
-    err error
-    f *os.File
-    size int64
-    info os.FileInfo
-    bytesRead int
-  )
-
+func (s *TextsServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.Text, error) {
   if !utils.IsNameSafe(request.Area) {
     return nil, errors.New("area name not safe")
   }
@@ -93,8 +79,8 @@ func (s *SquareServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.C
     return nil, errors.New("user name not safe")
   }
 
-  fp := filepath.Join(s.Dir, request.Area, request.Name, squareFileName)
-  f, err = os.OpenFile(
+  fp := filepath.Join(s.Dir, request.Area, request.Name, textsFileName)
+  f, err := os.OpenFile(
     fp,
     os.O_RDONLY|os.O_CREATE,
     0644,
@@ -103,14 +89,15 @@ func (s *SquareServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.C
     return nil, err
   }
 
-  if info, err = f.Stat(); err != nil {
+  info, err := f.Stat()
+  if err != nil {
     return nil, err
   }
 
-  size = info.Size()
+  size := info.Size()
   p := make([]byte, size)
 
-  bytesRead, err = f.Read(p)
+  bytesRead, err := f.Read(p)
   if err != nil {
     return nil, err
   }
@@ -119,11 +106,10 @@ func (s *SquareServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.C
     return nil, errors.New("read less bytes than in file")
   }
 
-  coords := &pb.Coords{}
-  if err = proto.Unmarshal(p, coords); err != nil {
+  text := &pb.Text{}
+  if err = proto.Unmarshal(p, text); err != nil {
     return nil, err
   }
 
-  return coords, nil
+  return text, nil
 }
-
