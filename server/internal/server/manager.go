@@ -4,7 +4,7 @@ import (
   "net/http"
 
   "github.com/gorilla/mux"
-  "github.com/teralion/live-connections/server/internal/meta"
+  "github.com/teralion/live-connections/meta"
   "github.com/teralion/live-connections/server/internal/rpc"
 )
 

@@ -8,7 +8,7 @@ import (
   dotenv "github.com/joho/godotenv"
 
   "github.com/teralion/live-connections/server/internal/server"
-  "github.com/teralion/live-connections/server/internal/meta"
+  "github.com/teralion/live-connections/meta"
 )
 
 func main() {

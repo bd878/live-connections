@@ -13,7 +13,7 @@ import (
   "github.com/gorilla/mux"
 
   "github.com/teralion/live-connections/server/proto/disk"
-  "github.com/teralion/live-connections/server/internal/meta"
+  "github.com/teralion/live-connections/meta"
 )
 
 type Disk struct {

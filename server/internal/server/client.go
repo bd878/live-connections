@@ -4,7 +4,7 @@ import (
   "time"
 
   ws "github.com/gorilla/websocket"
-  "github.com/teralion/live-connections/server/internal/meta"
+  "github.com/teralion/live-connections/meta"
 )
 
 const MaxPayloadSize int64 = 512

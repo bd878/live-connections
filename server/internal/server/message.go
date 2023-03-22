@@ -6,7 +6,7 @@ import (
   "unsafe"
   "bytes"
 
-  "github.com/teralion/live-connections/server/internal/meta"
+  "github.com/teralion/live-connections/meta"
 )
 
 var enc = binary.LittleEndian
