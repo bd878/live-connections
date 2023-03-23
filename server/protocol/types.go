@@ -9,7 +9,7 @@ type Decoder interface {
 }
 
 type Typed struct {
-  messageType int8
+  MessageType int8
 }
 
 type Coords struct {
@@ -18,18 +18,18 @@ type Coords struct {
 }
 
 type Text struct {
-  text string
+  Str string
 }
 
 type Raw struct {
-  size uint16
-  data []byte
+  Size uint16
+  Data []byte
 }
 
 type List struct {
-  items []string
+  Items []string
 }
 
 type Identity struct {
-  user string
+  User string
 }

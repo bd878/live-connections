@@ -5,6 +5,7 @@ import (
 
   ws "github.com/gorilla/websocket"
   "github.com/teralion/live-connections/meta"
+  "github.com/teralion/live-connections/server/protocol"
 )
 
 const MaxPayloadSize int64 = 512
@@ -83,6 +84,7 @@ func (c *Client) SetTextInput(text string) {
 
 func (c *Client) ReadLoop() {
   meta.Log().Debug(c.name, "launch reading loop")
+
   for {
     _, r, err := c.conn.NextReader()
     if err != nil {
@@ -90,50 +92,44 @@ func (c *Client) ReadLoop() {
       break
     }
 
-    message := NewMessage()
-    meta.Log().Debug(c.name, "received new message")
-    if _, err := message.ReadFrom(r); err != nil {
+    rawMessage, err := protocol.ReadFrom(r)
+    if err != nil {
       meta.Log().Warn(c.name, "failed to read message", err)
       break
     }
 
-    if err := message.Decode(); err != nil {
+    message, err := rawMessage.Decode()
+    if err != nil {
       meta.Log().Warn(c.name, "failed to decode message:", err)
       break
     }
 
-    switch message.Type() {
-    case authMessageType:
+    switch message := message.(type) {
+    case *protocol.AuthMessage:
       meta.Log().Debug(c.name, "received auth message")
-
-      c.area = message.area
-      c.name = message.user
 
       c.hub.register <- c
       defer c.unregister()
-    case textInputMessageType:
+    case *protocol.TextMessage:
       meta.Log().Debug(c.name, "received text input message")
 
-      message.SetArea(c.area)
       message.SetUser(c.name)
 
-      c.textInput = message.text
+      c.textInput = message.Str
 
       c.hub.broadcast <- message.Encode()
-    case mouseMoveMessageType:
+    case *protocol.MouseMoveMessage:
       meta.Log().Debug(c.name, "received mouse move message")
 
-      message.SetArea(c.area)
       message.SetUser(c.name)
 
       c.cursorXPos = message.XPos
       c.cursorYPos = message.YPos
 
       c.hub.broadcast <- message.Encode()
-    case squareMoveMessageType:
+    case *protocol.SquareMoveMessage:
       meta.Log().Debug(c.name, "received square move message")
 
-      message.SetArea(c.area)
       message.SetUser(c.name)
 
       c.squareXPos = message.XPos
@@ -141,7 +137,7 @@ func (c *Client) ReadLoop() {
 
       c.hub.broadcast <- message.Encode()
     default:
-      meta.Log().Warn("unknown event =", message.Type())
+      meta.Log().Warn("unknown event")
       break
     }
   }
@@ -158,17 +154,19 @@ func (c *Client) LifecycleLoop() {
     case <-c.registered:
       meta.Log().Debug(c.name, "client registered")
 
-      clientsOnline := c.hub.ListClientsOnline()
-      c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
+      clientsOnlineMessage := protocol.NewClientsOnlineMessage(c.hub.ListClientsOnline())
+      c.hub.broadcast <- clientsOnlineMessage.Encode()
 
       squaresCoords := c.hub.ListSquaresCoords()
-      for _, clientCoords := range squaresCoords {
-        c.hub.broadcast <- EncodeSquareInit(clientCoords)
+      for _, coords := range squaresCoords {
+        squareInitMessage := protocol.NewSquareInitMessage(coords.name, coords.XPos, coords.YPos)
+        c.hub.broadcast <- squareInitMessage.Encode()
       }
 
       inputTexts := c.hub.ListTextsInputs()
-      for _, clientText := range inputTexts {
-        c.hub.broadcast <- EncodeTextInputInit(clientText)
+      for _, text := range inputTexts {
+        textMessage := protocol.NewTextMessage(text.name, text.text)
+        c.hub.broadcast <- textMessage.Encode()
       }
     case <-c.unregistered:
       meta.Log().Debug(c.name, "client unregistered")
@@ -177,8 +175,8 @@ func (c *Client) LifecycleLoop() {
       close(c.unregistered)
       closed = true
 
-      clientsOnline := c.hub.ListClientsOnline()
-      c.hub.broadcast <- EncodeClientsOnline(clientsOnline)
+      clientsOnlineMessage := protocol.NewClientsOnlineMessage(c.hub.ListClientsOnline())
+      c.hub.broadcast <- clientsOnlineMessage.Encode()
     }
 
     if closed {

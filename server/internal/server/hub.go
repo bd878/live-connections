@@ -13,6 +13,17 @@ type Hub struct {
   broadcast chan []byte
 }
 
+type ClientCoords struct {
+  name string
+  XPos float32
+  YPos float32
+}
+
+type ClientText struct {
+  name string
+  text string
+}
+
 func NewHub(disk *rpc.Disk) *Hub {
   return &Hub{
     disk: disk,

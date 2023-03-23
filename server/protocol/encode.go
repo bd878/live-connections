@@ -8,11 +8,11 @@ import (
 )
 
 func (i *Identity) SetUser(name string) {
-  i.user = name
+  i.User = name
 }
 
 func (t *Typed) SetType(typ int8) {
-  t.messageType = typ
+  t.MessageType = typ
 }
 
 func (c *Coords) SetX(XPos float32) {
@@ -24,11 +24,11 @@ func (c *Coords) SetY(YPos float32) {
 }
 
 func (l *List) SetItems(items []string) {
-  l.items = items
+  l.Items = items
 }
 
 func (t *Text) SetText(str string) {
-  t.text = str
+  t.Str = str
 }
 
 type AuthMessage struct {
@@ -62,6 +62,15 @@ type SquareMoveMessage struct {
   Identity
 }
 
+func NewSquareMoveMessage(user string, XPos, YPos float32) *SquareMoveMessage {
+  message := &SquareMoveMessage{
+    Typed{MessageType: squareMove},
+    Coords{XPos: XPos, YPos: YPos},
+    Identity{User: user},
+  }
+  return message
+}
+
 // totalSize + type + userSize + userBytes + XPos + YPos
 func (m *SquareMoveMessage) Encode() []byte {
   meta.Log().Debug("encode coords message")
@@ -87,6 +96,15 @@ type SquareInitMessage struct {
   Typed
   Coords
   Identity
+}
+
+func NewSquareInitMessage(user string, XPos, YPos float32) *SquareInitMessage {
+  message := &SquareInitMessage{
+    Typed{MessageType: squareInit},
+    Coords{XPos: XPos, YPos: YPos},
+    Identity{User: user},
+  }
+  return message
 }
 
 // totalSize + type + userSize + userBytes + XPos + YPos
@@ -116,6 +134,15 @@ type MouseMoveMessage struct {
   Identity
 }
 
+func NewMouseMoveMessage(user string, XPos, YPos float32) *MouseMoveMessage {
+  message := &MouseMoveMessage{
+    Typed{MessageType: mouseMove},
+    Coords{XPos: XPos, YPos: YPos},
+    Identity{User: user},
+  }
+  return message
+}
+
 // totalSize + type + userSize + userBytes + XPos + YPos
 func (m *MouseMoveMessage) Encode() []byte {
   meta.Log().Debug("encode mouse move message")
@@ -142,6 +169,14 @@ type ClientsOnlineMessage struct {
   List
 }
 
+func NewClientsOnlineMessage(items []string) *ClientsOnlineMessage {
+  message := &ClientsOnlineMessage{
+    Typed{MessageType: clientsOnline},
+    List{Items: items},
+  }
+  return message
+}
+
 // totalSize + type + usersCount + []{userSize + userBytes}
 func (m *ClientsOnlineMessage) Encode() []byte {
   meta.Log().Debug("encode clients online message")
@@ -165,6 +200,15 @@ type TextMessage struct {
   Typed
   Identity
   Text
+}
+
+func NewTextMessage(user, str string) *TextMessage {
+  message := &TextMessage{
+    Typed{MessageType: text},
+    Identity{User: user},
+    Text{Str: str},
+  }
+  return message
 }
 
 // totalSize + type + userSize + userBytes + textSize + textBytes
@@ -207,7 +251,7 @@ func (m *Coords) Encode() []byte {
 // user size + user text
 func (m *Identity) Encode() []byte {
   userBytes := new(bytes.Buffer)
-  if err := binary.Write(userBytes, enc, []byte(m.user)); err != nil {
+  if err := binary.Write(userBytes, enc, []byte(m.User)); err != nil {
     meta.Log().Warn("error writing user size")
     return nil
   }
@@ -230,7 +274,7 @@ func (m *Identity) Encode() []byte {
 // text size + text
 func (m *Text) Encode() []byte {
   textBytes := new(bytes.Buffer)
-  if err := binary.Write(textBytes, enc, []byte(m.text)); err != nil {
+  if err := binary.Write(textBytes, enc, []byte(m.Str)); err != nil {
     meta.Log().Warn("error writing text size")
     return nil
   }
@@ -252,7 +296,7 @@ func (m *Text) Encode() []byte {
 
 func (m *Typed) Encode() []byte {
   typeBytes := new(bytes.Buffer)
-  if err := binary.Write(typeBytes, enc, m.messageType); err != nil {
+  if err := binary.Write(typeBytes, enc, m.MessageType); err != nil {
     meta.Log().Warn("error writing coords type")
     return nil
   }
@@ -263,13 +307,13 @@ func (m *Typed) Encode() []byte {
 // itemsCount + []{itemSize + itemBytes}
 func (m *List) Encode() []byte {
   countBytes := new(bytes.Buffer)
-  if err := binary.Write(countBytes, enc, uint16(len(m.items))); err != nil {
+  if err := binary.Write(countBytes, enc, uint16(len(m.Items))); err != nil {
     meta.Log().Warn("error writing items count =", err)
     return nil
   }
 
   itemsBytes := new(bytes.Buffer)
-  for _, item := range m.items {
+  for _, item := range m.Items {
     size := uint16(len(item))
     if err := binary.Write(itemsBytes, enc, size); err != nil {
       meta.Log().Warn("error writing item name size =", err)

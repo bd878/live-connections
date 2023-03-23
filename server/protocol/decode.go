@@ -19,20 +19,20 @@ type RawMessage struct {
 func ReadFrom(r io.Reader) (Decoder, error) {
   raw := Raw{}
 
-  if err := binary.Read(r, enc, &raw.size); err != nil {
+  if err := binary.Read(r, enc, &raw.Size); err != nil {
     meta.Log().Warn("binary.Read size err =", err)
     return nil, err
   }
 
   typed := Typed{}
-  if err := binary.Read(r, enc, &typed.messageType); err != nil {
+  if err := binary.Read(r, enc, &typed.MessageType); err != nil {
     meta.Log().Warn("failed to read message type")
     return nil, err
   }
 
-  raw.size = raw.size - uint16(unsafe.Sizeof(typed.messageType)) // size = type + raw
+  raw.Size = raw.Size - uint16(unsafe.Sizeof(typed.MessageType)) // size = type + raw
 
-  if err := binary.Read(r, enc, &raw.data); err != nil {
+  if err := binary.Read(r, enc, &raw.Data); err != nil {
     meta.Log().Warn("binary.Read message err =", err)
     return nil, err
   }
@@ -41,7 +41,7 @@ func ReadFrom(r io.Reader) (Decoder, error) {
 }
 
 func (m *RawMessage) Decode() (Encoder, error) {
-  switch (m.messageType) {
+  switch (m.MessageType) {
   case auth:
     return m.decodeAuth()
   case mouseMove:
@@ -59,8 +59,9 @@ func (m *RawMessage) Decode() (Encoder, error) {
 func (m *RawMessage) decodeAuth() (Encoder, error) {
   meta.Log().Debug("decode auth")
 
-  mr := bytes.NewReader(m.data)
+  mr := bytes.NewReader(m.Data)
 
+  // TODO: remove area from auth message
   var areaSize uint16
   if err := binary.Read(mr, enc, &areaSize); err != nil {
     meta.Log().Warn("failed to read areaSize")
@@ -120,7 +121,7 @@ func (m *RawMessage) decodeSquareMove() (Encoder, error) {
 func (m *RawMessage) decodeCoords() (Coords, error) {
   meta.Log().Debug("decode coords")
 
-  mr := bytes.NewReader(m.data)
+  mr := bytes.NewReader(m.Data)
 
   result := Coords{}
 
@@ -141,7 +142,7 @@ func (m *RawMessage) decodeCoords() (Coords, error) {
 func (m *RawMessage) decodeText() (Encoder, error) {
   meta.Log().Debug("parse text message")
 
-  mr := bytes.NewReader(m.data)
+  mr := bytes.NewReader(m.Data)
 
   msg := TextMessage{}
 
