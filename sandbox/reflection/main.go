@@ -10,7 +10,7 @@ type Country struct {
   name string
 }
 
-func main() {
+func Residence() {
   var residence Country
   residence = Country{capital: "Paris", name: "France"}
   residenceType := reflect.TypeOf(residence)
@@ -26,4 +26,8 @@ func main() {
   } else {
     log.Println("has not field 'nation'")
   }
+}
+
+func main() {
+  ShowKinds()
 }
