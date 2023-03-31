@@ -109,19 +109,19 @@ func (a *Area) ListTextsInputs() map[string](*messages.Text) {
 }
 
 func (a *Area) saveClient(c *Client) {
-  a.disk.WriteSquareCoords(c.Area(), c.Name(), c.SquareX(), c.SquareY())
-  a.disk.WriteText(c.Area(), c.Name(), c.TextInput())
+  a.disk.WriteSquareCoords(context.TODO(), c.Area(), c.Name(), c.SquareX(), c.SquareY())
+  a.disk.WriteText(context.TODO(), c.Area(), c.Name(), c.TextInput())
 }
 
 func (a *Area) restoreClient(c *Client) {
-  text, err := a.disk.ReadText(c.Area(), c.Name())
+  text, err := a.disk.ReadText(context.TODO(), c.Area(), c.Name())
   if err != nil {
     meta.Log().Error("failed to restore client input")
     return
   }
   c.SetTextInput(text)
 
-  coords, err := a.disk.ReadSquareCoords(c.Area(), c.Name())
+  coords, err := a.disk.ReadSquareCoords(context.TODO(), c.Area(), c.Name())
   if err != nil {
     meta.Log().Error("failed to read client square coords")
     return

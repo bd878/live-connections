@@ -40,14 +40,13 @@ type Client struct {
   area *Area
 }
 
-func NewClient(conn *ws.Conn, area *Area, areaName, myName string) *Client {
+func NewClient(conn *ws.Conn, areaName, myName string) *Client {
   conn.SetReadLimit(MaxPayloadSize)
   conn.SetReadDeadline(time.Now().Add(pongWait))
   conn.SetPongHandler(func(string) error { conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
   return &Client{
     conn: conn,
-    area: area,
     areaName: areaName,
     myName: myName,
     send: make(chan []byte, 256),
