@@ -40,6 +40,9 @@ func (a *Area) Run(ctx context.Context) {
 
   for {
     select {
+    case <-ctx.Done():
+      meta.Log().Debug("area.Run context exited")
+      return
     case client := <-a.register:
       a.clients[client.Name()] = client
 

@@ -106,7 +106,7 @@ func (m *RawMessage) decodeMouseMove() (Encoder, error) {
 }
 
 func (m *RawMessage) decodeSquareMove() (Encoder, error) {
-  meta.Log().Debug("square move")
+  meta.Log().Debug("decode square move")
 
   msg := SquareMoveMessage{}
   var err error
@@ -140,7 +140,7 @@ func (m *RawMessage) decodeCoords() (Coords, error) {
 
 // textSize + text message
 func (m *RawMessage) decodeText() (Encoder, error) {
-  meta.Log().Debug("parse text message")
+  meta.Log().Debug("decode text message")
 
   mr := bytes.NewReader(m.Data)
 

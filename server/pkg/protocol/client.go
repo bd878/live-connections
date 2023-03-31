@@ -35,8 +35,8 @@ type Client struct {
 
   registered chan bool
   unregistered chan bool
-
   send chan []byte
+
   area *Area
 }
 
@@ -95,40 +95,44 @@ func (c *Client) Close() {
 }
 
 func (c *Client) Run(ctx context.Context) {
+  defer c.Close()
+
   quit := make(chan struct{})
 
-  innerCtx, cancel := context.WithCancel(ctx)
+  go func() {
+    <-ctx.Done()
+    quit <- struct{}{}
+  }()
 
-  go c.readLoop(innerCtx, quit)
-  go c.lifecycleLoop(innerCtx, quit)
-  go c.writeLoop(innerCtx, quit)
+  go c.readLoop(ctx, quit)
+  go c.lifecycleLoop(ctx, quit)
+  go c.writeLoop(ctx, quit)
 
   <-quit
-
-  cancel()
-  c.Close()
 }
 
 func (c *Client) readLoop(ctx context.Context, quit chan struct{}) {
   meta.Log().Debug(c.Name(), "launch reading loop")
+  defer meta.Log().Debug(c.Name(), "exit reading loop")
 
   for {
     _, r, err := c.conn.NextReader()
     if err != nil {
       meta.Log().Warn("failed to obtain next reader")
-      break
+      quit <- struct{}{}
+      return
     }
 
     rawMessage, err := messages.ReadFrom(r)
     if err != nil {
       meta.Log().Warn(c.Name(), "failed to read message", err)
-      break
+      continue
     }
 
     message, err := rawMessage.Decode()
     if err != nil {
       meta.Log().Warn(c.Name(), "failed to decode message:", err)
-      break
+      continue
     }
 
     switch message := message.(type) {
@@ -165,13 +169,8 @@ func (c *Client) readLoop(ctx context.Context, quit chan struct{}) {
       c.area.broadcast <- message.Encode()
     default:
       meta.Log().Warn("unknown event")
-      break
     }
   }
-
-  meta.Log().Debug(c.Name(), "exit reading loop")
-
-  quit <- struct{}{}
 }
 
 func (c *Client) writeLoop(ctx context.Context, quit chan struct{}) {
@@ -180,58 +179,53 @@ func (c *Client) writeLoop(ctx context.Context, quit chan struct{}) {
   ticker := time.NewTicker(pingPeriod)
 
   defer func() {
+    meta.Log().Debug(c.Name(), "exit writing loop")
     c.conn.Close()
     ticker.Stop()
   }()
 
-  var exit bool
   for {
     select {
+    case <-quit:
+      return
     case bytes := <-c.send:
       c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
       w, err := c.conn.NextWriter(ws.BinaryMessage)
       if err != nil {
         meta.Log().Warn("obtaining next writer err =", err)
-        exit = true
-        break
+        quit <- struct{}{}
+        return
       }
-      defer w.Close()
 
       meta.Log().Debug("write p =", bytes)
 
       _, err = w.Write(bytes)
       if err != nil {
         meta.Log().Warn("failed to write bytes")
-        exit = true
-        break
+        quit <- struct{}{}
+        return
       }
     case <-ticker.C:
       c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
       if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
         meta.Log().Warn(fmt.Sprintf("ping message writing failed, err: %v\n", err))
-        exit = true
-        break
+        quit <- struct{}{}
+        return
       }
     }
-
-    if exit {
-      break
-    }
   }
-
-  meta.Log().Debug(c.Name(), "exit writing loop")
-
-  quit <- struct{}{}
 }
 
 func (c *Client) lifecycleLoop(ctx context.Context, quit chan struct{}) {
   meta.Log().Debug(c.Name(), "launch lifecycle loop")
+  defer meta.Log().Debug(c.Name(), "exit lifecycle loop")
 
-  var closed bool = false
   for {
     select {
+    case <-quit:
+      return
     case <-c.registered:
       meta.Log().Debug(c.Name(), "client registered")
 
@@ -254,16 +248,12 @@ func (c *Client) lifecycleLoop(ctx context.Context, quit chan struct{}) {
       close(c.send)
       close(c.registered)
       close(c.unregistered)
-      closed = true
 
       clientsOnlineMessage := messages.NewClientsOnlineMessage(c.area.ListClientsOnline())
       c.area.broadcast <- clientsOnlineMessage.Encode()
-    }
 
-    if closed {
-      break;
+      quit <- struct{}{}
+      return
     }
   }
-
-  meta.Log().Debug(c.Name(), "exit lifecycle loop")
 }

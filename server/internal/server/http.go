@@ -55,6 +55,8 @@ func (s *Server) ListenAndServe() error {
 }
 
 func (s *Server) ListenAndServeTLS(serverCrt string, serverKey string) error {
+  s.manager.StartHandlers(s.ctx)
+
   return s.httpServer.ListenAndServeTLS(serverCrt, serverKey)
 }
 

@@ -21,7 +21,7 @@ type Manager struct {
   queue chan *protocol.Client
   maxConns int
   handlersCount int
-  wg *sync.WaitGroup
+  wg sync.WaitGroup
 }
 
 func NewManager() *Manager {
