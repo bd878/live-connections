@@ -48,54 +48,59 @@ func NewDisk(addr string) *Disk {
   }
 }
 
-func (d *Disk) CreateNewUser(area string) string {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) CreateNewUser(ctx context.Context, area string) (string, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   resp, err := d.user.Add(ctx, &proto.AddUserRequest{Area: area})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("user.Add failed: %v", err))
+    return "", err
   }
 
-  return resp.Name
+  return resp.Name, nil
 }
 
-func (d *Disk) CreateNewArea() string {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
-
+func (d *Disk) CreateNewArea(ctx context.Context) (string, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
+
   resp, err := d.area.Create(ctx, &proto.CreateAreaRequest{})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("area.Create failed: %v", err))
+    return "", err
   }
 
-  return resp.Name
+  return resp.Name, nil
 }
 
-func (d *Disk) ListUsers(area string) []string {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) ListUsers(ctx context.Context, area string) ([]string, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   resp, err := d.area.ListUsers(ctx, &proto.ListAreaUsersRequest{Name: area})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("area.ListUsers failed: %v", err))
+    return nil, err
   }
 
-  return resp.GetUsers()
+  return resp.GetUsers(), nil
 }
 
-func (d *Disk) HasUser(area string, user string) bool {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) HasUser(ctx context.Context, area, user string) bool {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
+
   resp, err := d.area.HasUser(ctx, &proto.HasUserRequest{Area: area, User: user})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("area.HasUser failed: %v", err))
   }
+
   return resp.Result
 }
 
-func (d *Disk) WriteSquareCoords(area, user string, XPos, YPos float32) {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) WriteSquareCoords(ctx context.Context, area, user string, XPos, YPos float32) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   coords := &proto.Coords{XPos: XPos, YPos: YPos}
@@ -105,8 +110,8 @@ func (d *Disk) WriteSquareCoords(area, user string, XPos, YPos float32) {
   }
 }
 
-func (d *Disk) WriteText(area, user, value string) {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) WriteText(ctx context.Context, area, user, value string) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   text := &proto.Text{Value: value}
@@ -116,8 +121,8 @@ func (d *Disk) WriteText(area, user, value string) {
   }
 }
 
-func (d *Disk) ReadSquareCoords(area, user string) (*messages.Coords, error) {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) ReadSquareCoords(ctx context.Context, area, user string) (*messages.Coords, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   resp, err := d.square.Read(ctx, &proto.ReadRequest{Area: area, Name: user})
@@ -129,8 +134,8 @@ func (d *Disk) ReadSquareCoords(area, user string) (*messages.Coords, error) {
   return &messages.Coords{XPos: resp.XPos, YPos: resp.YPos}, nil
 }
 
-func (d *Disk) ReadText(area, user string) (string, error) {
-  ctx, cancel := context.WithTimeout(context.Background(), d.timeout)
+func (d *Disk) ReadText(ctx context.Context, area, user string) (string, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   resp, err := d.texts.Read(ctx, &proto.ReadRequest{Area: area, Name: user})

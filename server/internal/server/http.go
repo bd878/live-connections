@@ -2,6 +2,7 @@ package server
 
 import (
   "net/http"
+  "fmt"
   "time"
   "os"
   "context"
@@ -17,6 +18,7 @@ var publicPath = filepath.Join("../", "public")
 type Server struct {
   manager *Manager
   httpServer *http.Server
+  ctx context.Context
 }
 
 func NewHTTPServer(addr string, done chan struct{}) *Server {
@@ -36,8 +38,9 @@ func NewHTTPServer(addr string, done chan struct{}) *Server {
   }
 
   server := &Server{
-    manager,
-    httpServer,
+    manager: manager,
+    httpServer: httpServer,
+    ctx: context.Background(),
   }
 
   go server.sigHandler(os.Interrupt, done)
@@ -46,6 +49,8 @@ func NewHTTPServer(addr string, done chan struct{}) *Server {
 }
 
 func (s *Server) ListenAndServe() error {
+  s.manager.StartHandlers(s.ctx)
+
   return s.httpServer.ListenAndServe()
 }
 
@@ -59,7 +64,7 @@ func (s *Server) sigHandler(sig os.Signal, done chan struct{}) {
   <-sigint
 
   if err := s.httpServer.Shutdown(context.Background()); err != nil {
-    meta.Log().Debug("HTTP server Shutdown: %v", err)
+    meta.Log().Debug(fmt.Sprintf("HTTP server Shutdown: %v", err))
   } else {
     meta.Log().Debug("SIGINT caught")
   }
