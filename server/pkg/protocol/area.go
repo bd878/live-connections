@@ -21,6 +21,9 @@ type Area struct {
 func NewArea(disk *rpc.Disk) *Area {
   return &Area{
     disk: disk,
+    register: make(chan *Client, 1),
+    unregister: make(chan *Client, 1),
+    broadcast: make(chan []byte, 256),
     clients: make(map[string]*Client, 10),
   }
 }
@@ -31,30 +34,26 @@ func (a *Area) Close() {
   close(a.broadcast)
 }
 
-func (a *Area) Attach(c *Client) {
-  a.clients[c.Name()] = c
-}
-
 func (a *Area) Run(ctx context.Context) {
   meta.Log().Debug("area is running")
+  defer meta.Log().Debug("area stopped running")
 
   for {
     select {
     case <-ctx.Done():
-      meta.Log().Debug("area.Run context exited")
       return
     case client := <-a.register:
       a.clients[client.Name()] = client
 
       a.restoreClient(client)
-
-      client.registered <- true
+      go a.onRegister(client)
     case client := <-a.unregister:
       if _, ok := a.clients[client.Name()]; ok {
         a.saveClient(client)
 
         delete(a.clients, client.Name())
-        client.unregistered <- true
+
+        go a.onUnregister(client)
       }
     case bytes := <-a.broadcast:
       for _, client := range a.clients {
@@ -130,4 +129,30 @@ func (a *Area) restoreClient(c *Client) {
     return
   }
   c.SetSquareCoords(coords.XPos, coords.YPos)
+}
+
+func (a *Area) onRegister(c *Client) {
+  meta.Log().Debug(c.Name(), "client registered")
+
+  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.ListClientsOnline())
+  a.broadcast <- clientsOnlineMessage.Encode()
+
+  squaresCoords := a.ListSquaresCoords()
+  for name, coords := range squaresCoords {
+    squareInitMessage := messages.NewSquareInitMessage(name, coords.XPos, coords.YPos)
+    a.broadcast <- squareInitMessage.Encode()
+  }
+
+  inputTexts := a.ListTextsInputs()
+  for name, text := range inputTexts {
+    textMessage := messages.NewTextMessage(name, text.Str)
+    a.broadcast <- textMessage.Encode()
+  }
+}
+
+func (a *Area) onUnregister(c *Client) {
+  meta.Log().Debug(c.Name(), "client unregistered")
+
+  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.ListClientsOnline())
+  a.broadcast <- clientsOnlineMessage.Encode()
 }

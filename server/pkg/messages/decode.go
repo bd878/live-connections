@@ -32,12 +32,13 @@ func ReadFrom(r io.Reader) (Decoder, error) {
 
   raw.Size = raw.Size - uint16(unsafe.Sizeof(typed.MessageType)) // size = type + raw
 
+  raw.Data = make([]byte, raw.Size)
   if err := binary.Read(r, enc, &raw.Data); err != nil {
     meta.Log().Warn("binary.Read message err =", err)
     return nil, err
   }
 
-  return &RawMessage{typed, raw}, nil
+  return &RawMessage{Typed: typed, Raw: raw}, nil
 }
 
 func (m *RawMessage) Decode() (Encoder, error) {
@@ -59,9 +60,8 @@ func (m *RawMessage) Decode() (Encoder, error) {
 func (m *RawMessage) decodeAuth() (Encoder, error) {
   meta.Log().Debug("decode auth")
 
-  mr := bytes.NewReader(m.Data)
+  mr := bytes.NewReader(m.Raw.Data)
 
-  // TODO: remove area from auth message
   var areaSize uint16
   if err := binary.Read(mr, enc, &areaSize); err != nil {
     meta.Log().Warn("failed to read areaSize")
@@ -86,8 +86,9 @@ func (m *RawMessage) decodeAuth() (Encoder, error) {
     return nil, err
   }
 
-  result := AuthMessage{}
-  meta.Log().Debug("area =", string(areaBytes))
+  typed := Typed{MessageType: auth}
+  result := AuthMessage{Typed: typed}
+  result.SetArea(string(areaBytes))
   result.SetUser(string(userBytes))
 
   return &result, nil
@@ -96,7 +97,8 @@ func (m *RawMessage) decodeAuth() (Encoder, error) {
 func (m *RawMessage) decodeMouseMove() (Encoder, error) {
   meta.Log().Debug("decode mouse move")
 
-  msg := MouseMoveMessage{}
+  typed := Typed{MessageType: mouseMove}
+  msg := MouseMoveMessage{Typed: typed}
   var err error
   msg.Coords, err = m.decodeCoords()
   if err != nil {
@@ -108,7 +110,8 @@ func (m *RawMessage) decodeMouseMove() (Encoder, error) {
 func (m *RawMessage) decodeSquareMove() (Encoder, error) {
   meta.Log().Debug("decode square move")
 
-  msg := SquareMoveMessage{}
+  typed := Typed{MessageType: squareMove}
+  msg := SquareMoveMessage{Typed: typed}
   var err error
   msg.Coords, err = m.decodeCoords()
   if err != nil {
@@ -144,7 +147,8 @@ func (m *RawMessage) decodeText() (Encoder, error) {
 
   mr := bytes.NewReader(m.Data)
 
-  msg := TextMessage{}
+  typed := Typed{MessageType: text}
+  msg := TextMessage{Typed: typed}
 
   var textSize uint16
   if err := binary.Read(mr, enc, &textSize); err != nil {

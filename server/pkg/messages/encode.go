@@ -11,6 +11,10 @@ func (i *Identity) SetUser(name string) {
   i.User = name
 }
 
+func (i *Identity) SetArea(area string) {
+  i.Area = area
+}
+
 func (t *Typed) SetType(typ int8) {
   t.MessageType = typ
 }

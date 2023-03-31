@@ -89,6 +89,8 @@ func (c *Client) SetArea(area *Area) {
 }
 
 func (c *Client) Close() {
+  meta.Log().Debug("close client")
+
   close(c.send)
   close(c.registered)
   close(c.unregistered)
@@ -104,14 +106,13 @@ func (c *Client) Run(ctx context.Context) {
     quit <- struct{}{}
   }()
 
-  go c.readLoop(ctx, quit)
-  go c.lifecycleLoop(ctx, quit)
-  go c.writeLoop(ctx, quit)
+  go c.readLoop(quit)
+  go c.writeLoop(quit)
 
   <-quit
 }
 
-func (c *Client) readLoop(ctx context.Context, quit chan struct{}) {
+func (c *Client) readLoop(quit chan struct{}) {
   meta.Log().Debug(c.Name(), "launch reading loop")
   defer meta.Log().Debug(c.Name(), "exit reading loop")
 
@@ -173,7 +174,7 @@ func (c *Client) readLoop(ctx context.Context, quit chan struct{}) {
   }
 }
 
-func (c *Client) writeLoop(ctx context.Context, quit chan struct{}) {
+func (c *Client) writeLoop(quit chan struct{}) {
   meta.Log().Debug(c.Name(), "launch writing loop")
 
   ticker := time.NewTicker(pingPeriod)
@@ -214,46 +215,6 @@ func (c *Client) writeLoop(ctx context.Context, quit chan struct{}) {
         quit <- struct{}{}
         return
       }
-    }
-  }
-}
-
-func (c *Client) lifecycleLoop(ctx context.Context, quit chan struct{}) {
-  meta.Log().Debug(c.Name(), "launch lifecycle loop")
-  defer meta.Log().Debug(c.Name(), "exit lifecycle loop")
-
-  for {
-    select {
-    case <-quit:
-      return
-    case <-c.registered:
-      meta.Log().Debug(c.Name(), "client registered")
-
-      clientsOnlineMessage := messages.NewClientsOnlineMessage(c.area.ListClientsOnline())
-      c.area.broadcast <- clientsOnlineMessage.Encode()
-
-      squaresCoords := c.area.ListSquaresCoords()
-      for name, coords := range squaresCoords {
-        squareInitMessage := messages.NewSquareInitMessage(name, coords.XPos, coords.YPos)
-        c.area.broadcast <- squareInitMessage.Encode()
-      }
-
-      inputTexts := c.area.ListTextsInputs()
-      for name, text := range inputTexts {
-        textMessage := messages.NewTextMessage(name, text.Str)
-        c.area.broadcast <- textMessage.Encode()
-      }
-    case <-c.unregistered:
-      meta.Log().Debug(c.Name(), "client unregistered")
-      close(c.send)
-      close(c.registered)
-      close(c.unregistered)
-
-      clientsOnlineMessage := messages.NewClientsOnlineMessage(c.area.ListClientsOnline())
-      c.area.broadcast <- clientsOnlineMessage.Encode()
-
-      quit <- struct{}{}
-      return
     }
   }
 }

@@ -104,6 +104,7 @@ func (m *Manager) Handle(ctx context.Context, num int) {
 
     c.SetArea(area)
     c.Run(ctx)
+    meta.Log().Debug(fmt.Sprintf("handler %d free client %s", num, c.Name()))
   }
 }
 

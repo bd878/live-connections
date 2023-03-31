@@ -32,4 +32,5 @@ type List struct {
 
 type Identity struct {
   User string
+  Area string
 }
