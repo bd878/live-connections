@@ -19,6 +19,8 @@ const pingPeriod = (pongWait * 9) / 10 // a bit less than pongWait
 
 const writeWait = 10 * time.Second
 
+var newline = []byte{'\n'}
+
 type Client struct {
   conn *ws.Conn
 
@@ -192,16 +194,9 @@ func (c *Client) writeLoop(quit chan struct{}) {
     case bytes := <-c.send:
       c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
-      w, err := c.conn.NextWriter(ws.BinaryMessage)
-      if err != nil {
-        meta.Log().Warn("obtaining next writer err =", err)
-        quit <- struct{}{}
-        return
-      }
-
       meta.Log().Debug("write p =", bytes)
 
-      _, err = w.Write(bytes)
+      err := c.conn.WriteMessage(ws.BinaryMessage, append(bytes, newline...))
       if err != nil {
         meta.Log().Warn("failed to write bytes")
         quit <- struct{}{}

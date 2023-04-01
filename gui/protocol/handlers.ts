@@ -65,12 +65,18 @@ function onInitSquareCoords(e: CoordsEvent) {
     square.redraw();
     area.addElem(sUid, square);
 
-    if (users.myName() === e.name) {
-      squares.setMyUid(sUid);
+    const textarea = square.getElem(getUid(TextArea.cname, e.name));
+    if (textarea instanceof TextArea) {
+      if (users.myName() === e.name) {
+        squares.setMyUid(sUid);
 
-      // TODO: once middleware is setup, refactor
-      const myTextara = square.getElem(getUid(TextArea.cname, e.name));
-      trackTextInput(myTextara);
+        // TODO: once middleware is setup, refactor
+        trackTextInput(textarea);
+      } else {
+        textarea.turnReadonly();
+      }
+    } else {
+      log.Warn(getUid(TextArea.cname, e.name), " not a textarea instance");
     }
 
     square.move(e.xPos, e.yPos);

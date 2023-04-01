@@ -4,6 +4,7 @@ import setId from '../../methods/setId';
 import getUid from '../../methods/getUid';
 import getName from '../../methods/getName';
 import create from '../../methods/create';
+import turnReadonly from './turnReadonly';
 import redraw from './redraw';
 
 class TextArea implements
@@ -33,6 +34,8 @@ class TextArea implements
 
   setId = setId;
   getUid = getUid;
+
+  turnReadonly = turnReadonly;
 }
 
 export default TextArea;
