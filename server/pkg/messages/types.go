@@ -30,6 +30,16 @@ type List struct {
   Items []string
 }
 
+type Record struct {
+  Value string
+  UpdatedAt int
+  CreatedAt int
+}
+
+type RecordsList struct {
+  Items []Record
+}
+
 type Identity struct {
   User string
   Area string

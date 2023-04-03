@@ -168,6 +168,32 @@ func (m *MouseMoveMessage) Encode() []byte {
   )
 }
 
+type TitlesListMessage struct {
+  Typed
+  RecordsList
+  Identity
+}
+
+func (m *TitlesListMessage) Encode() []byte {
+  meta.Log().Debug("encode titles list message")
+
+  typeBytes := m.Typed.Encode()
+  userBytes := m.Identity.Encode()
+  recordsBytes := m.RecordsList.Encode()
+
+  sizeBytes := encodeSize(len(typeBytes) + len(userBytes) + len(recordsBytes))
+
+  return bytes.Join(
+    [][]byte{
+      sizeBytes,
+      typeBytes,
+      userBytes,
+      recordsBytes,
+    },
+    []byte{},
+  )
+}
+
 type ClientsOnlineMessage struct {
   Typed
   List
@@ -334,6 +360,92 @@ func (m *List) Encode() []byte {
     [][]byte{
       countBytes.Bytes(),
       itemsBytes.Bytes(),
+    },
+    []byte{},
+  )
+}
+
+// recordsCount + []{itemSize + recordBytes}
+func (m *RecordsList) Encode() []byte {
+  countBytes := new(bytes.Buffer)
+  if err := binary.Write(countBytes, enc, uint16(len(m.Items))); err != nil {
+    meta.Log().Warn("error writing records count =", err)
+    return nil
+  }
+
+  itemsBytes := new(bytes.Buffer)
+  for _, item := range m.Items {
+    rb := item.Encode()
+
+    size := uint16(len(rb))
+    if err := binary.Write(itemsBytes, enc, size); err != nil {
+      meta.Log().Warn("error writing record name size =", err)
+      return nil
+    }
+
+    if err := binary.Write(itemsBytes, enc, rb); err != nil {
+      meta.Log().Warn("error writing record name size =", err)
+      return nil
+    }
+  }
+
+  return bytes.Join(
+    [][]byte{
+      countBytes.Bytes(),
+      itemsBytes.Bytes(),
+    },
+    []byte{},
+  )
+}
+
+// valueSize + valueBytes + updatedAtSize + updatedAtBytes + createdAtSize + createdAtBytes
+func (m *Record) Encode() []byte {
+  valueBytes := new(bytes.Buffer)
+  if err := binary.Write(valueBytes, enc, []byte(m.Value)); err != nil {
+    meta.Log().Warn("error writing record value")
+    return nil
+  }
+
+  valueSize := new(bytes.Buffer)
+  if err := binary.Write(valueSize, enc, uint16(valueBytes.Len())); err != nil {
+    meta.Log().Warn("error writing record value size =", err)
+    return nil
+  }
+
+  updatedAtBytes := new(bytes.Buffer)
+  if err := binary.Write(updatedAtBytes, enc, m.UpdatedAt); err != nil {
+    meta.Log().Warn("error writing record value")
+    return nil
+  }
+
+  updatedAtSize := new(bytes.Buffer)
+  if err := binary.Write(updatedAtSize, enc, uint16(updatedAtBytes.Len())); err != nil {
+    meta.Log().Warn("error writing record value size =", err)
+    return nil
+  }
+
+  createdAtBytes := new(bytes.Buffer)
+  if err := binary.Write(createdAtBytes, enc, m.CreatedAt); err != nil {
+    meta.Log().Warn("error writing record value")
+    return nil
+  }
+
+  createdAtSize := new(bytes.Buffer)
+  if err := binary.Write(createdAtSize, enc, uint16(createdAtBytes.Len())); err != nil {
+    meta.Log().Warn("error writing record value size =", err)
+    return nil
+  }
+
+  return bytes.Join(
+    [][]byte{
+      valueSize.Bytes(),
+      valueBytes.Bytes(),
+
+      updatedAtSize.Bytes(),
+      updatedAtBytes.Bytes(),
+
+      createdAtSize.Bytes(),
+      createdAtBytes.Bytes(),
     },
     []byte{},
   )

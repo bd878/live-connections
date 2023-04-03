@@ -10,6 +10,7 @@ const (
   squareInit int8 = 7
   squareMove int8 = 8
   text int8 = 9
+  titlesList int8 = 10
 )
 
 var enc = binary.LittleEndian
