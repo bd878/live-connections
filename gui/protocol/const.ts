@@ -9,6 +9,8 @@ const C: Record<string, any> = {
   MOUSE_MOVE_TYPE: 2,
   COORD_SIZE: 4,
 
+  TIMESTAMP_SIZE: 4, // int32
+
   AUTH_USER_TYPE: 1,
 
   USERS_ONLINE_TYPE: 3,
@@ -22,6 +24,8 @@ const C: Record<string, any> = {
   SQUARE_MOVE_TYPE: 8,
 
   TEXT_INPUT_TYPE: 9,
+
+  TITLES_LIST_TYPE: 10,
 };
 
 C.ENDIANNE = C.LITTLE_ENDIANNE;

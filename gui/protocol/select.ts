@@ -5,6 +5,7 @@ import {
   parseAuthOkMessage,
   parseTextInputMessage,
   parseUsersOnlineMessage,
+  parseTitlesListMessage,
 } from './parser';
 import {
   onMouseMove,
@@ -13,6 +14,7 @@ import {
   onUsersOnline,
   onAuthOk,
   onTextInput,
+  onListTitles,
 } from './handlers';
 
 const log = new Log("protocol/select");
@@ -38,6 +40,11 @@ async function select(b: any /* another set of bytes have come... */ ) {
     const slice = buffer.slice(offset);
 
     switch (type) {
+      case C.TITLES_LIST_TYPE:
+        setTimeout(() => {
+          parseTitlesListMessage(slice).then(onListTitles);
+        }, 0); /* throw it in a loop */
+        break;
       case C.MOUSE_MOVE_TYPE:
         setTimeout(() => {
           parseCoordsMessage(slice).then(onMouseMove);

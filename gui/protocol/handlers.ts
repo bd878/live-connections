@@ -8,9 +8,11 @@ import squares from '../entities/squares';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
 import TextArea from '../components/TextArea';
+import TitlesList from '../components/TitlesList';
 import Square from '../components/Square';
 import UserTile from '../components/UserTile';
-import diff from '../misc/diff';
+import TextRow from '../components/TextRow';
+import diff, { defaultMapper } from '../misc/diff';
 import getUid from '../misc/getUid';
 import getColorFromUserName from '../misc/getColorFromUserName';
 import {
@@ -86,7 +88,7 @@ function onInitSquareCoords(e: CoordsEvent) {
 function onUsersOnline(e: UsersOnlineEvent) {
   log.Info("onUsersOnline", e);
 
-  const diffPair = diff(users.listNames(), e.users);
+  const diffPair = diff(users.listNames(), e.users, defaultMapper);
   const leaved = diffPair[0];
   const entered = diffPair[1];
 
@@ -111,6 +113,7 @@ function onUsersOnline(e: UsersOnlineEvent) {
     const name = entered[i];
     const user = users.getByName(name);
 
+    // TODO: place UserTile logic into users.redraw()
     const tUid = getUid(UserTile.cname, name);
     if (!area.hasElem(tUid)) {
       const tile = new UserTile(user.color);
@@ -129,6 +132,61 @@ function onUsersOnline(e: UsersOnlineEvent) {
   }
 }
 
+function onListTitles(e: TitlesListEvent) {
+  log.Info("onListTitles", e);
+
+  const sUid = getUid(Square.cname, e.name);
+  if (area.hasElem(sUid)) {
+    const square = area.getElem(sUid);
+
+    if (square instanceof Square) {
+      const tUid = getUid(TitlesList.cname, e.name);
+      if (square.hasElem(tUid)) {
+        const titlesList = square.getElem(tUid);
+
+        if (titlesList instanceof TitlesList) {
+          // TODO: unify diffList logic with usersList
+          const diffPair = diff<TextRecord, number>(
+            titlesList.listRecords(),
+            e.records,
+            (v: TextRecord) => v.createdAt
+          );
+          const deleted = diffPair[0];
+          const added = diffPair[1];
+
+          for (let i = 0; i < deleted.length; i++) {
+            const id = deleted[i].createdAt;
+
+            const rUid = getUid(TextRow.cname, `${id}`);
+            ;(titlesList.hasElem(rUid) && titlesList.delElem(rUid))
+          }
+
+          for (let i = 0; i < added.length; i++) {
+            const textRecord = added[i];
+            const id = textRecord.createdAt;
+
+            const rUid = getUid(TextRow.cname, `${id}`);
+            if (!titlesList.hasElem(rUid)) {
+              const textRow = new TextRow(textRecord);
+              textRow.create(`${id}`);
+              textRow.redraw();
+              titlesList.addElem(rUid, textRow);
+            }
+          }
+        } else {
+          log.Warn("not TitlesList instance");
+        }
+      } else {
+        log.Warn("square has no TitlesList instance", tUid);
+      }
+    } else {
+      log.Warn("not Square instance");
+    }
+  } else {
+    log.Warn("area has no square instance", sUid);
+  }
+}
+
 export {
   onAuthOk,
   onMouseMove,
@@ -136,4 +194,5 @@ export {
   onInitSquareCoords,
   onUsersOnline,
   onTextInput,
+  onListTitles,
 };

@@ -3,6 +3,12 @@ type AreaName = string;
 
 type UserName = string;
 
+type TextRecord = {
+  value: string;
+  updatedAt: number; // int64
+  createdAt: number; // int64, id
+};
+
 type Uid = string;
 
 type Id = UserName;
@@ -50,7 +56,12 @@ type UsersOnlineEvent = {
 type TextInputEvent = {
   name: string;
   text: string;
-}
+};
+
+type TitlesListEvent = {
+  name: string;
+  records: TextRecord[];
+};
 
 interface Appendable {
   append(I: Elem): void;

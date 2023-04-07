@@ -3,6 +3,50 @@ import C from './const';
 
 const log = new Log("parser");
 
+// userSize + userBytes + recordsCount + []{recordSize + titleSize + titleBytes + updatedAtBytes + createdAtBytes}
+async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<TitlesListEvent> {
+  let offset = 0;
+  const dv = new DataView(buf);
+
+  let userSize = dv.getUint16(offset, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  if (userSize === 0) {
+    throw new Error(`[parseTitlesListMessage]: userSize is 0`);
+  }
+
+  const userBytes = new Uint8Array(buf, offset, userSize);
+  const blob = new Blob([userBytes]);
+  const name = await blob.text();
+  offset += userSize;
+
+  let recordsCount = dv.getUint16(offset, C.ENDIANNE)
+  offset += C.COUNT_USERS_SIZE;
+
+  const records: TextRecord[] = [];
+  for (let i = 0; i < recordsCount; i++) {
+    const recordSize = dv.getUint16(offset, C.ENDIANNE); // not used
+    offset += C.SIZE_PREFIX_SIZE;
+
+    const valueSize = dv.getUint16(offset, C.ENDIANNE);
+    offset += C.SIZE_PREFIX_SIZE;
+
+    const valueBytes = new Uint8Array(buf, offset, valueSize);
+    const valueBlob = new Blob([valueBytes]);
+    const value = await blob.text();
+
+    const updatedAt = dv.getInt32(offset, C.ENDIANNE);
+    offset += C.TIMESTAMP_SIZE;
+
+    const createdAt = dv.getInt32(offset, C.ENDIANNE);
+    offset += C.TIMESTAMP_SIZE;
+
+    records.push({ value, updatedAt, createdAt });
+  }
+
+  return { name, records } as TitlesListEvent;
+}
+
 async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEvent> {
   let offset = 0;
   const dv = new DataView(buf);
@@ -92,4 +136,5 @@ export {
   parseAuthOkMessage,
   parseUsersOnlineMessage,
   parseTextInputMessage,
+  parseTitlesListMessage,
 };
