@@ -1,5 +1,6 @@
 .titles-list {
   display: flex;
   flex-flow: column;
-  width: 20px;
+  width: 48px;
+  height: calc(100% - 20px);
 }
