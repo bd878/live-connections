@@ -35,7 +35,7 @@ type Client struct {
 
   textInput string
 
-  records [](*messages.Record)
+  records []*messages.Record
 
   registered chan bool
   unregistered chan bool
@@ -80,7 +80,7 @@ func (c *Client) TextInput() string {
 }
 
 func (c *Client) Records() [](*messages.Record) {
-  return nil
+  return c.records
 }
 
 func (c *Client) SetSquareCoords(XPos, YPos float32) {

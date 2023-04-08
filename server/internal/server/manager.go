@@ -85,26 +85,29 @@ func (m *Manager) Handle(ctx context.Context, num int) {
   }()
 
   for c := range m.queue {
-    meta.Log().Debug(fmt.Sprintf("handler %d get client %s", num, c.Name()))
+    func() {
+      meta.Log().Debug(fmt.Sprintf("handler %d get client %s", num, c.Name()))
+      defer meta.Log().Debug(fmt.Sprintf("handler %d free client %s", num, c.Name()))
 
-    if !m.disk.HasUser(ctx, c.Area(), c.Name()) {
-      meta.Log().Warn("area/user not exists, break")
-      break
-    }
+      u, err := m.disk.HasUser(ctx, c.Area(), c.Name())
+      if !u || err != nil {
+        meta.Log().Warn("area/user not exists, break")
+        return
+      }
 
-    var area *protocol.Area
-    if m.areas[c.Area()] == nil {
-      area = protocol.NewArea(m.disk)
-      m.areas[c.Area()] = area
+      var area *protocol.Area
+      if m.areas[c.Area()] == nil {
+        area = protocol.NewArea(m.disk)
+        m.areas[c.Area()] = area
 
-      go area.Run(ctx)
-    } else {
-      area = m.areas[c.Area()]
-    }
+        go area.Run(ctx)
+      } else {
+        area = m.areas[c.Area()]
+      }
 
-    c.SetArea(area)
-    c.Run(ctx)
-    meta.Log().Debug(fmt.Sprintf("handler %d free client %s", num, c.Name()))
+      c.SetArea(area)
+      c.Run(ctx)
+    }()
   }
 }
 

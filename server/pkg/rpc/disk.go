@@ -87,19 +87,20 @@ func (d *Disk) ListUsers(ctx context.Context, area string) ([]string, error) {
   return resp.GetUsers(), nil
 }
 
-func (d *Disk) HasUser(ctx context.Context, area, user string) bool {
+func (d *Disk) HasUser(ctx context.Context, area, user string) (bool, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   resp, err := d.area.HasUser(ctx, &proto.HasUserRequest{Area: area, User: user})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("area.HasUser failed: %v", err))
+    return false, err
   }
 
-  return resp.Result
+  return resp.Result, nil
 }
 
-func (d *Disk) WriteSquareCoords(ctx context.Context, area, user string, XPos, YPos float32) {
+func (d *Disk) WriteSquareCoords(ctx context.Context, area, user string, XPos, YPos float32) error {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
@@ -107,10 +108,13 @@ func (d *Disk) WriteSquareCoords(ctx context.Context, area, user string, XPos, Y
   _, err := d.square.Write(ctx, &proto.WriteSquareRequest{Area: area, Name: user, Coords: coords})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("square.Write failed: %v", err))
+    return err
   }
+
+  return nil
 }
 
-func (d *Disk) WriteText(ctx context.Context, area, user, value string) {
+func (d *Disk) WriteText(ctx context.Context, area, user, value string) error {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
@@ -118,7 +122,10 @@ func (d *Disk) WriteText(ctx context.Context, area, user, value string) {
   _, err := d.texts.Write(ctx, &proto.WriteTextRequest{Area: area, Name: user, Text: text})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("text.Write failed: %v", err))
+    return err
   }
+
+  return nil
 }
 
 func (d *Disk) ReadSquareCoords(ctx context.Context, area, user string) (*messages.Coords, error) {
@@ -140,9 +147,22 @@ func (d *Disk) ReadText(ctx context.Context, area, user string) (string, error) 
 
   resp, err := d.texts.Read(ctx, &proto.ReadRequest{Area: area, Name: user})
   if err != nil {
-    meta.Log().Warn(fmt.Sprintf("text.Read failed: %v", err))
+    meta.Log().Warn(fmt.Sprintf("texts.Read failed: %v", err))
     return "", err
   }
 
   return resp.Value, nil
+}
+
+func (d *Disk) ListTitles(ctx context.Context, area, user string) ([](*proto.TitleRecord), error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
+  defer cancel()
+
+  resp, err := d.texts.ListTitles(ctx, &proto.ListTitlesRequest{Area: area, User: user})
+  if err != nil {
+    meta.Log().Warn(fmt.Sprintf("texts.AddTitle failed: %v", err))
+    return nil, err
+  }
+
+  return resp.GetRecords(), nil
 }
