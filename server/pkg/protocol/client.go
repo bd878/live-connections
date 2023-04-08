@@ -35,6 +35,8 @@ type Client struct {
 
   textInput string
 
+  records [](*messages.Record)
+
   registered chan bool
   unregistered chan bool
   send chan []byte
@@ -75,6 +77,10 @@ func (c *Client) SquareY() float32 {
 
 func (c *Client) TextInput() string {
   return c.textInput
+}
+
+func (c *Client) Records() [](*messages.Record) {
+  return nil
 }
 
 func (c *Client) SetSquareCoords(XPos, YPos float32) {

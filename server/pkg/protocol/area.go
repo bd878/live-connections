@@ -2,8 +2,6 @@ package protocol
 
 import (
   "context"
-  "errors"
-  "fmt"
 
   "github.com/teralion/live-connections/meta"
   "github.com/teralion/live-connections/server/pkg/rpc"
@@ -67,18 +65,6 @@ func (a *Area) Run(ctx context.Context) {
   }
 }
 
-func (a *Area) GetClients() map[string]*Client {
-  return a.clients
-}
-
-func (a *Area) GetClient(name string) (*Client, error) {
-  if _, has := a.clients[name]; has {
-    return a.clients[name], nil
-  } else {
-    return nil, errors.New(fmt.Sprintf("no client %s", name))
-  }
-}
-
 func (a *Area) ListClientsOnline() []string {
   var names []string
   for _, client := range a.clients {
@@ -91,10 +77,7 @@ func (a *Area) ListSquaresCoords() map[string](*messages.Coords) {
   coords := make(map[string](*messages.Coords), len(a.clients))
 
   for _, client := range a.clients {
-    coords[client.Name()] = &messages.Coords{
-      XPos: client.SquareX(),
-      YPos: client.SquareY(),
-    }
+    coords[client.Name()] = messages.NewCoords(client.SquareX(), client.SquareY())
   }
   return coords
 }
@@ -103,11 +86,18 @@ func (a *Area) ListTextsInputs() map[string](*messages.Text) {
   texts := make(map[string](*messages.Text), len(a.clients))
 
   for _, client := range a.clients {
-    texts[client.Name()] = &messages.Text{
-      Str: client.TextInput(),
-    }
+    texts[client.Name()] = messages.NewText(client.TextInput())
   }
   return texts
+}
+
+func (a *Area) ListTitlesRecords() map[string]([](*messages.Record)) {
+  records := make(map[string]([](*messages.Record)), len(a.clients))
+
+  for _, client := range a.clients {
+    records[client.Name()] = client.Records()
+  }
+  return records
 }
 
 func (a *Area) saveClient(c *Client) {
@@ -131,6 +121,7 @@ func (a *Area) restoreClient(c *Client) {
   c.SetSquareCoords(coords.XPos, coords.YPos)
 }
 
+// TODO; send to given client only, broadcast is redundant
 func (a *Area) onRegister(c *Client) {
   meta.Log().Debug(c.Name(), "client registered")
 
@@ -141,6 +132,12 @@ func (a *Area) onRegister(c *Client) {
   for name, coords := range squaresCoords {
     squareInitMessage := messages.NewSquareInitMessage(name, coords.XPos, coords.YPos)
     a.broadcast <- squareInitMessage.Encode()
+  }
+
+  titlesRecords := a.ListTitlesRecords()
+  for name, records := range titlesRecords {
+    titlesListMessage := messages.NewTitlesListMessage(name, records)
+    a.broadcast <- titlesListMessage.Encode()
   }
 
   inputTexts := a.ListTextsInputs()
