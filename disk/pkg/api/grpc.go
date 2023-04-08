@@ -13,6 +13,11 @@ import (
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
+type GRPCServer struct {
+  server *grpc.Server
+  listener net.Listener
+}
+
 func NewGRPCServer(addr string) *GRPCServer {
   listener, err := net.Listen("tcp", addr)
   if err != nil {

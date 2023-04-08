@@ -10,7 +10,7 @@ import (
 
   "google.golang.org/protobuf/proto"
 
-  utils "github.com/teralion/live-connections/disk/internal/utils"
+  "github.com/teralion/live-connections/disk/pkg/utils"
   pb "github.com/teralion/live-connections/disk/pkg/proto"
 )
 
