@@ -32,12 +32,12 @@ type List struct {
 
 type Record struct {
   Value string
-  UpdatedAt int
-  CreatedAt int
+  UpdatedAt int32
+  CreatedAt int32
 }
 
 type RecordsList struct {
-  Items []Record
+  Items [](*Record)
 }
 
 type Identity struct {
