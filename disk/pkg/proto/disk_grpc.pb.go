@@ -412,6 +412,8 @@ var _SquareManager_serviceDesc = grpc.ServiceDesc{
 type TextsManagerClient interface {
 	Write(ctx context.Context, in *WriteTextRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Text, error)
+	AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*AddTitleResponse, error)
+	ListTitles(ctx context.Context, in *ListTitlesRequest, opts ...grpc.CallOption) (*ListTitlesResponse, error)
 }
 
 type textsManagerClient struct {
@@ -440,12 +442,32 @@ func (c *textsManagerClient) Read(ctx context.Context, in *ReadRequest, opts ...
 	return out, nil
 }
 
+func (c *textsManagerClient) AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*AddTitleResponse, error) {
+	out := new(AddTitleResponse)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/AddTitle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textsManagerClient) ListTitles(ctx context.Context, in *ListTitlesRequest, opts ...grpc.CallOption) (*ListTitlesResponse, error) {
+	out := new(ListTitlesResponse)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/ListTitles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TextsManagerServer is the server API for TextsManager service.
 // All implementations must embed UnimplementedTextsManagerServer
 // for forward compatibility
 type TextsManagerServer interface {
 	Write(context.Context, *WriteTextRequest) (*EmptyResponse, error)
 	Read(context.Context, *ReadRequest) (*Text, error)
+	AddTitle(context.Context, *AddTitleRequest) (*AddTitleResponse, error)
+	ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error)
 	mustEmbedUnimplementedTextsManagerServer()
 }
 
@@ -458,6 +480,12 @@ func (UnimplementedTextsManagerServer) Write(context.Context, *WriteTextRequest)
 }
 func (UnimplementedTextsManagerServer) Read(context.Context, *ReadRequest) (*Text, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
+}
+func (UnimplementedTextsManagerServer) AddTitle(context.Context, *AddTitleRequest) (*AddTitleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddTitle not implemented")
+}
+func (UnimplementedTextsManagerServer) ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTitles not implemented")
 }
 func (UnimplementedTextsManagerServer) mustEmbedUnimplementedTextsManagerServer() {}
 
@@ -508,6 +536,42 @@ func _TextsManager_Read_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TextsManager_AddTitle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddTitleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).AddTitle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/AddTitle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).AddTitle(ctx, req.(*AddTitleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextsManager_ListTitles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTitlesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).ListTitles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/ListTitles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).ListTitles(ctx, req.(*ListTitlesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _TextsManager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "disk.TextsManager",
 	HandlerType: (*TextsManagerServer)(nil),
@@ -519,6 +583,14 @@ var _TextsManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Read",
 			Handler:    _TextsManager_Read_Handler,
+		},
+		{
+			MethodName: "AddTitle",
+			Handler:    _TextsManager_AddTitle_Handler,
+		},
+		{
+			MethodName: "ListTitles",
+			Handler:    _TextsManager_ListTitles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
