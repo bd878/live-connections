@@ -86,6 +86,10 @@ const onTextAreaInput = debounce(async (event: any) => {
   socket.send(message);
 });
 
+const onAddTextRecord = debounce(() => {
+  log.Debug("button is pressed!");
+});
+
 function trackMouseMove() {
   document.addEventListener('mousemove', onMouseMove);
 }
@@ -99,8 +103,13 @@ function trackTextInput(elem: Elem & Accessible) {
   elem.get().addEventListener("input", onTextAreaInput);
 }
 
+function trackAddRecord(elem: Elem & Accessible) {
+  elem.get().addEventListener("click", onAddTextRecord);
+}
+
 export {
   trackTextInput,
   trackMouseMove,
   trackMousePress,
+  trackAddRecord,
 };

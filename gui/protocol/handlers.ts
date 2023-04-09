@@ -8,6 +8,7 @@ import squares from '../entities/squares';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
 import TextArea from '../components/TextArea';
+import Button from '../components/Button';
 import TitlesList from '../components/TitlesList';
 import Square from '../components/Square';
 import UserTile from '../components/UserTile';
@@ -17,6 +18,7 @@ import getUid from '../misc/getUid';
 import getColorFromUserName from '../misc/getColorFromUserName';
 import {
   trackTextInput,
+  trackAddRecord,
 } from '../listeners';
 import {
   isContainable,
@@ -70,17 +72,25 @@ function onInitSquareCoords(e: CoordsEvent) {
       .addElem(sUid, square);
 
     const textarea = square.getElem(getUid(TextArea.cname, e.name));
-    if (textarea instanceof TextArea) {
-      if (users.myName() === e.name) {
-        squares.setMyUid(sUid);
+    const button = square.getElem(getUid(Button.cname, e.name));
+    if (users.myName() === e.name) {
+      squares.setMyUid(sUid);
 
+      if (textarea instanceof TextArea) {
         // TODO: once middleware is setup, refactor
         trackTextInput(textarea);
       } else {
-        textarea.turnReadonly();
+        log.Warn(getUid(TextArea.cname, e.name), " not a textarea instance");
+      }
+
+      if (button instanceof Button) {
+        trackAddRecord(button);
+      } else {
+        log.Warn(getUid(Button.cname, e.name), " not a button instance");
       }
     } else {
-      log.Warn(getUid(TextArea.cname, e.name), " not a textarea instance");
+      ;((textarea instanceof TextArea) && textarea.turnReadonly());
+      ;((button instanceof Button) && button.turnReadonly());
     }
 
     square.move(e.xPos, e.yPos);

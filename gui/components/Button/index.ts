@@ -4,6 +4,7 @@ import getName from '../../methods/getName';
 import create from '../../methods/create';
 import setId from '../../methods/setId';
 import getUid from '../../methods/getUid';
+import turnReadonly from './turnReadonly';
 
 class Button implements
   Elem,
@@ -30,6 +31,8 @@ class Button implements
 
   setId = setId;
   getUid = getUid;
+
+  turnReadonly = turnReadonly;
 }
 
 export default Button;
