@@ -6,8 +6,9 @@ import setId from '../../methods/setId';
 import getUid from '../../methods/getUid';
 import getName from '../../methods/getName';
 import hasElem from '../../methods/hasElem';
+import addChild from '../../methods/addChild';
+import addElem from '../../methods/addElem';
 import delElemChild from '../../methods/delElemChild';
-import addElemChild from '../../methods/addElemChild';
 import redraw from './redraw';
 import getElem from './getElem';
 import create from './create';
@@ -45,9 +46,11 @@ class Square implements
 
   redraw = redraw;
 
+  addChild = addChild;
+
   hasElem = hasElem;
   getElem = getElem;
-  addElem = addElemChild;
+  addElem = addElem;
   delElem = delElemChild;
 
   setId = setId;

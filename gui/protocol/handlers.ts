@@ -65,7 +65,9 @@ function onInitSquareCoords(e: CoordsEvent) {
     const square = new Square(getColorFromUserName(e.name));
     square.create(e.name);
     square.redraw();
-    area.addElem(sUid, square);
+    area
+      .addChild(square)
+      .addElem(sUid, square);
 
     const textarea = square.getElem(getUid(TextArea.cname, e.name));
     if (textarea instanceof TextArea) {
@@ -119,7 +121,9 @@ function onUsersOnline(e: UsersOnlineEvent) {
       const tile = new UserTile(user.color);
       tile.create(name);
       tile.redraw();
-      usersList.addElem(tUid, tile);
+      usersList
+        .addChild(tile)
+        .addElem(tUid, tile);
     }
 
     const cUid = getUid(Cursor.cname, name);
@@ -127,7 +131,9 @@ function onUsersOnline(e: UsersOnlineEvent) {
       const cursor = new Cursor(user.color);
       cursor.create(name);
       cursor.redraw();
-      area.addElem(cUid, cursor);
+      area
+        .addChild(cursor)
+        .addElem(cUid, cursor);
     }
   }
 }
@@ -170,7 +176,9 @@ function onListTitles(e: TitlesListEvent) {
               const textRow = new TextRow(textRecord);
               textRow.create(`${id}`);
               textRow.redraw();
-              titlesList.addElem(rUid, textRow);
+              titlesList
+                .addChild(textRow)
+                .addElem(rUid, textRow);
             }
           }
         } else {

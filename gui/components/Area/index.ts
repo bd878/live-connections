@@ -4,7 +4,8 @@ import write from '../../methods/write';
 import create from '../../methods/create';
 import hasElem from '../../methods/hasElem';
 import getName from '../../methods/getName';
-import addElemChild from '../../methods/addElemChild';
+import addChild from '../../methods/addChild';
+import addElem from '../../methods/addElem';
 import delElemChild from '../../methods/delElemChild';
 import getElem from './getElem';
 import free from './free';
@@ -38,9 +39,11 @@ class Area implements
   free = free;
   write = write;
 
+  addChild = addChild;
+
   hasElem = hasElem;
   getElem = getElem;
-  addElem = addElemChild;
+  addElem = addElem;
   delElem = delElemChild;
 }
 

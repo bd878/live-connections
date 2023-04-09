@@ -6,8 +6,9 @@ import create from '../../methods/create';
 import getName from '../../methods/getName';
 import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
+import addChild from '../../methods/addChild';
 import delElemChild from '../../methods/delElemChild';
-import addElemChild from '../../methods/addElemChild';
+import addElem from '../../methods/addElem';
 import listRecords from './listRecords';
 
 class TitlesList implements
@@ -38,9 +39,11 @@ class TitlesList implements
 
   listRecords = listRecords;
 
+  addChild = addChild;
+
   hasElem = hasElem;
   getElem = getElem;
-  addElem = addElemChild;
+  addElem = addElem;
   delElem = delElemChild;
 
   setId = setId;
