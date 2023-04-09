@@ -170,6 +170,9 @@ function onListTitles(e: TitlesListEvent) {
           const deleted = diffPair[0];
           const added = diffPair[1];
 
+          log.Debug("deleted:", deleted);
+          log.Debug("added:", added);
+
           for (let i = 0; i < deleted.length; i++) {
             const id = deleted[i].createdAt;
 

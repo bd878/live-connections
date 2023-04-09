@@ -7,6 +7,7 @@ const C: Record<string, any> = {
   COUNT_USERS_SIZE: 2,
 
   MOUSE_MOVE_TYPE: 2,
+
   COORD_SIZE: 4,
 
   TIMESTAMP_SIZE: 4, // int32

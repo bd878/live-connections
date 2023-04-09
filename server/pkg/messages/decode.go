@@ -51,6 +51,8 @@ func (m *RawMessage) Decode() (Encoder, error) {
     return m.decodeSquareMove()
   case text:
     return m.decodeText()
+  case addRecord:
+    return m.decodeAddRecord()
   default:
     return nil, errors.New("undefined message type")
   }
@@ -163,6 +165,15 @@ func (m *RawMessage) decodeText() (Encoder, error) {
   }
 
   msg.SetText(string(textBytes))
+
+  return &msg, nil
+}
+
+func (m *RawMessage) decodeAddRecord() (Encoder, error) {
+  meta.Log().Debug("decode add record message")
+
+  typed := Typed{MessageType: addRecord}
+  msg := AddRecordMessage{Typed: typed}
 
   return &msg, nil
 }

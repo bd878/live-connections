@@ -235,6 +235,27 @@ func (m *ClientsOnlineMessage) Encode() []byte {
   )
 }
 
+type AddRecordMessage struct {
+  Typed
+}
+
+// totalSize + type
+func (m *AddRecordMessage) Encode() []byte {
+  meta.Log().Debug("encode record message")
+
+  typeBytes := m.Typed.Encode()
+
+  sizeBytes := encodeSize(len(typeBytes))
+
+  return bytes.Join(
+    [][]byte{
+      sizeBytes,
+      typeBytes,
+    },
+    []byte{},
+  )
+}
+
 type TextMessage struct {
   Typed
   Identity

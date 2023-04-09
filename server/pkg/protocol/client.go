@@ -96,6 +96,17 @@ func (c *Client) SetArea(area *Area) {
   c.area = area
 }
 
+func (c *Client) AddNewRecord() {
+  updatedAt := int32(time.Now().Unix())
+  createdAt := updatedAt
+
+  c.records = append(c.records, &messages.Record{
+    Value: "",
+    UpdatedAt: updatedAt,
+    CreatedAt: createdAt,
+  })
+}
+
 func (c *Client) Close() {
   meta.Log().Debug("close client")
 
@@ -176,6 +187,13 @@ func (c *Client) readLoop(quit chan struct{}) {
       c.squareYPos = message.YPos
 
       c.area.broadcast <- message.Encode()
+    case *messages.AddRecordMessage:
+      meta.Log().Debug(c.Name(), "add record message")
+
+      c.AddNewRecord()
+      responseMessage := messages.NewTitlesListMessage(c.Name(), c.Records())
+
+      c.area.broadcast <- responseMessage.Encode()
     default:
       meta.Log().Warn("unknown event")
     }
