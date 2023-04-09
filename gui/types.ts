@@ -5,8 +5,8 @@ type UserName = string;
 
 type TextRecord = {
   value: string;
-  updatedAt: number; // int64
-  createdAt: number; // int64, id
+  updatedAt: number; // int32
+  createdAt: number; // int32, id
 };
 
 type Uid = string;
@@ -107,13 +107,14 @@ interface Identifable {
   getUid(): Uid;
 }
 
-interface Containable<C extends BaseContainer = BaseContainer> {
-  container: C;
+interface Containable {
+  container: BaseContainer;
 
   hasElem(uid: Uid): boolean;
   getElem(uid: Uid): Elem;
-  addElem(uid: Uid, elem: Elem): void;
-  delElem(uid: Uid): void;
+  addChild(elem: Elem & Accessible): Containable;
+  addElem(uid: Uid, elem: Elem): Containable;
+  delElem(uid: Uid): Containable;
 }
 
 interface Clearable {
