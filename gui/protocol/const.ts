@@ -26,6 +26,8 @@ const C: Record<string, any> = {
   TEXT_INPUT_TYPE: 9,
 
   TITLES_LIST_TYPE: 10,
+
+  ADD_RECORD_TYPE: 11,
 };
 
 C.ENDIANNE = C.LITTLE_ENDIANNE;

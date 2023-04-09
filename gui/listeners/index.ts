@@ -9,6 +9,7 @@ import {
   makeMouseMoveMessage,
   makeSquareMoveMessage,
   makeTextInputMessage,
+  makeAddRecordMessage,
 } from '../protocol/messages';
 
 const log = new Log("listeners");
@@ -86,8 +87,9 @@ const onTextAreaInput = debounce(async (event: any) => {
   socket.send(message);
 });
 
-const onAddTextRecord = debounce(() => {
-  log.Debug("button is pressed!");
+const onAddRecord = debounce(async () => {
+  const message = await makeAddRecordMessage();
+  socket.send(message);
 });
 
 function trackMouseMove() {
@@ -104,7 +106,7 @@ function trackTextInput(elem: Elem & Accessible) {
 }
 
 function trackAddRecord(elem: Elem & Accessible) {
-  elem.get().addEventListener("click", onAddTextRecord);
+  elem.get().addEventListener("click", onAddRecord);
 }
 
 export {

@@ -11,6 +11,25 @@ function makeSquareMoveMessage(x: number, y: number): ABuffer {
   return makeCoordsMessage(x, y, C.SQUARE_MOVE_TYPE);
 }
 
+// messageSize + type
+async function makeAddRecordMessage(): Promise<ABuffer> {
+  const messageSize = (
+    C.TYPE_SIZE // type
+  );
+
+  const buffer = new ArrayBuffer(C.SIZE_PREFIX_SIZE + messageSize);
+  const dv: any = new DataView(buffer);
+
+  let offset = 0;
+  dv.setUint16(offset, messageSize, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  dv.setInt8(offset, C.ADD_RECORD_TYPE, C.ENDIANNE);
+  offset += C.TYPE_SIZE;
+
+  return buffer;
+}
+
 // messageSize + type + textSize + text
 async function makeTextInputMessage(text: string): Promise<ABuffer> {
   const textEncoded = new Blob([text], { type: "text/plain"});
@@ -127,4 +146,5 @@ export {
   makeAuthUserMessage,
   makeSquareMoveMessage,
   makeTextInputMessage,
+  makeAddRecordMessage,
 };
