@@ -6,8 +6,8 @@ import (
 
   dotenv "github.com/joho/godotenv"
 
-  "github.com/teralion/live-connections/meta"
-  "github.com/teralion/live-connections/disk/pkg/api"
+  "github.com/bd878/live-connections/meta"
+  "github.com/bd878/live-connections/disk/pkg/api"
 )
 
 func main() {

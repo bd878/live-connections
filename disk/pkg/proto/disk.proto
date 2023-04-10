@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/teralion/live-connections/disk/pkg/proto";
+option go_package = "github.com/bd878/live-connections/disk/pkg/proto";
 
 package disk;
 

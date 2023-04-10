@@ -7,8 +7,8 @@ import (
   "path/filepath"
   "errors"
 
-  "github.com/teralion/live-connections/disk/pkg/utils"
-  pb "github.com/teralion/live-connections/disk/pkg/proto"
+  "github.com/bd878/live-connections/disk/pkg/utils"
+  pb "github.com/bd878/live-connections/disk/pkg/proto"
 )
 
 const allEntries = -1

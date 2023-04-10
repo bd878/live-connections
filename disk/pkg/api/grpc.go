@@ -9,8 +9,8 @@ import (
 
   "google.golang.org/grpc"
 
-  services "github.com/teralion/live-connections/disk/internal/services"
-  pb "github.com/teralion/live-connections/disk/pkg/proto"
+  services "github.com/bd878/live-connections/disk/internal/services"
+  pb "github.com/bd878/live-connections/disk/pkg/proto"
 )
 
 type GRPCServer struct {
