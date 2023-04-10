@@ -85,6 +85,7 @@ message EmptyResponse {}
 message ReadRequest {
   string area = 1;
   string name = 2;
+  int32 recordId = 3;
 }
 
 message Text {
@@ -94,13 +95,19 @@ message Text {
 service TextsManager {
   rpc Write(WriteTextRequest) returns (EmptyResponse);
   rpc Read(ReadRequest) returns (Text);
-  rpc AddTitle(AddTitleRequest) returns (AddTitleResponse);
+  rpc AddTitle(AddTitleRequest) returns (TitleRecord);
   rpc ListTitles(ListTitlesRequest) returns (ListTitlesResponse);
 }
 
 message TitleRecord {
+  string value = 1;
   int32 updatedAt = 2;
   int32 createdAt = 3;
+}
+
+message TextRecord {
+  TitleRecord title = 1;
+  Text text = 2;
 }
 
 message WriteTextRequest {
@@ -108,20 +115,18 @@ message WriteTextRequest {
   string name = 2;
 
   Text text = 3;
+
+  int32 recordId = 4;
 }
 
 message AddTitleRequest {
   string area = 1;
-  string user = 2;
-}
-
-message AddTitleResponse {
-  TitleRecord record = 1;
+  string name = 2;
 }
 
 message ListTitlesRequest {
   string area = 1;
-  string user = 2;
+  string name = 2;
 }
 
 message ListTitlesResponse {

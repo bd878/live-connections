@@ -412,7 +412,7 @@ var _SquareManager_serviceDesc = grpc.ServiceDesc{
 type TextsManagerClient interface {
 	Write(ctx context.Context, in *WriteTextRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Text, error)
-	AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*AddTitleResponse, error)
+	AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*TitleRecord, error)
 	ListTitles(ctx context.Context, in *ListTitlesRequest, opts ...grpc.CallOption) (*ListTitlesResponse, error)
 }
 
@@ -442,8 +442,8 @@ func (c *textsManagerClient) Read(ctx context.Context, in *ReadRequest, opts ...
 	return out, nil
 }
 
-func (c *textsManagerClient) AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*AddTitleResponse, error) {
-	out := new(AddTitleResponse)
+func (c *textsManagerClient) AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*TitleRecord, error) {
+	out := new(TitleRecord)
 	err := c.cc.Invoke(ctx, "/disk.TextsManager/AddTitle", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -466,7 +466,7 @@ func (c *textsManagerClient) ListTitles(ctx context.Context, in *ListTitlesReque
 type TextsManagerServer interface {
 	Write(context.Context, *WriteTextRequest) (*EmptyResponse, error)
 	Read(context.Context, *ReadRequest) (*Text, error)
-	AddTitle(context.Context, *AddTitleRequest) (*AddTitleResponse, error)
+	AddTitle(context.Context, *AddTitleRequest) (*TitleRecord, error)
 	ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error)
 	mustEmbedUnimplementedTextsManagerServer()
 }
@@ -481,7 +481,7 @@ func (UnimplementedTextsManagerServer) Write(context.Context, *WriteTextRequest)
 func (UnimplementedTextsManagerServer) Read(context.Context, *ReadRequest) (*Text, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Read not implemented")
 }
-func (UnimplementedTextsManagerServer) AddTitle(context.Context, *AddTitleRequest) (*AddTitleResponse, error) {
+func (UnimplementedTextsManagerServer) AddTitle(context.Context, *AddTitleRequest) (*TitleRecord, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTitle not implemented")
 }
 func (UnimplementedTextsManagerServer) ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error) {
