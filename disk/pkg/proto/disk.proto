@@ -97,6 +97,19 @@ service TextsManager {
   rpc Read(ReadRequest) returns (Text);
   rpc AddTitle(AddTitleRequest) returns (TitleRecord);
   rpc ListTitles(ListTitlesRequest) returns (ListTitlesResponse);
+  rpc SelectTitle(SelectTitleRequest) returns (EmptyResponse);
+  rpc ReadSelectedTitle(ReadSelectedRequest) returns (TitleRecord);
+}
+
+message SelectTitleRequest {
+  string area = 1;
+  string name = 2;
+  int32 recordId = 3;
+}
+
+message ReadSelectedRequest {
+  string area = 1;
+  string name = 2;
 }
 
 message TitleRecord {

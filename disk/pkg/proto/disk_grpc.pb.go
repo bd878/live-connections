@@ -414,6 +414,8 @@ type TextsManagerClient interface {
 	Read(ctx context.Context, in *ReadRequest, opts ...grpc.CallOption) (*Text, error)
 	AddTitle(ctx context.Context, in *AddTitleRequest, opts ...grpc.CallOption) (*TitleRecord, error)
 	ListTitles(ctx context.Context, in *ListTitlesRequest, opts ...grpc.CallOption) (*ListTitlesResponse, error)
+	SelectTitle(ctx context.Context, in *SelectTitleRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
+	ReadSelectedTitle(ctx context.Context, in *ReadSelectedRequest, opts ...grpc.CallOption) (*TitleRecord, error)
 }
 
 type textsManagerClient struct {
@@ -460,6 +462,24 @@ func (c *textsManagerClient) ListTitles(ctx context.Context, in *ListTitlesReque
 	return out, nil
 }
 
+func (c *textsManagerClient) SelectTitle(ctx context.Context, in *SelectTitleRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/SelectTitle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *textsManagerClient) ReadSelectedTitle(ctx context.Context, in *ReadSelectedRequest, opts ...grpc.CallOption) (*TitleRecord, error) {
+	out := new(TitleRecord)
+	err := c.cc.Invoke(ctx, "/disk.TextsManager/ReadSelectedTitle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TextsManagerServer is the server API for TextsManager service.
 // All implementations must embed UnimplementedTextsManagerServer
 // for forward compatibility
@@ -468,6 +488,8 @@ type TextsManagerServer interface {
 	Read(context.Context, *ReadRequest) (*Text, error)
 	AddTitle(context.Context, *AddTitleRequest) (*TitleRecord, error)
 	ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error)
+	SelectTitle(context.Context, *SelectTitleRequest) (*EmptyResponse, error)
+	ReadSelectedTitle(context.Context, *ReadSelectedRequest) (*TitleRecord, error)
 	mustEmbedUnimplementedTextsManagerServer()
 }
 
@@ -486,6 +508,12 @@ func (UnimplementedTextsManagerServer) AddTitle(context.Context, *AddTitleReques
 }
 func (UnimplementedTextsManagerServer) ListTitles(context.Context, *ListTitlesRequest) (*ListTitlesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListTitles not implemented")
+}
+func (UnimplementedTextsManagerServer) SelectTitle(context.Context, *SelectTitleRequest) (*EmptyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelectTitle not implemented")
+}
+func (UnimplementedTextsManagerServer) ReadSelectedTitle(context.Context, *ReadSelectedRequest) (*TitleRecord, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadSelectedTitle not implemented")
 }
 func (UnimplementedTextsManagerServer) mustEmbedUnimplementedTextsManagerServer() {}
 
@@ -572,6 +600,42 @@ func _TextsManager_ListTitles_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TextsManager_SelectTitle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectTitleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).SelectTitle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/SelectTitle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).SelectTitle(ctx, req.(*SelectTitleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TextsManager_ReadSelectedTitle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReadSelectedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TextsManagerServer).ReadSelectedTitle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/disk.TextsManager/ReadSelectedTitle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TextsManagerServer).ReadSelectedTitle(ctx, req.(*ReadSelectedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _TextsManager_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "disk.TextsManager",
 	HandlerType: (*TextsManagerServer)(nil),
@@ -591,6 +655,14 @@ var _TextsManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListTitles",
 			Handler:    _TextsManager_ListTitles_Handler,
+		},
+		{
+			MethodName: "SelectTitle",
+			Handler:    _TextsManager_SelectTitle_Handler,
+		},
+		{
+			MethodName: "ReadSelectedTitle",
+			Handler:    _TextsManager_ReadSelectedTitle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

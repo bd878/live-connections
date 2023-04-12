@@ -11,6 +11,7 @@ import (
   "bufio"
   "os"
   "path/filepath"
+  "encoding/binary"
 
   "google.golang.org/protobuf/proto"
 
@@ -30,6 +31,8 @@ func buildFilename(id int32) string {
 }
 
 var textRe = regexp.MustCompile(`^\d*\.text\.state`)
+
+const selectedTextName = "selected.state"
 
 func NewTextsManagerServer(baseDir string) *TextsServer {
   return &TextsServer{Dir: baseDir}
@@ -52,7 +55,7 @@ func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (
 
   f, err := os.OpenFile(
     fp,
-    os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+    os.O_RDWR|os.O_CREATE,
     0644,
   )
   if err != nil {
@@ -68,21 +71,37 @@ func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (
   size := info.Size()
   p := make([]byte, size)
 
+  log.Println("file size:", size)
+
   bytesRead, err := f.Read(p)
   if err != nil {
     return nil, err
   }
 
+  log.Println("bytes read:", bytesRead)
+
   if int64(bytesRead) != size {
     return nil, errors.New("read less bytes than in file")
   }
 
-  textRecord := &pb.TextRecord{}
-  if err = proto.Unmarshal(p, textRecord); err != nil {
-    return nil, err
+  title := &pb.TitleRecord{}
+  text := &pb.Text{}
+  textRecord := &pb.TextRecord{Title: title, Text: text}
+  if len(p) > 0 {
+    if err = proto.Unmarshal(p, textRecord); err != nil {
+      return nil, err
+    }
   }
 
   textRecord.Text.Value = request.Text.Value
+
+  log.Println("text value:", request.Text.Value)
+
+  p, err = proto.Marshal(textRecord)
+  if err != nil {
+    log.Println("failed to marshal text record")
+    return nil, err
+  }
 
   buf := bufio.NewWriter(f)
   if _, err = buf.Write(p); err != nil {
@@ -135,7 +154,9 @@ func (s *TextsServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.Te
     return nil, errors.New("read less bytes than in file")
   }
 
-  textRecord := &pb.TextRecord{}
+  title := &pb.TitleRecord{}
+  text := &pb.Text{}
+  textRecord := &pb.TextRecord{Title: title, Text: text}
   if err = proto.Unmarshal(p, textRecord); err != nil {
     return nil, err
   }
@@ -198,7 +219,7 @@ func (s *TextsServer) AddTitle(ctx context.Context, request *pb.AddTitleRequest)
   return title, nil
 }
 
-func (s *TextsServer) ListTitles(ctx context.Context, request *pb.WriteTextRequest) (*pb.ListTitlesResponse, error) {
+func (s *TextsServer) ListTitles(ctx context.Context, request *pb.ListTitlesRequest) (*pb.ListTitlesResponse, error) {
   log.Println("list titles")
 
   if !utils.IsNameSafe(request.Area) {
@@ -247,7 +268,9 @@ func (s *TextsServer) ListTitles(ctx context.Context, request *pb.WriteTextReque
         return nil, errors.New("read less bytes than in file")
       }
 
-      textRecord := &pb.TextRecord{}
+      title := &pb.TitleRecord{}
+      text := &pb.Text{}
+      textRecord := &pb.TextRecord{Title: title, Text: text}
       if err = proto.Unmarshal(p, textRecord); err != nil {
         return nil, err
       }
@@ -261,4 +284,112 @@ func (s *TextsServer) ListTitles(ctx context.Context, request *pb.WriteTextReque
   }
 
   return result, nil
+}
+
+func (s *TextsServer) SelectTitle(ctx context.Context, request *pb.SelectTitleRequest) (*pb.EmptyResponse, error) {
+  log.Println("select title")
+
+  // TODO: check if record file exists
+  if !utils.IsNameSafe(request.Area) {
+    return nil, errors.New("area name not safe")
+  }
+
+  if !utils.IsNameSafe(request.Name) {
+    return nil, errors.New("user name not safe")
+  }
+
+  fp := filepath.Join(s.Dir, request.Area, request.Name, selectedTextName)
+  f, err := os.OpenFile(
+    fp,
+    os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+    0644,
+  )
+  if err != nil {
+    log.Println("failed to open file =", fp)
+    return nil, err
+  }
+
+  err = binary.Write(f, binary.LittleEndian, request.RecordId)
+  if err != nil {
+    return nil, err
+  }
+
+  return &pb.EmptyResponse{}, nil
+}
+
+func (s *TextsServer) ReadSelectedTitle(ctx context.Context, request *pb.ReadSelectedRequest) (*pb.TitleRecord, error) {
+  log.Println("read selected title")
+
+  // TODO: check if record file exists
+  if !utils.IsNameSafe(request.Area) {
+    return nil, errors.New("area name not safe")
+  }
+
+  if !utils.IsNameSafe(request.Name) {
+    return nil, errors.New("user name not safe")
+  }
+
+  fp := filepath.Join(s.Dir, request.Area, request.Name, selectedTextName)
+  f, err := os.OpenFile(
+    fp,
+    os.O_RDONLY,
+    0644,
+  )
+  if err != nil {
+    log.Println("failed to open file =", fp)
+    return nil, err
+  }
+
+  log.Println("selected filepath:", fp)
+
+  var recordId int32
+  err = binary.Read(f, binary.LittleEndian, &recordId)
+  if err != nil {
+    return nil, err
+  }
+
+  log.Println("selected recordId", recordId)
+
+  recordFp := filepath.Join(s.Dir, request.Area, request.Name, buildFilename(recordId))
+
+  log.Println("record fp:", recordFp)
+
+  recordF, err := os.OpenFile(
+    recordFp,
+    os.O_RDONLY,
+    0644,
+  )
+  if err != nil {
+    return nil, err
+  }
+
+  info, err := recordF.Stat()
+  if err != nil {
+    return nil, err
+  }
+
+  size := info.Size()
+  p := make([]byte, size)
+
+  bytesRead, err := recordF.Read(p)
+  if err != nil {
+    return nil, err
+  }
+
+  log.Println("size / bytes read:", size, bytesRead)
+
+  if int64(bytesRead) != size {
+    return nil, errors.New("read less bytes than in file")
+  }
+
+  title := &pb.TitleRecord{}
+  text := &pb.Text{}
+  textRecord := &pb.TextRecord{Title: title, Text: text}
+  if err = proto.Unmarshal(p, textRecord); err != nil {
+    return nil, err
+  }
+
+  log.Println("text record title:", textRecord.Title)
+
+  return textRecord.Title, nil
 }
