@@ -7,7 +7,7 @@ import (
 
   dotenv "github.com/joho/godotenv"
 
-  server "github.com/teralion/live-connections/client/internal/server"
+  server "github.com/bd878/live-connections/client/internal/server"
 )
 
 func main() {

@@ -1,3 +1,3 @@
-module github.com/teralion/live-connections/meta
+module github.com/bd878/live-connections/meta
 
 go 1.19
