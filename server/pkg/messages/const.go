@@ -12,6 +12,7 @@ const (
   text int8 = 9
   titlesList int8 = 10
   addRecord int8 = 11
+  selectRecord int8 = 12
 )
 
 var enc = binary.LittleEndian

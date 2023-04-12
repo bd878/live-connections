@@ -10,9 +10,9 @@ import (
   "sync"
 
   "github.com/gorilla/mux"
-  "github.com/teralion/live-connections/meta"
-  "github.com/teralion/live-connections/server/pkg/rpc"
-  "github.com/teralion/live-connections/server/pkg/protocol"
+  "github.com/bd878/live-connections/meta"
+  "github.com/bd878/live-connections/server/pkg/rpc"
+  "github.com/bd878/live-connections/server/pkg/protocol"
 )
 
 type Manager struct {
@@ -126,10 +126,28 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
 
   userName, err := m.disk.CreateNewUser(ctx, areaName.String())
   if err != nil {
-    meta.Log().Fatal("failed to create area", err)
+    meta.Log().Fatal("failed to create user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusBadRequest,
+    )
+    return
+  }
+  record, err := m.disk.AddTitle(ctx, areaName.String(), userName)
+  if err != nil {
+    meta.Log().Fatal("failed to add title to new user", err)
+    http.Error(w,
+      fmt.Sprint("cannot create user"),
+      http.StatusInternalServerError,
+    )
+    return
+  }
+  err = m.disk.SelectTitle(ctx, areaName.String(), userName, record.CreatedAt)
+  if err != nil {
+    meta.Log().Fatal("failed to select new title for new user", err)
+    http.Error(w,
+      fmt.Sprint("cannot create user"),
+      http.StatusInternalServerError,
     )
     return
   }

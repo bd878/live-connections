@@ -7,8 +7,8 @@ import (
 
   ws "github.com/gorilla/websocket"
 
-  "github.com/teralion/live-connections/meta"
-  "github.com/teralion/live-connections/server/pkg/messages"
+  "github.com/bd878/live-connections/meta"
+  "github.com/bd878/live-connections/server/pkg/messages"
 )
 
 const MaxPayloadSize int64 = 512
@@ -37,6 +37,8 @@ type Client struct {
 
   records []*messages.Record
 
+  record *messages.Record
+
   registered chan bool
   unregistered chan bool
   send chan []byte
@@ -53,6 +55,7 @@ func NewClient(conn *ws.Conn, areaName, myName string) *Client {
     conn: conn,
     areaName: areaName,
     myName: myName,
+    records: make([](*messages.Record), 0, 100),
     send: make(chan []byte, 256),
     registered: make(chan bool),
     unregistered: make(chan bool),
@@ -83,6 +86,32 @@ func (c *Client) Records() [](*messages.Record) {
   return c.records
 }
 
+func (c *Client) Record() *messages.Record {
+  return c.record
+}
+
+func (c *Client) RecordId() int32 {
+  return c.Record().CreatedAt
+}
+
+func (c *Client) SetRecord(r *messages.Record) {
+  c.record = r
+}
+
+func (c *Client) SetRecords(rs [](*messages.Record)) {
+  c.records = rs
+}
+
+func (c *Client) FindRecord(createdAt int32) *messages.Record {
+  var found *messages.Record
+  for i := 0; i < len(c.records) && found == nil; i++ {
+    if c.records[i].CreatedAt == createdAt {
+      found = c.records[i]
+    }
+  }
+  return found
+}
+
 func (c *Client) SetSquareCoords(XPos, YPos float32) {
   c.squareXPos = XPos
   c.squareYPos = YPos
@@ -96,15 +125,18 @@ func (c *Client) SetArea(area *Area) {
   c.area = area
 }
 
-func (c *Client) AddNewRecord() {
+func (c *Client) AddNewRecord() *messages.Record {
   updatedAt := int32(time.Now().Unix())
   createdAt := updatedAt
 
-  c.records = append(c.records, &messages.Record{
+  rec := &messages.Record{
     Value: "",
     UpdatedAt: updatedAt,
     CreatedAt: createdAt,
-  })
+  }
+
+  c.records = append(c.records, rec)
+  return rec
 }
 
 func (c *Client) Close() {
@@ -187,10 +219,18 @@ func (c *Client) readLoop(quit chan struct{}) {
       c.squareYPos = message.YPos
 
       c.area.broadcast <- message.Encode()
+    case *messages.SelectRecordMessage:
+      meta.Log().Debug(c.Name(), "add record message")
+
+      found := c.FindRecord(message.CreatedAt)
+      if found != nil {
+        meta.Log().Debug("selected record", found.CreatedAt)
+      }
     case *messages.AddRecordMessage:
       meta.Log().Debug(c.Name(), "add record message")
 
-      c.AddNewRecord()
+      rec := c.AddNewRecord()
+      c.SetRecord(rec)
       responseMessage := messages.NewTitlesListMessage(c.Name(), c.Records())
 
       c.area.broadcast <- responseMessage.Encode()

@@ -7,10 +7,10 @@ import (
 
   "google.golang.org/grpc"
 
-  "github.com/teralion/live-connections/disk/pkg/proto"
+  "github.com/bd878/live-connections/disk/pkg/proto"
 
-  "github.com/teralion/live-connections/meta"
-  "github.com/teralion/live-connections/server/pkg/messages"
+  "github.com/bd878/live-connections/meta"
+  "github.com/bd878/live-connections/server/pkg/messages"
 )
 
 type Disk struct {
@@ -114,12 +114,12 @@ func (d *Disk) WriteSquareCoords(ctx context.Context, area, user string, XPos, Y
   return nil
 }
 
-func (d *Disk) WriteText(ctx context.Context, area, user, value string) error {
+func (d *Disk) WriteText(ctx context.Context, area, user string, recordId int32, value string) error {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
   text := &proto.Text{Value: value}
-  _, err := d.texts.Write(ctx, &proto.WriteTextRequest{Area: area, Name: user, Text: text})
+  _, err := d.texts.Write(ctx, &proto.WriteTextRequest{Area: area, Name: user, Text: text, RecordId: recordId})
   if err != nil {
     meta.Log().Fatal(fmt.Sprintf("text.Write failed: %v", err))
     return err
@@ -141,28 +141,88 @@ func (d *Disk) ReadSquareCoords(ctx context.Context, area, user string) (*messag
   return &messages.Coords{XPos: resp.XPos, YPos: resp.YPos}, nil
 }
 
-func (d *Disk) ReadText(ctx context.Context, area, user string) (string, error) {
+func (d *Disk) ReadText(ctx context.Context, area, user string, recordId int32) (string, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  resp, err := d.texts.Read(ctx, &proto.ReadRequest{Area: area, Name: user})
+  resp, err := d.texts.Read(ctx, &proto.ReadRequest{Area: area, Name: user, RecordId: recordId})
   if err != nil {
-    meta.Log().Warn(fmt.Sprintf("texts.Read failed: %v", err))
+    meta.Log().Warn(fmt.Sprintf("texts.ReadText failed: %v", err))
     return "", err
   }
 
-  return resp.Value, nil
+  return resp.GetValue(), nil
 }
 
-func (d *Disk) ListTitles(ctx context.Context, area, user string) ([](*proto.TitleRecord), error) {
+func (d *Disk) AddTitle(ctx context.Context, area, user string) (*messages.Record, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  resp, err := d.texts.ListTitles(ctx, &proto.ListTitlesRequest{Area: area, User: user})
+  resp, err := d.texts.AddTitle(ctx, &proto.AddTitleRequest{Area: area, Name: user})
   if err != nil {
     meta.Log().Warn(fmt.Sprintf("texts.AddTitle failed: %v", err))
     return nil, err
   }
 
-  return resp.GetRecords(), nil
+  result := &messages.Record{
+    Value: resp.Value,
+    UpdatedAt: resp.UpdatedAt,
+    CreatedAt: resp.CreatedAt,
+  }
+
+  return result, nil
+}
+
+func (d *Disk) ListTitles(ctx context.Context, area, user string) ([](*messages.Record), error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
+  defer cancel()
+
+  resp, err := d.texts.ListTitles(ctx, &proto.ListTitlesRequest{Area: area, Name: user})
+  if err != nil {
+    meta.Log().Warn(fmt.Sprintf("texts.ListTitles failed: %v", err))
+    return nil, err
+  }
+
+  protoRecords := resp.GetRecords()
+  result := make([](*messages.Record), len(protoRecords))
+
+  for i, r := range protoRecords {
+    result[i] = &messages.Record{
+      Value: r.Value,
+      CreatedAt: r.CreatedAt,
+      UpdatedAt: r.UpdatedAt,
+    }
+  }
+
+  return result, nil
+}
+
+func (d *Disk) ReadSelectedTitle(ctx context.Context, area, user string) (*messages.Record, error) {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
+  defer cancel()
+
+  resp, err := d.texts.ReadSelectedTitle(ctx, &proto.ReadSelectedRequest{Area: area, Name: user})
+  if err != nil {
+    meta.Log().Warn(fmt.Sprintf("texts.ReadSelectedTitle failed: %v", err))
+    return nil, err
+  }
+
+  return &messages.Record{
+    Value: resp.Value,
+    CreatedAt: resp.CreatedAt,
+    UpdatedAt: resp.UpdatedAt,
+  }, nil
+}
+
+func (d *Disk) SelectTitle(ctx context.Context, area, user string, recordId int32) error {
+  ctx, cancel := context.WithTimeout(ctx, d.timeout)
+  defer cancel()
+
+  _, err := d.texts.SelectTitle(ctx, &proto.SelectTitleRequest{Area: area, Name: user, RecordId: recordId})
+  if err != nil {
+    meta.Log().Warn(fmt.Sprintf("texts.SelectTitle failed: %v", err))
+    return err
+  }
+
+  return nil
 }

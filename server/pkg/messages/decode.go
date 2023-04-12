@@ -7,7 +7,7 @@ import (
   "bytes"
   "errors"
 
-  "github.com/teralion/live-connections/meta"
+  "github.com/bd878/live-connections/meta"
 )
 
 type RawMessage struct {
@@ -53,6 +53,8 @@ func (m *RawMessage) Decode() (Encoder, error) {
     return m.decodeText()
   case addRecord:
     return m.decodeAddRecord()
+  case selectRecord:
+    return m.decodeSelectRecord()
   default:
     return nil, errors.New("undefined message type")
   }
@@ -150,7 +152,7 @@ func (m *RawMessage) decodeText() (Encoder, error) {
   mr := bytes.NewReader(m.Data)
 
   typed := Typed{MessageType: text}
-  msg := TextMessage{Typed: typed}
+  result := TextMessage{Typed: typed}
 
   var textSize uint16
   if err := binary.Read(mr, enc, &textSize); err != nil {
@@ -164,16 +166,23 @@ func (m *RawMessage) decodeText() (Encoder, error) {
     return nil, err
   }
 
-  msg.SetText(string(textBytes))
+  result.SetText(string(textBytes))
 
-  return &msg, nil
+  return &result, nil
 }
 
 func (m *RawMessage) decodeAddRecord() (Encoder, error) {
   meta.Log().Debug("decode add record message")
 
   typed := Typed{MessageType: addRecord}
-  msg := AddRecordMessage{Typed: typed}
+  result := AddRecordMessage{Typed: typed}
 
-  return &msg, nil
+  return &result, nil
+}
+
+// createdAtBytes
+func (m *RawMessage) decodeSelectRecord() (Encoder, error) {
+  meta.Log().Debug("decode select record message")
+
+  return nil, nil
 }

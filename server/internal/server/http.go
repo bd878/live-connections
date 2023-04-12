@@ -10,7 +10,7 @@ import (
   "path/filepath"
 
   "github.com/gorilla/mux"
-  "github.com/teralion/live-connections/meta"
+  "github.com/bd878/live-connections/meta"
 )
 
 var publicPath = filepath.Join("../", "public")

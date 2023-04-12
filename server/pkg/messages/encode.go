@@ -4,7 +4,7 @@ import (
   "encoding/binary"
   "bytes"
 
-  "github.com/teralion/live-connections/meta"
+  "github.com/bd878/live-connections/meta"
 )
 
 func (i *Identity) SetUser(name string) {
@@ -256,6 +256,33 @@ func (m *AddRecordMessage) Encode() []byte {
   )
 }
 
+type SelectRecordMessage struct {
+  Typed
+  Identity
+  CreatedAt int32
+}
+
+// totalSize + type + userSize + userBytes + createdAtBytes
+func (m *SelectRecordMessage) Encode() []byte {
+  meta.Log().Debug("encode select record message")
+
+  typeBytes := m.Typed.Encode()
+  userBytes := m.Identity.Encode()
+  timeBytes := encodeUnixTime(m.CreatedAt)
+
+  sizeBytes := encodeSize(len(typeBytes) + len(userBytes) + len(timeBytes))
+
+  return bytes.Join(
+    [][]byte{
+      sizeBytes,
+      typeBytes,
+      userBytes,
+      timeBytes,
+    },
+    []byte{},
+  )
+}
+
 type TextMessage struct {
   Typed
   Identity
@@ -462,27 +489,27 @@ func (m *Record) Encode() []byte {
     return nil
   }
 
-  updatedAtBytes := new(bytes.Buffer)
-  if err := binary.Write(updatedAtBytes, enc, m.UpdatedAt); err != nil {
-    meta.Log().Warn("error writing record value")
-    return nil
-  }
-
-  createdAtBytes := new(bytes.Buffer)
-  if err := binary.Write(createdAtBytes, enc, m.CreatedAt); err != nil {
-    meta.Log().Warn("error writing record value")
-    return nil
-  }
+  updatedAtBytes := encodeUnixTime(m.UpdatedAt)
+  createdAtBytes := encodeUnixTime(m.CreatedAt)
 
   return bytes.Join(
     [][]byte{
       valueSize.Bytes(),
       valueBytes.Bytes(),
-      updatedAtBytes.Bytes(),
-      createdAtBytes.Bytes(),
+      updatedAtBytes,
+      createdAtBytes,
     },
     []byte{},
   )
+}
+
+func encodeUnixTime(t int32) []byte {
+  timeBytes := new(bytes.Buffer)
+  if err := binary.Write(timeBytes, enc, t); err != nil {
+    meta.Log().Warn("error writing unix time value")
+    return nil
+  }
+  return timeBytes.Bytes()
 }
 
 func encodeSize(size int) []byte {

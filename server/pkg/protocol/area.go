@@ -3,9 +3,9 @@ package protocol
 import (
   "context"
 
-  "github.com/teralion/live-connections/meta"
-  "github.com/teralion/live-connections/server/pkg/rpc"
-  "github.com/teralion/live-connections/server/pkg/messages"
+  "github.com/bd878/live-connections/meta"
+  "github.com/bd878/live-connections/server/pkg/rpc"
+  "github.com/bd878/live-connections/server/pkg/messages"
 )
 
 type Area struct {
@@ -102,11 +102,26 @@ func (a *Area) ListTitlesRecords() map[string]([](*messages.Record)) {
 
 func (a *Area) saveClient(c *Client) {
   a.disk.WriteSquareCoords(context.TODO(), c.Area(), c.Name(), c.SquareX(), c.SquareY())
-  a.disk.WriteText(context.TODO(), c.Area(), c.Name(), c.TextInput())
+  a.disk.WriteText(context.TODO(), c.Area(), c.Name(), c.RecordId(), c.TextInput())
+  a.disk.SelectTitle(context.TODO(), c.Area(), c.Name(), c.RecordId())
 }
 
 func (a *Area) restoreClient(c *Client) {
-  text, err := a.disk.ReadText(context.TODO(), c.Area(), c.Name())
+  records, err := a.disk.ListTitles(context.TODO(), c.Area(), c.Name())
+  if err != nil {
+    meta.Log().Error(c.Area(), c.Name(), "has no records yet")
+    return
+  }
+  c.SetRecords(records)
+
+  record, err := a.disk.ReadSelectedTitle(context.TODO(), c.Area(), c.Name())
+  if err != nil {
+    meta.Log().Error("failed to read selected record")
+  } else {
+    c.SetRecord(record)
+  }
+
+  text, err := a.disk.ReadText(context.TODO(), c.Area(), c.Name(), c.RecordId())
   if err != nil {
     meta.Log().Error("failed to restore client input")
     return
