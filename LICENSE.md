@@ -1,4 +1,4 @@
-Copyright (c) 2022 github.com/teralion 
+Copyright (c) 2022 github.com/bd878 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

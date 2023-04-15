@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/bd878/live-connections/disk v0.0.0-20230408141444-9c53e6156fa3
-	github.com/bd878/live-connections/meta v0.0.0-20230408143603-08aac6a0bc9c
+	github.com/bd878/live-connections/meta v0.0.0-20230412053653-10d0c61eb70d
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/joho/godotenv v1.4.0
@@ -20,10 +20,6 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
-replace github.com/bd878/live-connections/meta => ../meta
-
 replace github.com/bd878/live-connections/server/pkg/rpc => ./pkg/rpc
 
 replace github.com/bd878/live-connections/server/internal/server => ./internal/server
-
-replace github.com/bd878/live-connections/disk => ../disk

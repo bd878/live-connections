@@ -3,7 +3,7 @@ module github.com/bd878/live-connections/disk
 go 1.19
 
 require (
-	github.com/bd878/live-connections/meta v0.0.0-20230408143603-08aac6a0bc9c
+	github.com/bd878/live-connections/meta v0.0.0-20230412053653-10d0c61eb70d
 	github.com/joho/godotenv v1.4.0
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
@@ -16,5 +16,3 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 )
-
-replace github.com/bd878/live-connections/meta => ../meta

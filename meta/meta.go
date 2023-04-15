@@ -19,7 +19,7 @@ var (
 func NewLogWriter(prefix string, degree string) *LogWriter {
   once.Do(func() {
     if degree == "" {
-      degree = "debug"
+      degree = "warn"
     }
 
     instance = LogWriter{
