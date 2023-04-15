@@ -153,7 +153,6 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
   }
 
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-  w.Header().Set("Access-Control-Allow-Origin", "*")
   fmt.Fprint(w, userName)
 }
 
@@ -171,7 +170,6 @@ func (m *Manager) HandleNewArea(w http.ResponseWriter, r *http.Request) {
   }
 
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-  w.Header().Set("Access-Control-Allow-Origin", "*")
   fmt.Fprint(w, areaName)
 }
 
@@ -191,7 +189,6 @@ func (m *Manager) HandleAreaUsers(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  w.Header().Set("Access-Control-Allow-Origin", "*")
   w.Header().Set("Content-Type", "text/plain; charset=utf-8")
   fmt.Fprint(w, users)
 }
