@@ -3,16 +3,16 @@ module github.com/bd878/live-connections/disk
 go 1.19
 
 require (
-	github.com/bd878/live-connections/meta v0.0.0-20230412053653-10d0c61eb70d
-	github.com/joho/godotenv v1.4.0
-	google.golang.org/grpc v1.51.0
-	google.golang.org/protobuf v1.28.1
+	github.com/bd878/live-connections/meta v0.0.0-20230415185003-1d802308ce63
+	github.com/joho/godotenv v1.5.1
+	google.golang.org/grpc v1.54.0
+	google.golang.org/protobuf v1.30.0
 )
 
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
-	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/text v0.4.0 // indirect
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	golang.org/x/net v0.8.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 )
