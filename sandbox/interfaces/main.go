@@ -47,6 +47,10 @@ func main() {
   if !ok {
     log.Fatal("not a pipe backend")
   }
+  v1 := reflect.ValueOf(p)
+  v2 := reflect.ValueOf(s)
+  fmt.Println(v1.Equal(v2))
+
   p.Respond()
   s.Shutdown()
 }
