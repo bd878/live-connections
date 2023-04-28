@@ -1,5 +1,7 @@
 github.com/bd878/live-connections/disk v0.0.0-20230415185003-1d802308ce63 h1:Gl02Mjcn1nBJonkaHNeJ28Snyfwyc0tSxgUmOteytiE=
 github.com/bd878/live-connections/disk v0.0.0-20230415185003-1d802308ce63/go.mod h1:jrEdJVlw1jBO81EXB2SlQOj26LTQCmUk8DTb18ISikk=
+github.com/bd878/live-connections/disk v0.0.0-20230417105641-5eb252a44741 h1:42+TakTsdSiyDepx5UGnxuuRXxpo5Fp8vLSLPuHdyWE=
+github.com/bd878/live-connections/disk v0.0.0-20230417105641-5eb252a44741/go.mod h1:KYq90zMYDyuu198Zh2Nj61dKNtXK0eAhjYiXPcIDRaY=
 github.com/bd878/live-connections/meta v0.0.0-20230415185003-1d802308ce63 h1:3GBw85UtOPQPIps3TXE2NBvUBXuRgjV95j8E6lfg3/o=
 github.com/bd878/live-connections/meta v0.0.0-20230415185003-1d802308ce63/go.mod h1:JYExmP02+fZNtNP+E8xPVB6sk7sg01DvD75404qf6lI=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
@@ -28,3 +30,5 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175w=
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+google.golang.org/protobuf v1.30.0 h1:kPPoIgf3TsEvrm0PFe15JQ+570QVxYzEvvHqChK+cng=
+google.golang.org/protobuf v1.30.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=

@@ -259,7 +259,7 @@ func (m *AddRecordMessage) Encode() []byte {
 type SelectRecordMessage struct {
   Typed
   Identity
-  CreatedAt int32
+  CreatedAt int32 // TODO: change on id
 }
 
 // totalSize + type + userSize + userBytes + createdAtBytes
@@ -475,7 +475,7 @@ func (m *RecordsList) Encode() []byte {
   )
 }
 
-// valueSize + valueBytes + updatedAtBytes + createdAtBytes
+// valueSize + valueBytes + idBytes + updatedAtBytes + createdAtBytes
 func (m *Record) Encode() []byte {
   valueBytes := new(bytes.Buffer)
   if err := binary.Write(valueBytes, enc, []byte(m.Value)); err != nil {
@@ -489,6 +489,12 @@ func (m *Record) Encode() []byte {
     return nil
   }
 
+  idBytes := new(bytes.Buffer)
+  if err := binary.Write(idBytes, enc, m.Id); err != nil {
+    meta.Log().Warn("error writing id value =", err)
+    return nil
+  }
+
   updatedAtBytes := encodeUnixTime(m.UpdatedAt)
   createdAtBytes := encodeUnixTime(m.CreatedAt)
 
@@ -496,6 +502,7 @@ func (m *Record) Encode() []byte {
     [][]byte{
       valueSize.Bytes(),
       valueBytes.Bytes(),
+      idBytes.Bytes(),
       updatedAtBytes,
       createdAtBytes,
     },

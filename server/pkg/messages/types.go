@@ -32,6 +32,7 @@ type List struct {
 
 type Record struct {
   Value string
+  Id int32
   UpdatedAt int32
   CreatedAt int32
 }

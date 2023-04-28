@@ -3,7 +3,7 @@ import C from './const';
 
 const log = new Log("parser");
 
-// userSize + userBytes + recordsCount + []{recordSize + titleSize + titleBytes + updatedAtBytes + createdAtBytes}
+// userSize + userBytes + recordsCount + []{recordSize + titleSize + titleBytes + id + updatedAt + createdAt}
 async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<TitlesListEvent> {
   let offset = 0;
   const dv = new DataView(buf);
@@ -28,12 +28,15 @@ async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<Title
     const recordSize = dv.getUint16(offset, C.ENDIANNE); // not used
     offset += C.SIZE_PREFIX_SIZE;
 
-    const valueSize = dv.getUint16(offset, C.ENDIANNE);
+    const titleSize = dv.getUint16(offset, C.ENDIANNE);
     offset += C.SIZE_PREFIX_SIZE;
 
-    const valueBytes = new Uint8Array(buf, offset, valueSize);
-    const valueBlob = new Blob([valueBytes]);
-    const value = await blob.text();
+    const titleBytes = new Uint8Array(buf, offset, titleSize);
+    const titleBlob = new Blob([titleBytes]);
+    const value = await titleBlob.text();
+
+    const id = dv.getInt32(offset, C.ENDIANNE);
+    offset += C.ID_SIZE;
 
     const updatedAt = dv.getInt32(offset, C.ENDIANNE);
     offset += C.TIMESTAMP_SIZE;
@@ -41,7 +44,9 @@ async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<Title
     const createdAt = dv.getInt32(offset, C.ENDIANNE);
     offset += C.TIMESTAMP_SIZE;
 
-    records.push({ value, updatedAt, createdAt });
+    log.Debug("value, id, updatedAt, createdAt:", value, id, updatedAt, createdAt);
+
+    records.push({ value, id, updatedAt, createdAt });
   }
 
   return { name, records } as TitlesListEvent;

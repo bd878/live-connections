@@ -4,9 +4,10 @@ type AreaName = string;
 type UserName = string;
 
 type TextRecord = {
+  id: number;        // int32
   value: string;
   updatedAt: number; // int32
-  createdAt: number; // int32, id
+  createdAt: number; // int32
 };
 
 type Uid = string;

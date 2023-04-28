@@ -116,6 +116,7 @@ message TitleRecord {
   string value = 1;
   int32 updatedAt = 2;
   int32 createdAt = 3;
+  int32 id = 4;
 }
 
 message TextRecord {

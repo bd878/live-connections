@@ -131,9 +131,12 @@ func (c *Client) AddNewRecord() *messages.Record {
 
   rec := &messages.Record{
     Value: "",
+    Id: createdAt,
     UpdatedAt: updatedAt,
     CreatedAt: createdAt,
   }
+
+  meta.Log().Debug(c.Name(), "add new record, id:", rec.Id)
 
   c.records = append(c.records, rec)
   return rec

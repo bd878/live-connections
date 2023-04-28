@@ -12,6 +12,8 @@ const C: Record<string, any> = {
 
   TIMESTAMP_SIZE: 4, // int32
 
+  ID_SIZE: 4, // int32
+
   AUTH_USER_TYPE: 1,
 
   USERS_ONLINE_TYPE: 3,

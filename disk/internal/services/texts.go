@@ -178,6 +178,8 @@ func (s *TextsServer) AddTitle(ctx context.Context, request *pb.AddTitleRequest)
   createdAt := int32(time.Now().Unix())
   updatedAt := createdAt
 
+  fmt.Println("name, createdAt, updatedAt", request.Name, createdAt, updatedAt)
+
   fp := filepath.Join(s.Dir, request.Area, request.Name, buildFilename(createdAt))
   f, err := os.OpenFile(
     fp,
@@ -190,6 +192,7 @@ func (s *TextsServer) AddTitle(ctx context.Context, request *pb.AddTitleRequest)
 
   title := &pb.TitleRecord{
     Value: "",
+    Id: createdAt,
     CreatedAt: createdAt,
     UpdatedAt: updatedAt,
   }
