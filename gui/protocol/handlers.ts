@@ -7,6 +7,7 @@ import areas from '../entities/areas';
 import squares from '../entities/squares';
 import usersList from '../components/UsersList';
 import Cursor from '../components/Cursor';
+import Button from '../components/Button';
 import TextArea from '../components/TextArea';
 import TitlesList from '../components/TitlesList';
 import Square from '../components/Square';
@@ -35,13 +36,17 @@ function onAuthOk(e: AuthOkEvent) {
 }
 
 function onMouseMove(e: CoordsEvent) {
-  const cursor = area.getElem(getUid(Cursor.cname, e.name));
-  cursor.move(e.xPos, e.yPos);
+  if (area.hasElem(getUid(Square.cname, e.name))) {
+    const cursor = area.getElem(getUid(Cursor.cname, e.name));
+    cursor.move(e.xPos, e.yPos);
+  }
 }
 
 function onSquareMove(e: CoordsEvent) {
-  const square = area.getElem(getUid(Square.cname, e.name));
-  square.move(e.xPos, e.yPos);
+  if (area.hasElem(getUid(Square.cname, e.name))) {
+    const square = area.getElem(getUid(Square.cname, e.name));
+    square.move(e.xPos, e.yPos);
+  }
 }
 
 function onTextInput(e: TextInputEvent) {
@@ -49,11 +54,13 @@ function onTextInput(e: TextInputEvent) {
 
   log.Debug("onTextInput", e);
 
-  const square = area.getElem(getUid(Square.cname, e.name));
-  if (isContainable(square)) {
-    const textarea = square.getElem(getUid(TextArea.cname, e.name));
-    if (isRedrawable(textarea)) {
-      textarea.redraw(e.text);
+  if (area.hasElem(getUid(Square.cname, e.name))) {
+    const square = area.getElem(getUid(Square.cname, e.name));
+    if (isContainable(square)) {
+      const textarea = square.getElem(getUid(TextArea.cname, e.name));
+      if (isRedrawable(textarea)) {
+        textarea.redraw(e.text);
+      }
     }
   }
 }
@@ -71,6 +78,7 @@ function onInitSquareCoords(e: CoordsEvent) {
       .addElem(sUid, square);
 
     const textarea = square.getElem(getUid(TextArea.cname, e.name));
+    const button = square.getElem(getUid(Button.cname, e.name));
     if (users.myName() === e.name) {
       squares.setMyUid(sUid);
 
@@ -80,8 +88,15 @@ function onInitSquareCoords(e: CoordsEvent) {
       } else {
         log.Warn(getUid(TextArea.cname, e.name), " not a textarea instance");
       }
+
+      if (button instanceof Button) {
+        trackAddRecord(button);
+      } else {
+        log.Warn(getUid(Button.cname, e.name), " not a button instance");
+      }
     } else {
       ;((textarea instanceof TextArea) && textarea.turnReadonly());
+      ;((button instanceof Button) && button.turnReadonly());
     }
 
     square.move(e.xPos, e.yPos);
