@@ -490,7 +490,7 @@ func (m *Record) Encode() []byte {
   }
 
   idBytes := new(bytes.Buffer)
-  if err := binary.Write(idBytes, enc, m.Id); err != nil {
+  if err := binary.Write(idBytes, enc, m.ID); err != nil {
     meta.Log().Warn("error writing id value =", err)
     return nil
   }

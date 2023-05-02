@@ -15,30 +15,43 @@ type RawMessage struct {
   Raw
 }
 
+func NewRawMessage() *RawMessage {
+  return &RawMessage{}
+}
+
 // size + type + raw
-func ReadFrom(r io.Reader) (Decoder, error) {
-  raw := Raw{}
-
-  if err := binary.Read(r, enc, &raw.Size); err != nil {
+func (m *RawMessage) ReadFrom(r io.Reader) (int, error) {
+  if err := binary.Read(r, enc, &m.Raw.Size); err != nil {
     meta.Log().Warn("binary.Read size err =", err)
-    return nil, err
+    return 0, err
   }
 
-  typed := Typed{}
-  if err := binary.Read(r, enc, &typed.MessageType); err != nil {
+  if err := binary.Read(r, enc, &m.Typed.MessageType); err != nil {
     meta.Log().Warn("failed to read message type")
-    return nil, err
+    return 0, err
   }
 
-  raw.Size = raw.Size - uint16(unsafe.Sizeof(typed.MessageType)) // size = type + raw
+  m.Raw.Size = m.Raw.Size - uint16(unsafe.Sizeof(m.Typed.MessageType)) // size = type + raw
 
-  raw.Data = make([]byte, raw.Size)
-  if err := binary.Read(r, enc, &raw.Data); err != nil {
+  m.Raw.Data = make([]byte, m.Raw.Size)
+  if err := binary.Read(r, enc, &m.Raw.Data); err != nil {
     meta.Log().Warn("binary.Read message err =", err)
-    return nil, err
+    return 0, err
   }
 
-  return &RawMessage{Typed: typed, Raw: raw}, nil
+  return m.Size(), nil
+}
+
+func (m *RawMessage) Read(p []byte) (int, error) {
+  r := bytes.NewReader(p)
+
+  return m.ReadFrom(r)
+}
+
+func (m *RawMessage) Size() int {
+  return int(unsafe.Sizeof(m.Typed.MessageType)) +
+    int(unsafe.Sizeof(m.Raw.Size)) +
+    len(m.Raw.Data)
 }
 
 func (m *RawMessage) Decode() (Encoder, error) {
