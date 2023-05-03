@@ -50,7 +50,9 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  client := protocol.NewClient(conn, area, user)
+  client := protocol.NewClient(conn)
+  client.SetName(user)
+  client.SetDisk(m.disk)
 
   if len(m.queue) < m.maxConns {
     m.queue <- client
@@ -89,23 +91,25 @@ func (m *Manager) Handle(ctx context.Context, num int) {
       meta.Log().Debug(fmt.Sprintf("handler %d get client %s", num, c.Name()))
       defer meta.Log().Debug(fmt.Sprintf("handler %d free client %s", num, c.Name()))
 
-      u, err := m.disk.HasUser(ctx, c.Area(), c.Name())
+      u, err := m.disk.HasUser(ctx, c.ParentName(), c.Name())
       if !u || err != nil {
         meta.Log().Warn("area/user not exists, break")
         return
       }
 
       var area *protocol.Area
-      if m.areas[c.Area()] == nil {
-        area = protocol.NewArea(m.disk)
-        m.areas[c.Area()] = area
+      if m.areas[c.ParentName()] == nil {
+        area = protocol.NewArea(c.ParentName())
+        area.SetDisk(m.disk)
+
+        m.areas[c.ParentName()] = area
 
         go area.Run(ctx)
       } else {
-        area = m.areas[c.Area()]
+        area = m.areas[c.ParentName()]
       }
 
-      c.SetArea(area)
+      c.SetParent(area)
       c.Run(ctx)
     }()
   }
@@ -142,7 +146,7 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
     )
     return
   }
-  err = m.disk.SelectTitle(ctx, areaName.String(), userName, record.Id)
+  err = m.disk.SelectTitle(ctx, areaName.String(), userName, record.ID)
   if err != nil {
     meta.Log().Fatal("failed to select new title for new user", err)
     http.Error(w,

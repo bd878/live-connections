@@ -2,34 +2,71 @@ package protocol
 
 import (
   "context"
+  "errors"
 
   "github.com/bd878/live-connections/meta"
   "github.com/bd878/live-connections/server/pkg/rpc"
   "github.com/bd878/live-connections/server/pkg/messages"
 )
 
+type Registry map[string]*Client
+
 type Area struct {
+  name string
+
   disk *rpc.Disk
-  clients map[string]*Client
-  register chan *Client
-  unregister chan *Client
+
+  registry Registry
+
   broadcast chan []byte
 }
 
-func NewArea(disk *rpc.Disk) *Area {
+func NewArea(name string) *Area {
   return &Area{
-    disk: disk,
-    register: make(chan *Client, 1),
-    unregister: make(chan *Client, 1),
-    broadcast: make(chan []byte, 256),
-    clients: make(map[string]*Client, 10),
+    name: name,
+    registry: make(Registry, MaxClients),
+    broadcast: make(chan []byte, MTU),
   }
 }
 
-func (a *Area) Close() {
-  close(a.register)
-  close(a.unregister)
+func (a *Area) Name() string {
+  return a.name
+}
+
+func (a *Area) Broadcast() chan []byte {
+  return a.broadcast
+}
+
+func (a *Area) Subscribers() *Registry {
+  return &a.registry
+}
+
+func (a *Area) Disk() *rpc.Disk {
+  return a.disk
+}
+
+func (a *Area) SetDisk(d *rpc.Disk) {
+  a.disk = d
+}
+
+func (a *Area) close() {
   close(a.broadcast)
+}
+
+func (a *Area) Join(n Named) {
+  c, ok := n.(*Client)
+  if !ok {
+    meta.Log().Warn("n is not a Client, cannot join")
+    return
+  }
+
+  a.registry[n.Name()] = c
+  a.onJoin()
+}
+
+func (a *Area) Lose(n Named) {
+  delete(a.registry, n.Name())
+  a.onLeave()
 }
 
 func (a *Area) Run(ctx context.Context) {
@@ -40,131 +77,87 @@ func (a *Area) Run(ctx context.Context) {
     select {
     case <-ctx.Done():
       return
-    case client := <-a.register:
-      a.clients[client.Name()] = client
-
-      a.restoreClient(client)
-      go a.onRegister(client)
-    case client := <-a.unregister:
-      if _, ok := a.clients[client.Name()]; ok {
-        a.saveClient(client)
-
-        delete(a.clients, client.Name())
-
-        go a.onUnregister(client)
-      }
-    case bytes := <-a.broadcast:
-      for _, client := range a.clients {
+    case bytes := <-a.Broadcast():
+      for _, c := range a.registry {
         select {
-        case client.send <- bytes:
+        case c.Send() <- bytes:
         default:
-          a.unregister <- client
+          c.Quit() <- struct{}{}
         }
       }
     }
   }
 }
 
-func (a *Area) ListClientsOnline() []string {
+func (a *Area) List() []string {
   var names []string
-  for _, client := range a.clients {
-    names = append(names, client.Name())
+  for name, _ := range a.registry {
+    names = append(names, name)
   }
   return names
 }
 
-func (a *Area) ListSquaresCoords() map[string](*messages.Coords) {
-  coords := make(map[string](*messages.Coords), len(a.clients))
-
-  for _, client := range a.clients {
-    coords[client.Name()] = messages.NewCoords(client.SquareX(), client.SquareY())
+func (a *Area) Get(n string) (interface{}, error) {
+  v, ok := a.registry[n]
+  if !ok {
+    return nil, errors.New("no subscriber with given name")
   }
+  return v, nil
+}
+
+func (a *Area) listSquaresCoords() map[string](*messages.Coords) {
+  coords := make(map[string](*messages.Coords), len(a.registry))
+
+  for name, c := range a.registry {
+    coords[name] = messages.NewCoords(c.SquareX(), c.SquareY())
+  }
+
   return coords
 }
 
-func (a *Area) ListTextsInputs() map[string](*messages.Text) {
-  texts := make(map[string](*messages.Text), len(a.clients))
+func (a *Area) listTextsInputs() map[string](*messages.Text) {
+  texts := make(map[string](*messages.Text), len(a.registry))
 
-  for _, client := range a.clients {
-    texts[client.Name()] = messages.NewText(client.TextInput())
+  for name, c := range a.registry {
+    texts[name] = messages.NewText(c.InputText())
   }
   return texts
 }
 
-func (a *Area) ListTitlesRecords() map[string]([](*messages.Record)) {
-  records := make(map[string]([](*messages.Record)), len(a.clients))
+func (a *Area) listTitlesRecords() map[string]([](*messages.Record)) {
+  records := make(map[string]([](*messages.Record)), len(a.registry))
 
-  for _, client := range a.clients {
-    records[client.Name()] = client.Records()
+  for name, c := range a.registry {
+    records[name] = c.Records()
   }
+
   return records
 }
 
-func (a *Area) saveClient(c *Client) {
-  a.disk.WriteSquareCoords(context.TODO(), c.Area(), c.Name(), c.SquareX(), c.SquareY())
-  a.disk.WriteText(context.TODO(), c.Area(), c.Name(), c.RecordId(), c.TextInput())
-  a.disk.SelectTitle(context.TODO(), c.Area(), c.Name(), c.RecordId())
+func (a *Area) onLeave() {
+  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.List())
+  a.Broadcast() <- clientsOnlineMessage.Encode()
 }
 
-func (a *Area) restoreClient(c *Client) {
-  records, err := a.disk.ListTitles(context.TODO(), c.Area(), c.Name())
-  if err != nil {
-    meta.Log().Error(c.Area(), c.Name(), "has no records yet")
-    return
-  }
-  c.SetRecords(records)
+func (a *Area) onJoin() {
+  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.List())
+  a.Broadcast() <- clientsOnlineMessage.Encode()
 
-  record, err := a.disk.ReadSelectedTitle(context.TODO(), c.Area(), c.Name())
-  if err != nil {
-    meta.Log().Error("failed to read selected record")
-  } else {
-    c.SetRecord(record)
-  }
-
-  text, err := a.disk.ReadText(context.TODO(), c.Area(), c.Name(), c.RecordId())
-  if err != nil {
-    meta.Log().Error("failed to restore client input")
-    return
-  }
-  c.SetTextInput(text)
-
-  coords, err := a.disk.ReadSquareCoords(context.TODO(), c.Area(), c.Name())
-  if err != nil {
-    meta.Log().Error("failed to read client square coords")
-    return
-  }
-  c.SetSquareCoords(coords.XPos, coords.YPos)
-}
-
-// TODO; send to given client only, broadcast is redundant
-func (a *Area) onRegister(c *Client) {
-  meta.Log().Debug(c.Name(), "client registered")
-
-  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.ListClientsOnline())
-  a.broadcast <- clientsOnlineMessage.Encode()
-
-  squaresCoords := a.ListSquaresCoords()
+  squaresCoords := a.listSquaresCoords()
   for name, coords := range squaresCoords {
     squareInitMessage := messages.NewSquareInitMessage(name, coords.XPos, coords.YPos)
-    a.broadcast <- squareInitMessage.Encode()
+    a.Broadcast() <- squareInitMessage.Encode()
   }
 
-  titlesRecords := a.ListTitlesRecords()
+  titlesRecords := a.listTitlesRecords()
   for name, records := range titlesRecords {
     titlesListMessage := messages.NewTitlesListMessage(name, records)
-    a.broadcast <- titlesListMessage.Encode()
+    a.Broadcast() <- titlesListMessage.Encode()
   }
 
-  inputTexts := a.ListTextsInputs()
+  inputTexts := a.listTextsInputs()
   for name, text := range inputTexts {
     textMessage := messages.NewTextMessage(name, text.Str)
-    a.broadcast <- textMessage.Encode()
+    a.Broadcast() <- textMessage.Encode()
   }
-}
-
-func (a *Area) onUnregister(c *Client) {
-  meta.Log().Debug(c.Name(), "client unregistered")
-
-  clientsOnlineMessage := messages.NewClientsOnlineMessage(a.ListClientsOnline())
-  a.broadcast <- clientsOnlineMessage.Encode()
 }

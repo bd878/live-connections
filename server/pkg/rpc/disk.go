@@ -170,7 +170,7 @@ func (d *Disk) AddTitle(ctx context.Context, area, user string) (*messages.Recor
 
   result := &messages.Record{
     Value: resp.Value,
-    Id: resp.Id,
+    ID: resp.Id,
     UpdatedAt: resp.UpdatedAt,
     CreatedAt: resp.CreatedAt,
   }
@@ -194,7 +194,7 @@ func (d *Disk) ListTitles(ctx context.Context, area, user string) ([](*messages.
   for i, r := range protoRecords {
     result[i] = &messages.Record{
       Value: r.Value,
-      Id: r.Id,
+      ID: r.Id,
       CreatedAt: r.CreatedAt,
       UpdatedAt: r.UpdatedAt,
     }
