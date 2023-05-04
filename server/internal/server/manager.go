@@ -50,16 +50,36 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  client := protocol.NewClient(conn)
-  client.SetName(user)
-  client.SetDisk(m.disk)
-
-  if len(m.queue) < m.maxConns {
-    m.queue <- client
-  } else {
+  if len(m.queue) > m.maxConns {
     meta.Log().Warn("queue is busy")
     return
   }
+
+  u, err := m.disk.HasUser(context.Background(), area, user)
+  if !u || err != nil {
+    meta.Log().Warn("area/user not exists, break")
+    return
+  }
+
+  c := protocol.NewClient(conn)
+  c.SetName(user)
+  c.SetDisk(m.disk)
+
+  var parent *protocol.Area
+  if m.areas[area] == nil {
+    parent = protocol.NewArea(area)
+    parent.SetDisk(m.disk)
+
+    m.areas[area] = parent
+
+    go parent.Run(context.Background())
+  } else {
+    parent = m.areas[area]
+  }
+
+  c.SetParent(parent)
+
+  m.queue <- c
 }
 
 func (m *Manager) Close() {
@@ -91,25 +111,6 @@ func (m *Manager) Handle(ctx context.Context, num int) {
       meta.Log().Debug(fmt.Sprintf("handler %d get client %s", num, c.Name()))
       defer meta.Log().Debug(fmt.Sprintf("handler %d free client %s", num, c.Name()))
 
-      u, err := m.disk.HasUser(ctx, c.ParentName(), c.Name())
-      if !u || err != nil {
-        meta.Log().Warn("area/user not exists, break")
-        return
-      }
-
-      var area *protocol.Area
-      if m.areas[c.ParentName()] == nil {
-        area = protocol.NewArea(c.ParentName())
-        area.SetDisk(m.disk)
-
-        m.areas[c.ParentName()] = area
-
-        go area.Run(ctx)
-      } else {
-        area = m.areas[c.ParentName()]
-      }
-
-      c.SetParent(area)
       c.Run(ctx)
     }()
   }

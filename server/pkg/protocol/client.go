@@ -16,6 +16,7 @@ import (
 type Parent interface {
   Broadcaster
   Space
+  Named
 }
 
 type Client struct {
@@ -81,12 +82,7 @@ func (c *Client) Done() <-chan struct{} {
 }
 
 func (c *Client) ParentName() string {
-  v, ok := c.parent.(Named)
-  if !ok {
-    meta.Log().Warn("v is not a named")
-    return ""
-  }
-  return v.Name()
+  return c.parent.Name()
 }
 
 func (c *Client) Name() string {
@@ -206,14 +202,13 @@ func (c *Client) Run(ctx context.Context) {
   }()
 
   var wg sync.WaitGroup
+  wg.Add(2)
   go func() {
     defer wg.Done()
-    wg.Add(1)
     c.receiveLoop()
   }()
   go func() {
     defer wg.Done()
-    wg.Add(1)
     c.sendLoop()
   }()
 
@@ -234,14 +229,16 @@ func (c *Client) receiveLoop() {
         _, r, err := c.conn.NextReader()
         if err != nil {
           meta.Log().Warn(c.Name(), "failed to obtain next reader", err)
-          continue
+          c.Quit() <- struct{}{}
+          return
         }
 
         rawMessage := messages.NewRawMessage()
         _, err = rawMessage.ReadFrom(r)
         if err != nil {
           meta.Log().Warn(c.Name(), "failed to read message", err)
-          continue
+          c.Quit() <- struct{}{}
+          return
         }
 
         c.receive <- rawMessage

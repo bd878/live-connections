@@ -3,11 +3,13 @@ package main
 import (
   "fmt"
   "time"
+  "context"
   "sync"
 )
 
 type Val struct {
   Ch chan string
+  ctx context.Context
 }
 
 func (v *Val) Loop(pr string) {
@@ -16,8 +18,8 @@ func (v *Val) Loop(pr string) {
 
   for {
     select {
-    case str := <-v.Ch:
-      fmt.Println(pr, ": ", str)
+    case <-v.ctx.Done():
+      fmt.Println(pr, ": done")
       return
     case t := <-ticker.C:
       fmt.Println(pr, ": tick", t)
@@ -26,8 +28,11 @@ func (v *Val) Loop(pr string) {
 }
 
 func main() {
+  ctx, cancel := context.WithCancel(context.Background())
+
   v := &Val{
     Ch: make(chan string, 2),
+    ctx: ctx,
   }
 
   var wg sync.WaitGroup
@@ -44,9 +49,7 @@ func main() {
 
   fmt.Println("sleeping...")
   time.Sleep(3 * time.Second)
-
-  v.Ch <- "aaa test"
-  v.Ch <- "bbb test"
+  cancel()
 
   fmt.Println("waiting...")
   wg.Wait()

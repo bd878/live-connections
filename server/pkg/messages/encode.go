@@ -43,8 +43,6 @@ type AuthMessage struct {
 
 // totalSize + type + text message
 func (m *AuthMessage) Encode() []byte {
-  meta.Log().Debug("encode auth message")
-
   typeBytes := m.Typed.Encode()
   textBytes := m.Text.Encode()
 
@@ -77,8 +75,6 @@ func NewSquareMoveMessage(user string, XPos, YPos float32) *SquareMoveMessage {
 
 // totalSize + type + userSize + userBytes + XPos + YPos
 func (m *SquareMoveMessage) Encode() []byte {
-  meta.Log().Debug("encode coords message")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   coordsBytes := m.Coords.Encode()
@@ -113,8 +109,6 @@ func NewSquareInitMessage(user string, XPos, YPos float32) *SquareInitMessage {
 
 // totalSize + type + userSize + userBytes + XPos + YPos
 func (m *SquareInitMessage) Encode() []byte {
-  meta.Log().Debug("encode square move")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   coordsBytes := m.Coords.Encode()
@@ -149,8 +143,6 @@ func NewMouseMoveMessage(user string, XPos, YPos float32) *MouseMoveMessage {
 
 // totalSize + type + userSize + userBytes + XPos + YPos
 func (m *MouseMoveMessage) Encode() []byte {
-  meta.Log().Debug("encode mouse move message")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   coordsBytes := m.Coords.Encode()
@@ -184,8 +176,6 @@ func NewTitlesListMessage(user string, items [](*Record)) *TitlesListMessage {
 }
 
 func (m *TitlesListMessage) Encode() []byte {
-  meta.Log().Debug("encode titles list message")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   recordsBytes := m.RecordsList.Encode()
@@ -218,8 +208,6 @@ func NewClientsOnlineMessage(items []string) *ClientsOnlineMessage {
 
 // totalSize + type + usersCount + []{userSize + userBytes}
 func (m *ClientsOnlineMessage) Encode() []byte {
-  meta.Log().Debug("encode clients online message")
-
   typeBytes := m.Typed.Encode()
   itemsBytes := m.List.Encode()
 
@@ -241,8 +229,6 @@ type AddRecordMessage struct {
 
 // totalSize + type
 func (m *AddRecordMessage) Encode() []byte {
-  meta.Log().Debug("encode record message")
-
   typeBytes := m.Typed.Encode()
 
   sizeBytes := encodeSize(len(typeBytes))
@@ -264,8 +250,6 @@ type SelectRecordMessage struct {
 
 // totalSize + type + userSize + userBytes + createdAtBytes
 func (m *SelectRecordMessage) Encode() []byte {
-  meta.Log().Debug("encode select record message")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   timeBytes := encodeUnixTime(m.CreatedAt)
@@ -300,8 +284,6 @@ func NewTextMessage(user, str string) *TextMessage {
 
 // totalSize + type + userSize + userBytes + textSize + textBytes
 func (m *TextMessage) Encode() []byte {
-  meta.Log().Debug("encode text input message")
-
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   textBytes := m.Text.Encode()

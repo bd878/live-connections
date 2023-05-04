@@ -75,8 +75,6 @@ func (m *RawMessage) Decode() (Encoder, error) {
 
 // areaSize + areaBytes + userSize + userBytes
 func (m *RawMessage) decodeAuth() (Encoder, error) {
-  meta.Log().Debug("decode auth")
-
   mr := bytes.NewReader(m.Raw.Data)
 
   var areaSize uint16
@@ -112,8 +110,6 @@ func (m *RawMessage) decodeAuth() (Encoder, error) {
 }
 
 func (m *RawMessage) decodeMouseMove() (Encoder, error) {
-  meta.Log().Debug("decode mouse move")
-
   typed := Typed{MessageType: mouseMove}
   msg := MouseMoveMessage{Typed: typed}
   var err error
@@ -125,8 +121,6 @@ func (m *RawMessage) decodeMouseMove() (Encoder, error) {
 }
 
 func (m *RawMessage) decodeSquareMove() (Encoder, error) {
-  meta.Log().Debug("decode square move")
-
   typed := Typed{MessageType: squareMove}
   msg := SquareMoveMessage{Typed: typed}
   var err error
@@ -139,8 +133,6 @@ func (m *RawMessage) decodeSquareMove() (Encoder, error) {
 
 // XPos + YPos
 func (m *RawMessage) decodeCoords() (Coords, error) {
-  meta.Log().Debug("decode coords")
-
   mr := bytes.NewReader(m.Data)
 
   result := Coords{}
@@ -160,8 +152,6 @@ func (m *RawMessage) decodeCoords() (Coords, error) {
 
 // textSize + text message
 func (m *RawMessage) decodeText() (Encoder, error) {
-  meta.Log().Debug("decode text message")
-
   mr := bytes.NewReader(m.Data)
 
   typed := Typed{MessageType: text}
@@ -185,8 +175,6 @@ func (m *RawMessage) decodeText() (Encoder, error) {
 }
 
 func (m *RawMessage) decodeAddRecord() (Encoder, error) {
-  meta.Log().Debug("decode add record message")
-
   typed := Typed{MessageType: addRecord}
   result := AddRecordMessage{Typed: typed}
 
@@ -195,7 +183,5 @@ func (m *RawMessage) decodeAddRecord() (Encoder, error) {
 
 // createdAtBytes
 func (m *RawMessage) decodeSelectRecord() (Encoder, error) {
-  meta.Log().Debug("decode select record message")
-
   return nil, nil
 }
