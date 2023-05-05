@@ -4,6 +4,7 @@ import (
   "testing"
   "io"
   "fmt"
+  "time"
   "log"
   "context"
   "sync"
@@ -56,11 +57,14 @@ func TestClient(_ *testing.T) {
   wg.Add(1)
   go func() {
     defer wg.Done()
-    fmt.Println("server is listening...")
+    fmt.Println("server is listening...") 
     if err := serv.ListenAndServe(); err != nil {
       log.Fatal(err)
     }
   }()
+
+  t := time.NewTimer(1500*time.Millisecond)
+  <-t.C
 
   _, err := http.Get("http://localhost:8080")
   if err != nil {
