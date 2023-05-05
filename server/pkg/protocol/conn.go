@@ -7,26 +7,30 @@ import (
   ws "github.com/gorilla/websocket"
 )
 
-type ProtocolConn struct {
+type WSConn struct {
   *ws.Conn
 }
 
-func NewConn(wsConn *ws.Conn) *ProtocolConn {
-  return &ProtocolConn{wsConn}
+func NewConn(wsConn *ws.Conn) *WSConn {
+  return &WSConn{wsConn}
 }
 
-func (p *ProtocolConn) Init() {
+func (p *WSConn) Init() {
   p.SetReadLimit(MaxPayloadSize)
   p.SetReadDeadline(time.Now().Add(PongWait))
   p.SetPongHandler(func(string) error { p.SetReadDeadline(time.Now().Add(PongWait)); return nil })
 }
 
-func (p *ProtocolConn) NextReader() (int, io.Reader, error) {
+func (p *WSConn) NextReader() (int, io.Reader, error) {
   return p.NextReader()
 }
 
-func (p *ProtocolConn) WriteMessage(messageType int, data []byte) error {
+func (p *WSConn) WriteMessage(messageType int, data []byte) error {
   p.SetWriteDeadline(time.Now().Add(WriteWait))
 
   return p.WriteMessage(messageType, data)
+}
+
+func (p *WSConn) Close() error {
+  return p.Close()
 }
