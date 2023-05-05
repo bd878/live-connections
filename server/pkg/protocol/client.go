@@ -6,8 +6,6 @@ import (
   "sync"
   "context"
 
-  ws "github.com/gorilla/websocket"
-
   "github.com/bd878/live-connections/meta"
   "github.com/bd878/live-connections/server/pkg/rpc"
   "github.com/bd878/live-connections/server/pkg/messages"
@@ -20,7 +18,7 @@ type Parent interface {
 }
 
 type Client struct {
-  conn *ws.Conn
+  conn Conn
 
   parent Parent
 
@@ -45,11 +43,7 @@ type Client struct {
   receive chan *messages.RawMessage
 }
 
-func NewClient(conn *ws.Conn) *Client {
-  conn.SetReadLimit(MaxPayloadSize)
-  conn.SetReadDeadline(time.Now().Add(PongWait))
-  conn.SetPongHandler(func(string) error { conn.SetReadDeadline(time.Now().Add(PongWait)); return nil })
-
+func NewClient(conn Conn) *Client {
   square := &messages.Coords{}
   cursor := &messages.Coords{}
   input := &Text{}
@@ -323,9 +317,7 @@ func (c *Client) sendLoop() {
       return
 
     case bytes := <-c.Send():
-      c.conn.SetWriteDeadline(time.Now().Add(WriteWait))
-
-      err := c.conn.WriteMessage(ws.BinaryMessage, append(bytes, []byte{'\n'}...))
+      err := c.conn.WriteMessage(BinaryMessage, append(bytes, []byte{'\n'}...))
       if err != nil {
         meta.Log().Warn("failed to write bytes")
         c.Quit() <- struct{}{}
@@ -333,9 +325,7 @@ func (c *Client) sendLoop() {
       }
 
     case <-ticker.C:
-      c.conn.SetWriteDeadline(time.Now().Add(WriteWait))
-
-      if err := c.conn.WriteMessage(ws.PingMessage, nil); err != nil {
+      if err := c.conn.WriteMessage(PingMessage, nil); err != nil {
         meta.Log().Warn(fmt.Sprintf("ping message writing failed, err: %v\n", err))
         c.Quit() <- struct{}{}
         return

@@ -61,7 +61,10 @@ func (m *Manager) HandleWS(w http.ResponseWriter, r *http.Request) {
     return
   }
 
-  c := protocol.NewClient(conn)
+  cn := protocol.NewConn(conn)
+  cn.Init()
+
+  c := protocol.NewClient(cn)
   c.SetName(user)
   c.SetDisk(m.disk)
 

@@ -2,6 +2,7 @@ package protocol
 
 import (
   "context"
+  "io"
 
   "github.com/bd878/live-connections/server/pkg/messages"
 )
@@ -13,6 +14,12 @@ type Text struct {
 type Records struct {
   List []*messages.Record
   Selected *messages.Record
+}
+
+type Conn interface {
+  NextReader() (int, io.Reader, error)
+  WriteMessage(messageType int, data []byte) error
+  Close() error
 }
 
 type Sender interface {

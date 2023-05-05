@@ -1,6 +1,10 @@
 package protocol
 
-import "time"
+import (
+  "time"
+
+  ws "github.com/gorilla/websocket"
+)
 
 const (
   MaxPayloadSize int64 = 512
@@ -9,4 +13,9 @@ const (
   WriteWait = 10 * time.Second
   MaxClients = 10
   MTU = 256
+)
+
+const (
+  BinaryMessage = ws.BinaryMessage
+  PingMessage = ws.PingMessage
 )
