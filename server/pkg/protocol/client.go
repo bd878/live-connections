@@ -119,8 +119,17 @@ func (c *Client) SetName(name string) {
   c.name = name
 }
 
-func (c *Client) SetParent(p Parent) {
+func (c *Client) SetParent(v interface{}) {
+  p, ok := v.(Parent)
+  if !ok {
+    meta.Log().Warn("not a parent")
+    return
+  }
   c.parent = p
+}
+
+func (c *Client) Parent() Parent {
+  return c.parent
 }
 
 func (c *Client) SetSelectedRecord(r *messages.Record) {

@@ -39,6 +39,11 @@ type Broadcaster interface {
   Broadcast() chan []byte
 }
 
+type Children interface {
+  SetParent(v interface{})
+  Parent() interface{}
+}
+
 type Squared interface {
   SquareX() float32
   SquareY() float32
@@ -58,8 +63,7 @@ type Catalogable interface {
 }
 
 type Space interface {
-  Join(v Named)
-  Lose(v Named)
+  Join(v interface{})
+  Lose(v interface{})
   List() []string
-  Get(n string) (interface{}, error)
 }

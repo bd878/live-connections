@@ -2,7 +2,6 @@ package protocol
 
 import (
   "context"
-  "errors"
 
   "github.com/bd878/live-connections/meta"
   "github.com/bd878/live-connections/server/pkg/rpc"
@@ -53,18 +52,24 @@ func (a *Area) close() {
   close(a.broadcast)
 }
 
-func (a *Area) Join(n Named) {
-  c, ok := n.(*Client)
+func (a *Area) Join(v interface{}) {
+  c, ok := v.(*Client)
   if !ok {
     meta.Log().Warn("n is not a Client, cannot join")
     return
   }
 
-  a.registry[n.Name()] = c
+  a.registry[c.Name()] = c
   a.onJoin()
 }
 
-func (a *Area) Lose(n Named) {
+func (a *Area) Lose(v interface{}) {
+  n, ok := v.(Named)
+  if !ok {
+    meta.Log().Warn("v is not named")
+    return
+  }
+
   delete(a.registry, n.Name())
   a.onLeave()
 }
@@ -95,14 +100,6 @@ func (a *Area) List() []string {
     names = append(names, name)
   }
   return names
-}
-
-func (a *Area) Get(n string) (interface{}, error) {
-  v, ok := a.registry[n]
-  if !ok {
-    return nil, errors.New("no subscriber with given name")
-  }
-  return v, nil
 }
 
 func (a *Area) listSquaresCoords() map[string](*messages.Coords) {
