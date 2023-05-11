@@ -18,6 +18,8 @@ type Area struct {
   registry Registry
 
   broadcast chan []byte
+
+  running bool
 }
 
 func NewArea(name string) *Area {
@@ -33,6 +35,11 @@ func (a *Area) Name() string {
 }
 
 func (a *Area) Broadcast() chan []byte {
+  if !a.Running() {
+    meta.Log().Error("area is not running")
+    panic("area is in inconsistent state")
+  }
+
   return a.broadcast
 }
 
@@ -74,9 +81,16 @@ func (a *Area) Lose(v interface{}) {
   a.onLeave()
 }
 
+func (a *Area) Running() bool {
+  return a.running
+}
+
 func (a *Area) Run(ctx context.Context) {
   meta.Log().Debug("area is running")
   defer meta.Log().Debug("area stopped running")
+  defer func (){ a.running = false }()
+
+  a.running = true
 
   for {
     select {

@@ -41,6 +41,8 @@ type Client struct {
   quit chan struct{}
 
   receive chan *messages.RawMessage
+
+  running bool
 }
 
 func NewClient(conn Conn) *Client {
@@ -64,6 +66,11 @@ func NewClient(conn Conn) *Client {
 }
 
 func (c *Client) Send() chan []byte {
+  if !c.Running() {
+    meta.Log().Error("client is not running")
+    panic("client is in inconsistent state")
+  }
+
   return c.send
 }
 
@@ -193,8 +200,15 @@ func (c *Client) close() {
   close(c.receive)
 }
 
+func (c *Client) Running() bool {
+  return c.running
+}
+
 func (c *Client) Run(ctx context.Context) {
   defer c.close()
+  defer func (){ c.running = false }()
+
+  c.running = true
 
   innerCtx, cancel := context.WithCancel(ctx)
   c.ctx = innerCtx

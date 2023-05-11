@@ -28,6 +28,7 @@ type Sender interface {
 }
 
 type Runnable interface {
+  Running() bool
   Run(ctx context.Context)
 }
 
