@@ -17,12 +17,19 @@ type Parent interface {
   Named
 }
 
+type Disk interface {
+  rpc.IdentityDisk
+  rpc.SquareDisk
+  rpc.TextDisk
+  rpc.CatalogDisk
+}
+
 type Client struct {
   conn Conn
 
   parent Parent
 
-  disk *rpc.Disk
+  disk Disk
 
   name string
 
@@ -114,11 +121,11 @@ func (c *Client) RecordID() int32 {
   return c.Record().CreatedAt
 }
 
-func (c *Client) Disk() *rpc.Disk {
+func (c *Client) Disk() Disk {
   return c.disk
 }
 
-func (c *Client) SetDisk(d *rpc.Disk) {
+func (c *Client) SetDisk(d Disk) {
   c.disk = d
 }
 
