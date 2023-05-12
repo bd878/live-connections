@@ -23,3 +23,5 @@ require (
 replace github.com/bd878/live-connections/disk/pkg/proto => ../disk/pkg/proto
 
 replace github.com/bd878/live-connections/disk => ../disk
+
+replace github.com/bd878/live-connections/server/pkg/mock => ./pkg/mock
