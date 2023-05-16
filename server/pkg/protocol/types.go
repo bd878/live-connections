@@ -52,15 +52,14 @@ type Squared interface {
   SetSquareY(YPos float32)
 }
 
-type Inputable interface {
-  InputText() string
-  SetInputText(text string)
-}
-
 type Catalogable interface {
   Records() []*messages.Record
+  SelectedRecord() *messages.Record
   SetRecords(rr []*messages.Record)
   FindRecord(recordID int32) *messages.Record
+  SelectRecord(recordID int32)
+  Text() string
+  SetText(txt string)
 }
 
 type Space interface {

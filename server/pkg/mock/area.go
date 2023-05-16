@@ -18,6 +18,10 @@ func (p *Area) Name() string {
   return p.name
 }
 
+func (p *Area) SetName(n string) {
+  p.name = name
+}
+
 func (p *Area) Broadcast() chan []byte {
   return p.broadcast
 }

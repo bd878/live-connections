@@ -37,8 +37,6 @@ type Client struct {
 
   cursor *messages.Coords
 
-  input *Text
-
   records *Records
 
   ctx context.Context
@@ -55,16 +53,15 @@ type Client struct {
 func NewClient(conn Conn) *Client {
   square := &messages.Coords{}
   cursor := &messages.Coords{}
-  input := &Text{}
   records := &Records{
     List: make([](*messages.Record), 0, 100),
+    Selected: nil,
   }
 
   return &Client{
     conn: conn,
     square: square,
     cursor: cursor,
-    input: input,
     records: records,
     send: make(chan []byte, 256),
     quit: make(chan struct{}),
@@ -105,20 +102,25 @@ func (c *Client) SquareY() float32 {
   return c.square.YPos
 }
 
-func (c *Client) InputText() string {
-  return c.input.Value
+func (c *Client) Text() string {
+  if c.SelectedRecord() == nil {
+    meta.Log().Warn("record is not selected")
+    return ""
+  }
+
+  return c.SelectedRecord().Value
 }
 
 func (c *Client) Records() [](*messages.Record) {
   return c.records.List
 }
 
-func (c *Client) Record() *messages.Record {
+func (c *Client) SelectedRecord() *messages.Record {
   return c.records.Selected
 }
 
 func (c *Client) RecordID() int32 {
-  return c.Record().CreatedAt
+  return c.SelectedRecord().ID
 }
 
 func (c *Client) Disk() Disk {
@@ -146,7 +148,7 @@ func (c *Client) Parent() Parent {
   return c.parent
 }
 
-func (c *Client) SetSelectedRecord(r *messages.Record) {
+func (c *Client) SelectRecord(r *messages.Record) {
   c.records.Selected = r
 }
 
@@ -180,11 +182,15 @@ func (c *Client) SetCursorY(YPos float32) {
   c.cursor.YPos = YPos
 }
 
-func (c *Client) SetInputText(text string) {
-  c.input.Value = text
+func (c *Client) SetText(text string) {
+  if c.SelectedRecord() != nil {
+    c.SelectedRecord().Value = text
+  } else {
+    meta.Log().Warn("record is not selected")
+  }
 }
 
-func (c *Client) NewRecord() *messages.Record {
+func (c *Client) AddNewRecord() *messages.Record {
   updatedAt := int32(time.Now().Unix())
   createdAt := updatedAt
   id := createdAt
@@ -294,7 +300,7 @@ func (c *Client) receiveLoop() {
       case *messages.TextMessage:
         message.SetUser(c.Name())
 
-        c.SetInputText(message.Str)
+        c.SetText(message.Str)
 
         c.parent.Broadcast() <- message.Encode()
 
@@ -318,7 +324,7 @@ func (c *Client) receiveLoop() {
         // TODO: implement
 
       case *messages.AddRecordMessage:
-        c.SetSelectedRecord(c.NewRecord())
+        c.SelectRecord(c.AddNewRecord())
 
         responseMessage := messages.NewTitlesListMessage(c.Name(), c.Records())
 
@@ -376,7 +382,7 @@ func (c *Client) Restore() {
   if err != nil {
     meta.Log().Error("failed to read selected record")
   } else {
-    c.SetSelectedRecord(record)
+    c.SelectRecord(record)
   }
 
   text, err := c.Disk().ReadText(context.TODO(), c.ParentName(), c.Name(), c.RecordID())
@@ -384,7 +390,7 @@ func (c *Client) Restore() {
     meta.Log().Error("failed to restore client input")
     return
   }
-  c.SetInputText(text)
+  c.SetText(text)
 
   coords, err := c.Disk().ReadSquareCoords(context.TODO(), c.ParentName(), c.Name())
   if err != nil {
@@ -397,6 +403,7 @@ func (c *Client) Restore() {
 
 func (c *Client) Save() {
   c.Disk().WriteSquareCoords(context.TODO(), c.ParentName(), c.Name(), c.SquareX(), c.SquareY())
-  c.Disk().WriteText(context.TODO(), c.ParentName(), c.Name(), c.RecordID(), c.InputText())
+  c.Disk().WriteRecords(context.TODO(), c.ParentName(), c.Name(), c.Records())
+  c.Disk().WriteText(context.TODO(), c.ParentName(), c.Name(), c.RecordID(), c.Text())
   c.Disk().SelectTitle(context.TODO(), c.ParentName(), c.Name(), c.RecordID())
 }

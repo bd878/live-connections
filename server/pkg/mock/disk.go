@@ -13,7 +13,7 @@ type Disk struct {
   users []string
   areas []string
   squareCoords map[string]*messages.Coords
-  records map[string][](*messages.Record)
+  records map[string][]*messages.Record
   selectedRecord *messages.Record
 }
 

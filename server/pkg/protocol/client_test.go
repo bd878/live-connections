@@ -65,3 +65,45 @@ func TestClientSend(t *testing.T) {
   }
 }
 
+func TestClientDisk(t *testing.T) {
+  disk1 := mock.NewDisk()
+  client := NewClient(mock.NewConn())
+
+  client.SetDisk(disk1)
+
+  disk2 := client.Disk()
+
+  dValue1 := reflect.ValueOf(disk1)
+  dValue2 := reflect.ValueOf(disk2)
+
+  if !dValue1.Equal(dValue2) {
+    t.Fatal("disk1 is NOT equal disk2")
+  } else {
+    t.Log("disk1 equal disk2")
+  }
+}
+
+func TestClientRestore(t *testing.T) {
+  disk := mock.NewDisk()
+  area := mock.NewArea()
+  conn := mock.NewConn()
+
+  client := NewClient(conn)
+  client.SetParent(area)
+  client.SetDisk(disk)
+
+  areaName := "area"
+  clientName := "client"
+  inputText := "testtest"
+  squareXPos = 30
+  squareYPos = 20
+
+  area.SetName(areaName)
+  client.SetSquareX(squareXPos)
+  client.SetSquareY(squareYPos)
+  client.SetName(clientName)
+  client.SelectRecord(client.NewRecord())
+  client.SetInputText(inputText)
+
+  client.Save()
+}
