@@ -50,6 +50,31 @@ func (tf *File) Open(paths ...string) error {
   return nil
 }
 
+func (tf *File) File() *os.File {
+  return tf.file
+}
+
+func (tf *File) Load() error {
+  info, err := tf.File().Stat()
+  if err != nil {
+    return err
+  }
+
+  size := info.Size()
+  tf.data = make([]byte, size)
+
+  bytesRead, err := tf.File().Read(tf.data)
+  if err != nil {
+    return err
+  }
+
+  if int64(bytesRead) != size {
+    return errors.New("read less bytes than in file")
+  }
+
+  return nil
+}
+
 func (tf *File) SetFlags(flags int) {
   tf.flags = flags
 }
