@@ -95,33 +95,30 @@ message Text {
 service TextsManager {
   rpc Write(WriteTextRequest) returns (EmptyResponse);
   rpc Read(ReadRequest) returns (Text);
-  rpc AddTitle(AddTitleRequest) returns (TitleRecord);
-  rpc ListTitles(ListTitlesRequest) returns (ListTitlesResponse);
-  rpc SelectTitle(SelectTitleRequest) returns (EmptyResponse);
-  rpc ReadSelectedTitle(ReadSelectedRequest) returns (TitleRecord);
+  rpc Add(AddTextRecordRequest) returns (TextRecord);
+  rpc List(ListTextRecordsRequest) returns (ListTextRecordsResponse);
+  rpc Select(SelectTextRecordRequest) returns (EmptyResponse);
+  rpc GetSelected(GetSelectedRecordRequest) returns (TextRecord);
 }
 
-message SelectTitleRequest {
+message SelectTextRecordRequest {
   string area = 1;
   string name = 2;
   int32 recordId = 3;
 }
 
-message ReadSelectedRequest {
+message GetSelectedRecordRequest {
   string area = 1;
   string name = 2;
 }
 
-message TitleRecord {
-  string value = 1;
+message TextRecord {
+  Text text = 1;
+
   int32 updatedAt = 2;
   int32 createdAt = 3;
   int32 id = 4;
-}
-
-message TextRecord {
-  TitleRecord title = 1;
-  Text text = 2;
+  string title = 5;
 }
 
 message WriteTextRequest {
@@ -133,16 +130,16 @@ message WriteTextRequest {
   int32 recordId = 4;
 }
 
-message AddTitleRequest {
+message AddTextRecordRequest {
   string area = 1;
   string name = 2;
 }
 
-message ListTitlesRequest {
+message ListTextRecordsRequest {
   string area = 1;
   string name = 2;
 }
 
-message ListTitlesResponse {
-  repeated TitleRecord records = 1;
+message ListTextRecordsResponse {
+  repeated TextRecord records = 1;
 }
