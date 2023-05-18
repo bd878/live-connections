@@ -154,79 +154,85 @@ func (d *Disk) ReadText(ctx context.Context, area, user string, recordId int32) 
   return resp.GetValue(), nil
 }
 
-func (d *Disk) AddTitle(ctx context.Context, area, user string) (*messages.Record, error) {
+func (d *Disk) AddTextRecord(ctx context.Context, area, user string) (*messages.Record, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  resp, err := d.texts.AddTitle(ctx, &proto.AddTitleRequest{Area: area, Name: user})
+  resp, err := d.texts.Add(ctx, &proto.AddTextRecordRequest{Area: area, Name: user})
   if err != nil {
-    meta.Log().Warn(fmt.Sprintf("texts.AddTitle failed: %v", err))
+    meta.Log().Warn(fmt.Sprintf("texts.Add failed: %v", err))
     return nil, err
   }
 
   meta.Log().Debug(
-    fmt.Sprintf("Add title %d: %d, %d\n", resp.Id, resp.UpdatedAt, resp.CreatedAt),
+    fmt.Sprintf("Add text record %d: %d, %d\n", resp.Id, resp.UpdatedAt, resp.CreatedAt),
   )
 
-  result := &messages.Record{
-    Value: resp.Value,
+  return &messages.Record{
+    Value: resp.Text.Value,
     ID: resp.Id,
     UpdatedAt: resp.UpdatedAt,
     CreatedAt: resp.CreatedAt,
-  }
-
-  return result, nil
+    // TODO: Title: resp.Title,
+  }, nil
 }
 
-func (d *Disk) ListTitles(ctx context.Context, area, user string) ([](*messages.Record), error) {
+func (d *Disk) ListTextRecords(ctx context.Context, area, user string) ([]*messages.Record, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  resp, err := d.texts.ListTitles(ctx, &proto.ListTitlesRequest{Area: area, Name: user})
+  resp, err := d.texts.List(ctx, &proto.ListTextRecordsRequest{Area: area, Name: user})
   if err != nil {
     meta.Log().Warn(fmt.Sprintf("texts.ListTitles failed: %v", err))
     return nil, err
   }
 
   protoRecords := resp.GetRecords()
-  result := make([](*messages.Record), len(protoRecords))
+  result := make([]*messages.Record, len(protoRecords))
 
   for i, r := range protoRecords {
     result[i] = &messages.Record{
-      Value: r.Value,
+      // TODO:
+      // Text: &messages.Text{
+      //   Value: r.Value,
+      // },
+      Value: r.Text.Value,
       ID: r.Id,
       CreatedAt: r.CreatedAt,
       UpdatedAt: r.UpdatedAt,
+      // TODO: Title: r.Title,
     }
   }
 
   return result, nil
 }
 
-func (d *Disk) ReadSelectedTitle(ctx context.Context, area, user string) (*messages.Record, error) {
+func (d *Disk) GetSelectedRecord(ctx context.Context, area, user string) (*messages.Record, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  resp, err := d.texts.ReadSelectedTitle(ctx, &proto.ReadSelectedRequest{Area: area, Name: user})
+  resp, err := d.texts.GetSelected(ctx, &proto.GetSelectedRecordRequest{Area: area, Name: user})
   if err != nil {
-    meta.Log().Warn(fmt.Sprintf("texts.ReadSelectedTitle failed: %v", err))
+    meta.Log().Warn(fmt.Sprintf("texts.GetSelected failed: %v", err))
     return nil, err
   }
 
   return &messages.Record{
-    Value: resp.Value,
+    Value: resp.Text.Value,
+    ID: resp.Id,
     CreatedAt: resp.CreatedAt,
     UpdatedAt: resp.UpdatedAt,
+    // TODO: add title
   }, nil
 }
 
-func (d *Disk) SelectTitle(ctx context.Context, area, user string, recordId int32) error {
+func (d *Disk) SelectTextRecord(ctx context.Context, area, user string, recordId int32) error {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()
 
-  _, err := d.texts.SelectTitle(ctx, &proto.SelectTitleRequest{Area: area, Name: user, RecordId: recordId})
+  _, err := d.texts.Select(ctx, &proto.SelectTextRecordRequest{Area: area, Name: user, RecordId: recordId})
   if err != nil {
-    meta.Log().Warn(fmt.Sprintf("texts.SelectTitle failed: %v", err))
+    meta.Log().Warn(fmt.Sprintf("texts.Select failed: %v", err))
     return err
   }
 
