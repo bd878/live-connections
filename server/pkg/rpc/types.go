@@ -24,8 +24,8 @@ type TextDisk interface {
 }
 
 type CatalogDisk interface {
-  AddTitle(ctx context.Context, area, user string) (*messages.Record, error)
-  ListTitles(ctx context.Context, area, user string) ([](*messages.Record), error)
-  ReadSelectedTitle(ctx context.Context, area, user string) (*messages.Record, error)
-  SelectTitle(ctx context.Context, area, user string, recordId int32) error
+  AddTextRecord(ctx context.Context, area, user string) (*messages.Record, error)
+  ListTextRecords(ctx context.Context, area, user string) ([](*messages.Record), error)
+  GetSelectedRecord(ctx context.Context, area, user string) (*messages.Record, error)
+  SelectTextRecord(ctx context.Context, area, user string, recordId int32) error
 }

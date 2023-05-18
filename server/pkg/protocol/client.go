@@ -184,6 +184,8 @@ func (c *Client) SetCursorY(YPos float32) {
 
 func (c *Client) SetText(text string) {
   if c.SelectedRecord() != nil {
+    c.Disk().WriteText(context.TODO(), c.ParentName(), c.Name(), c.SelectedRecord().ID, text)
+    // TODO: get selected record
     c.SelectedRecord().Value = text
   } else {
     meta.Log().Warn("record is not selected")
@@ -191,15 +193,10 @@ func (c *Client) SetText(text string) {
 }
 
 func (c *Client) AddNewRecord() *messages.Record {
-  updatedAt := int32(time.Now().Unix())
-  createdAt := updatedAt
-  id := createdAt
-
-  rec := &messages.Record{
-    Value: "",
-    ID: id,
-    UpdatedAt: updatedAt,
-    CreatedAt: createdAt,
+  rec, err := c.Disk().AddTextRecord(context.TODO(), c.ParentName(), c.Name())
+  if err != nil {
+    meta.Log().Debug("failed to add text record")
+    return nil
   }
 
   c.records.List = append(c.records.List, rec)
@@ -300,7 +297,7 @@ func (c *Client) receiveLoop() {
       case *messages.TextMessage:
         message.SetUser(c.Name())
 
-        c.SetText(message.Str)
+        c.SetText(message.Value)
 
         c.parent.Broadcast() <- message.Encode()
 
@@ -371,14 +368,14 @@ func (c *Client) sendLoop() {
 }
 
 func (c *Client) Restore() {
-  records, err := c.Disk().ListTitles(context.TODO(), c.ParentName(), c.Name())
+  records, err := c.Disk().ListTextRecords(context.TODO(), c.ParentName(), c.Name())
   if err != nil {
     meta.Log().Error(c.ParentName(), c.Name(), "has no records yet")
     return
   }
   c.SetRecords(records)
 
-  record, err := c.Disk().ReadSelectedTitle(context.TODO(), c.ParentName(), c.Name())
+  record, err := c.Disk().GetSelectedRecord(context.TODO(), c.ParentName(), c.Name())
   if err != nil {
     meta.Log().Error("failed to read selected record")
   } else {
@@ -403,7 +400,6 @@ func (c *Client) Restore() {
 
 func (c *Client) Save() {
   c.Disk().WriteSquareCoords(context.TODO(), c.ParentName(), c.Name(), c.SquareX(), c.SquareY())
-  c.Disk().WriteRecords(context.TODO(), c.ParentName(), c.Name(), c.Records())
+  c.Disk().SelectTextRecord(context.TODO(), c.ParentName(), c.Name(), c.RecordID())
   c.Disk().WriteText(context.TODO(), c.ParentName(), c.Name(), c.RecordID(), c.Text())
-  c.Disk().SelectTitle(context.TODO(), c.ParentName(), c.Name(), c.RecordID())
 }

@@ -141,18 +141,18 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
     )
     return
   }
-  record, err := m.disk.AddTitle(ctx, areaName.String(), userName)
+  record, err := m.disk.AddTextRecord(ctx, areaName.String(), userName)
   if err != nil {
-    meta.Log().Fatal("failed to add title to new user", err)
+    meta.Log().Fatal("failed to add text record to new user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusInternalServerError,
     )
     return
   }
-  err = m.disk.SelectTitle(ctx, areaName.String(), userName, record.ID)
+  err = m.disk.SelectTextRecord(ctx, areaName.String(), userName, record.ID)
   if err != nil {
-    meta.Log().Fatal("failed to select new title for new user", err)
+    meta.Log().Fatal("failed to select new text record for new user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusInternalServerError,

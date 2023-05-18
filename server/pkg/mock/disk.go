@@ -49,7 +49,7 @@ func (d *Disk) HasUser(ctx context.Context, _ string, user string) (bool, error)
 
 
 func (d *Disk) WriteSquareCoords(ctx context.Context, _ string, user string, XPos, YPos float32) error {
-  d.squareCoords[user] = &messages.Coords{XPos, YPos}
+  d.squareCoords[user] = &messages.Coords{XPos: XPos, YPos: YPos}
   return nil
 }
 
@@ -97,7 +97,7 @@ func (d *Disk) ReadText(ctx context.Context, _ string, user string, recordId int
 }
 
 
-func (d *Disk) AddTitle(ctx context.Context, _ string, user string) (*messages.Record, error) {
+func (d *Disk) AddTextRecord(ctx context.Context, _ string, user string) (*messages.Record, error) {
   updatedAt := int32(time.Now().Unix())
   createdAt := updatedAt
   id := createdAt
@@ -113,18 +113,18 @@ func (d *Disk) AddTitle(ctx context.Context, _ string, user string) (*messages.R
   return rec, nil
 }
 
-func (d *Disk) ListTitles(ctx context.Context, _ string, user string) ([](*messages.Record), error) {
+func (d *Disk) ListTextRecords(ctx context.Context, _ string, user string) ([](*messages.Record), error) {
   return d.records[user], nil
 }
 
-func (d *Disk) ReadSelectedTitle(ctx context.Context, _ string, user string) (*messages.Record, error) {
+func (d *Disk) GetSelectedRecord(ctx context.Context, _ string, user string) (*messages.Record, error) {
   if d.selectedRecord != nil {
     return d.selectedRecord, nil
   }
   return nil, errors.New("not selected")
 }
 
-func (d *Disk) SelectTitle(ctx context.Context, _ string, user string, recordId int32) error {
+func (d *Disk) SelectTextRecord(ctx context.Context, _ string, user string, recordId int32) error {
   rec, err := d.findRecordById(ctx, user, recordId)
   if err != nil {
     return err

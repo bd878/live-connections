@@ -130,7 +130,7 @@ func (a *Area) listTextsInputs() map[string](*messages.Text) {
   texts := make(map[string](*messages.Text), len(a.registry))
 
   for name, c := range a.registry {
-    texts[name] = messages.NewText(c.InputText())
+    texts[name] = messages.NewText(c.Text())
   }
   return texts
 }
@@ -168,7 +168,7 @@ func (a *Area) onJoin() {
 
   inputTexts := a.listTextsInputs()
   for name, text := range inputTexts {
-    textMessage := messages.NewTextMessage(name, text.Str)
+    textMessage := messages.NewTextMessage(name, text.Value)
     a.Broadcast() <- textMessage.Encode()
   }
 }

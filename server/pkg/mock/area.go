@@ -19,7 +19,7 @@ func (p *Area) Name() string {
 }
 
 func (p *Area) SetName(n string) {
-  p.name = name
+  p.name = n
 }
 
 func (p *Area) Broadcast() chan []byte {

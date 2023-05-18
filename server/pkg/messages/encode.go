@@ -31,8 +31,8 @@ func (l *List) SetItems(items []string) {
   l.Items = items
 }
 
-func (t *Text) SetText(str string) {
-  t.Str = str
+func (t *Text) SetText(value string) {
+  t.Value = value
 }
 
 type AuthMessage struct {
@@ -273,11 +273,11 @@ type TextMessage struct {
   Text
 }
 
-func NewTextMessage(user, str string) *TextMessage {
+func NewTextMessage(user, value string) *TextMessage {
   message := &TextMessage{
     Typed{MessageType: text},
     Identity{User: user},
-    Text{Str: str},
+    Text{Value: value},
   }
   return message
 }
@@ -347,16 +347,16 @@ func (m *Identity) Encode() []byte {
   )
 }
 
-func NewText(str string) *Text {
+func NewText(value string) *Text {
   return &Text{
-    Str: str,
+    Value: value,
   }
 }
 
 // text size + text
 func (m *Text) Encode() []byte {
   textBytes := new(bytes.Buffer)
-  if err := binary.Write(textBytes, enc, []byte(m.Str)); err != nil {
+  if err := binary.Write(textBytes, enc, []byte(m.Value)); err != nil {
     meta.Log().Warn("error writing text size")
     return nil
   }
@@ -457,6 +457,7 @@ func (m *RecordsList) Encode() []byte {
   )
 }
 
+// TODO: add title
 // valueSize + valueBytes + idBytes + updatedAtBytes + createdAtBytes
 func (m *Record) Encode() []byte {
   valueBytes := new(bytes.Buffer)

@@ -18,7 +18,7 @@ type Coords struct {
 }
 
 type Text struct {
-  Str string
+  Value string
 }
 
 type Raw struct {
@@ -30,6 +30,7 @@ type List struct {
   Items []string
 }
 
+// TODO: rename TextRecord, Text.Value, add Title string
 type Record struct {
   Value string
   ID int32
