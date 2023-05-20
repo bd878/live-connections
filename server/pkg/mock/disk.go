@@ -88,15 +88,6 @@ func (d *Disk) WriteText(ctx context.Context, _ string, user string, recordId in
   return nil
 }
 
-func (d *Disk) ReadText(ctx context.Context, _ string, user string, recordId int32) (string, error) {
-  rec, err := d.findRecordById(ctx, user, recordId)
-  if err != nil {
-    return "", err
-  }
-  return rec.Value, nil
-}
-
-
 func (d *Disk) AddTextRecord(ctx context.Context, _ string, user string) (*messages.TextRecord, error) {
   updatedAt := int32(time.Now().Unix())
   createdAt := updatedAt

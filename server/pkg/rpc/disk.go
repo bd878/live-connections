@@ -141,19 +141,6 @@ func (d *Disk) ReadSquareCoords(ctx context.Context, area, user string) (*messag
   return &messages.Coords{XPos: resp.XPos, YPos: resp.YPos}, nil
 }
 
-func (d *Disk) ReadText(ctx context.Context, area, user string, recordId int32) (string, error) {
-  ctx, cancel := context.WithTimeout(ctx, d.timeout)
-  defer cancel()
-
-  resp, err := d.texts.Read(ctx, &proto.ReadRequest{Area: area, Name: user, RecordId: recordId})
-  if err != nil {
-    meta.Log().Warn(fmt.Sprintf("texts.ReadText failed: %v", err))
-    return "", err
-  }
-
-  return resp.GetValue(), nil
-}
-
 func (d *Disk) AddTextRecord(ctx context.Context, area, user string) (*messages.TextRecord, error) {
   ctx, cancel := context.WithTimeout(ctx, d.timeout)
   defer cancel()

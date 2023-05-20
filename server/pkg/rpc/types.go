@@ -20,7 +20,6 @@ type SquareDisk interface {
 
 type TextDisk interface {
   WriteText(ctx context.Context, area, user string, recordId int32, value string) error
-  ReadText(ctx context.Context, area, user string, recordId int32) (string, error)
 }
 
 type CatalogDisk interface {

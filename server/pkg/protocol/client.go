@@ -382,12 +382,7 @@ func (c *Client) Restore() {
     c.SelectRecord(record)
   }
 
-  text, err := c.Disk().ReadText(context.TODO(), c.ParentName(), c.Name(), c.RecordID())
-  if err != nil {
-    meta.Log().Error("failed to restore client input")
-    return
-  }
-  c.SetText(text)
+  c.SetText(record.Text.Value)
 
   coords, err := c.Disk().ReadSquareCoords(context.TODO(), c.ParentName(), c.Name())
   if err != nil {

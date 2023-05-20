@@ -94,7 +94,6 @@ message Text {
 
 service TextsManager {
   rpc Write(WriteTextRequest) returns (EmptyResponse);
-  rpc Read(ReadRequest) returns (Text);
   rpc Add(AddTextRecordRequest) returns (TextRecord);
   rpc List(ListTextRecordsRequest) returns (ListTextRecordsResponse);
   rpc Select(SelectTextRecordRequest) returns (EmptyResponse);

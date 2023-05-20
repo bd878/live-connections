@@ -76,31 +76,6 @@ func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (
   return &pb.EmptyResponse{}, nil
 }
 
-func (s *TextsServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.Text, error) {
-  f := fd.NewFile(os.O_RDONLY|os.O_CREATE)
-
-  err := f.Open(s.Dir, request.Area, request.Name, buildFilename(request.RecordId))
-  if err != nil {
-    return nil, err
-  }
-
-  err = f.Load()
-  if err != nil {
-    return nil, err
-  }
-
-  textRecord := &pb.TextRecord{}
-  if err = proto.Unmarshal(f.Content(), textRecord); err != nil {
-    return nil, err
-  }
-
-  result := &pb.Text{
-    Value: textRecord.Text.Value,
-  }
-
-  return result, nil
-}
-
 func (s *TextsServer) Add(ctx context.Context, request *pb.AddTextRecordRequest) (*pb.TextRecord, error) {
   createdAt := int32(time.Now().Unix())
   updatedAt := createdAt
