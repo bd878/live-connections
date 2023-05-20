@@ -9,3 +9,4 @@
 files/*
 *.pem
 public/build/*
+*testdata/*

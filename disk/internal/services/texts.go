@@ -40,7 +40,7 @@ func NewTextsManagerServer(baseDir string) *TextsServer {
 func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (*pb.EmptyResponse, error) {
   f := fd.NewFile(os.O_RDWR|os.O_CREATE)
 
-  err := f.Open(request.Area, request.Name, buildFilename(request.RecordId))
+  err := f.Open(s.Dir, request.Area, request.Name, buildFilename(request.RecordId))
   if err != nil {
     return nil, err
   }
@@ -79,7 +79,7 @@ func (s *TextsServer) Write(ctx context.Context, request *pb.WriteTextRequest) (
 func (s *TextsServer) Read(ctx context.Context, request *pb.ReadRequest) (*pb.Text, error) {
   f := fd.NewFile(os.O_RDONLY|os.O_CREATE)
 
-  err := f.Open(request.Area, request.Name, buildFilename(request.RecordId))
+  err := f.Open(s.Dir, request.Area, request.Name, buildFilename(request.RecordId))
   if err != nil {
     return nil, err
   }
@@ -123,7 +123,7 @@ func (s *TextsServer) Add(ctx context.Context, request *pb.AddTextRecordRequest)
 
   f := fd.NewFile(os.O_WRONLY|os.O_CREATE|os.O_TRUNC)
 
-  err = f.Open(request.Area, request.Name, buildFilename(result.Id))
+  err = f.Open(s.Dir, request.Area, request.Name, buildFilename(result.Id))
   if err != nil {
     return nil, err
   }
