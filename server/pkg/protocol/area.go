@@ -135,7 +135,7 @@ func (a *Area) listTextsInputs() map[string](*messages.Text) {
   return texts
 }
 
-func (a *Area) listTitlesRecords() map[string]([](*messages.TextRecord)) {
+func (a *Area) listTextRecords() map[string]([](*messages.TextRecord)) {
   records := make(map[string]([](*messages.TextRecord)), len(a.registry))
 
   for name, c := range a.registry {
@@ -160,10 +160,10 @@ func (a *Area) onJoin() {
     a.Broadcast() <- squareInitMessage.Encode()
   }
 
-  titlesRecords := a.listTitlesRecords()
-  for name, records := range titlesRecords {
-    titlesListMessage := messages.NewTitlesListMessage(name, records)
-    a.Broadcast() <- titlesListMessage.Encode()
+  textRecords := a.listTextRecords()
+  for name, records := range textRecords {
+    recordsListMessage := messages.NewRecordsListMessage(name, records)
+    a.Broadcast() <- recordsListMessage.Encode()
   }
 
   inputTexts := a.listTextsInputs()

@@ -323,7 +323,7 @@ func (c *Client) receiveLoop() {
       case *messages.AddRecordMessage:
         c.SelectRecord(c.AddNewRecord())
 
-        responseMessage := messages.NewTitlesListMessage(c.Name(), c.Records())
+        responseMessage := messages.NewRecordsListMessage(c.Name(), c.Records())
 
         c.parent.Broadcast() <- responseMessage.Encode()
 

@@ -160,22 +160,22 @@ func (m *MouseMoveMessage) Encode() []byte {
   )
 }
 
-type TitlesListMessage struct {
+type RecordsListMessage struct {
   Typed
   RecordsList
   Identity
 }
 
-func NewTitlesListMessage(user string, items [](*TextRecord)) *TitlesListMessage {
-  message := &TitlesListMessage{
-    Typed{MessageType: titlesList},
+func NewRecordsListMessage(user string, items [](*TextRecord)) *RecordsListMessage {
+  message := &RecordsListMessage{
+    Typed{MessageType: recordsList},
     RecordsList{Items: items},
     Identity{User: user},
   }
   return message
 }
 
-func (m *TitlesListMessage) Encode() []byte {
+func (m *RecordsListMessage) Encode() []byte {
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
   recordsBytes := m.RecordsList.Encode()
