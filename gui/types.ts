@@ -6,6 +6,7 @@ type UserName = string;
 type TextRecord = {
   id: number;        // int32
   value: string;
+  title: string;
   updatedAt: number; // int32
   createdAt: number; // int32
 };
@@ -59,7 +60,7 @@ type TextInputEvent = {
   text: string;
 };
 
-type TitlesListEvent = {
+type RecordsListEvent = {
   name: string;
   records: TextRecord[];
 };

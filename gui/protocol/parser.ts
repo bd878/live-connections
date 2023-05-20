@@ -3,8 +3,8 @@ import C from './const';
 
 const log = new Log("parser");
 
-// userSize + userBytes + recordsCount + []{recordSize + titleSize + titleBytes + id + updatedAt + createdAt}
-async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<TitlesListEvent> {
+// userSize + userBytes + recordsCount + []{recordSize + valueSize + valueBytes + titleSize + titleBytes + id + updatedAt + createdAt}
+async function parseRecordsListMessage(buf: any /* ArrayBuffer */): Promise<RecordsListEvent> {
   let offset = 0;
   const dv = new DataView(buf);
 
@@ -12,7 +12,7 @@ async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<Title
   offset += C.SIZE_PREFIX_SIZE;
 
   if (userSize === 0) {
-    throw new Error(`[parseTitlesListMessage]: userSize is 0`);
+    throw new Error(`[parseRecordsListMessage]: userSize is 0`);
   }
 
   const userBytes = new Uint8Array(buf, offset, userSize);
@@ -28,12 +28,21 @@ async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<Title
     const recordSize = dv.getUint16(offset, C.ENDIANNE); // not used
     offset += C.SIZE_PREFIX_SIZE;
 
+    const valueSize = dv.getUint16(offset, C.ENDIANNE);
+    offset += C.SIZE_PREFIX_SIZE;
+
+    const valueBytes = new Uint8Array(buf, offset, valueSize);
+    const valueBlob = new Blob([valueBytes]);
+    const value = await valueBlob.text();
+    offset += valueSize;
+
     const titleSize = dv.getUint16(offset, C.ENDIANNE);
     offset += C.SIZE_PREFIX_SIZE;
 
     const titleBytes = new Uint8Array(buf, offset, titleSize);
     const titleBlob = new Blob([titleBytes]);
-    const value = await titleBlob.text();
+    const title = await titleBlob.text();
+    offset += titleSize;
 
     const id = dv.getInt32(offset, C.ENDIANNE);
     offset += C.ID_SIZE;
@@ -44,12 +53,12 @@ async function parseTitlesListMessage(buf: any /* ArrayBuffer */): Promise<Title
     const createdAt = dv.getInt32(offset, C.ENDIANNE);
     offset += C.TIMESTAMP_SIZE;
 
-    log.Debug("value, id, updatedAt, createdAt:", value, id, updatedAt, createdAt);
+    log.Debug("value, title, id, updatedAt, createdAt:", value, title, id, updatedAt, createdAt);
 
-    records.push({ value, id, updatedAt, createdAt });
+    records.push({ value, title, id, updatedAt, createdAt });
   }
 
-  return { name, records } as TitlesListEvent;
+  return { name, records } as RecordsListEvent;
 }
 
 async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEvent> {
@@ -141,5 +150,5 @@ export {
   parseAuthOkMessage,
   parseUsersOnlineMessage,
   parseTextInputMessage,
-  parseTitlesListMessage,
+  parseRecordsListMessage,
 };

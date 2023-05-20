@@ -154,8 +154,8 @@ function onUsersOnline(e: UsersOnlineEvent) {
   }
 }
 
-function onListTitles(e: TitlesListEvent) {
-  log.Info("onListTitles", e);
+function onListRecords(e: RecordsListEvent) {
+  log.Info("onListRecords", e);
 
   const sUid = getUid(Square.cname, e.name);
   if (area.hasElem(sUid)) {
@@ -221,5 +221,5 @@ export {
   onInitSquareCoords,
   onUsersOnline,
   onTextInput,
-  onListTitles,
+  onListRecords,
 };
