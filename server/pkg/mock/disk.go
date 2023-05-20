@@ -13,8 +13,8 @@ type Disk struct {
   users []string
   areas []string
   squareCoords map[string]*messages.Coords
-  records map[string][]*messages.Record
-  selectedRecord *messages.Record
+  records map[string][]*messages.TextRecord
+  selectedRecord *messages.TextRecord
 }
 
 func NewDisk() *Disk {
@@ -57,10 +57,10 @@ func (d *Disk) ReadSquareCoords(ctx context.Context, _ string, user string) (*me
   return d.squareCoords[user], nil
 }
 
-func (d *Disk) findRecordById(ctx context.Context, user string, recordId int32) (*messages.Record, error) {
+func (d *Disk) findRecordById(ctx context.Context, user string, recordId int32) (*messages.TextRecord, error) {
   recs := d.records[user]
 
-  var result *messages.Record
+  var result *messages.TextRecord
 
   var found bool
   for i := 0; i < len(recs) && !found; i++ {
@@ -97,12 +97,12 @@ func (d *Disk) ReadText(ctx context.Context, _ string, user string, recordId int
 }
 
 
-func (d *Disk) AddTextRecord(ctx context.Context, _ string, user string) (*messages.Record, error) {
+func (d *Disk) AddTextRecord(ctx context.Context, _ string, user string) (*messages.TextRecord, error) {
   updatedAt := int32(time.Now().Unix())
   createdAt := updatedAt
   id := createdAt
 
-  rec := &messages.Record{
+  rec := &messages.TextRecord{
     Value: "",
     ID: id,
     UpdatedAt: updatedAt,
@@ -113,11 +113,11 @@ func (d *Disk) AddTextRecord(ctx context.Context, _ string, user string) (*messa
   return rec, nil
 }
 
-func (d *Disk) ListTextRecords(ctx context.Context, _ string, user string) ([](*messages.Record), error) {
+func (d *Disk) ListTextRecords(ctx context.Context, _ string, user string) ([](*messages.TextRecord), error) {
   return d.records[user], nil
 }
 
-func (d *Disk) GetSelectedRecord(ctx context.Context, _ string, user string) (*messages.Record, error) {
+func (d *Disk) GetSelectedRecord(ctx context.Context, _ string, user string) (*messages.TextRecord, error) {
   if d.selectedRecord != nil {
     return d.selectedRecord, nil
   }

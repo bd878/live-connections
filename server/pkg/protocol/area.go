@@ -135,8 +135,8 @@ func (a *Area) listTextsInputs() map[string](*messages.Text) {
   return texts
 }
 
-func (a *Area) listTitlesRecords() map[string]([](*messages.Record)) {
-  records := make(map[string]([](*messages.Record)), len(a.registry))
+func (a *Area) listTitlesRecords() map[string]([](*messages.TextRecord)) {
+  records := make(map[string]([](*messages.TextRecord)), len(a.registry))
 
   for name, c := range a.registry {
     records[name] = c.Records()

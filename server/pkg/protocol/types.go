@@ -12,8 +12,8 @@ type Text struct {
 }
 
 type Records struct {
-  List []*messages.Record
-  Selected *messages.Record
+  List []*messages.TextRecord
+  Selected *messages.TextRecord
 }
 
 type Conn interface {
@@ -53,10 +53,10 @@ type Squared interface {
 }
 
 type Catalogable interface {
-  Records() []*messages.Record
-  SelectedRecord() *messages.Record
-  SetRecords(rr []*messages.Record)
-  FindRecord(recordID int32) *messages.Record
+  Records() []*messages.TextRecord
+  SelectedRecord() *messages.TextRecord
+  SetRecords(rr []*messages.TextRecord)
+  FindRecord(recordID int32) *messages.TextRecord
   SelectRecord(recordID int32)
   Text() string
   SetText(txt string)

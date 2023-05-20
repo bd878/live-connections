@@ -134,16 +134,17 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
 
   userName, err := m.disk.CreateNewUser(ctx, areaName.String())
   if err != nil {
-    meta.Log().Fatal("failed to create user", err)
+    meta.Log().Error("failed to create user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusBadRequest,
     )
     return
   }
+
   record, err := m.disk.AddTextRecord(ctx, areaName.String(), userName)
   if err != nil {
-    meta.Log().Fatal("failed to add text record to new user", err)
+    meta.Log().Error("failed to add text record to new user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusInternalServerError,
@@ -152,7 +153,7 @@ func (m *Manager) HandleJoinArea(w http.ResponseWriter, r *http.Request) {
   }
   err = m.disk.SelectTextRecord(ctx, areaName.String(), userName, record.ID)
   if err != nil {
-    meta.Log().Fatal("failed to select new text record for new user", err)
+    meta.Log().Error("failed to select new text record for new user", err)
     http.Error(w,
       fmt.Sprint("cannot create user"),
       http.StatusInternalServerError,
@@ -170,7 +171,7 @@ func (m *Manager) HandleNewArea(w http.ResponseWriter, r *http.Request) {
 
   areaName, err := m.disk.CreateNewArea(ctx)
   if err != nil {
-    meta.Log().Fatal(fmt.Sprintf("area.Create failed: %v", err))
+    meta.Log().Error(fmt.Sprintf("area.Create failed: %v", err))
     http.Error(w,
       fmt.Sprint("cannot create area"),
       http.StatusBadRequest,
@@ -191,7 +192,7 @@ func (m *Manager) HandleAreaUsers(w http.ResponseWriter, r *http.Request) {
 
   users, err := m.disk.ListUsers(ctx, area)
   if err != nil {
-    meta.Log().Fatal(fmt.Sprintf("area.ListUsers failed: %v", err))
+    meta.Log().Error(fmt.Sprintf("area.ListUsers failed: %v", err))
     http.Error(w,
       fmt.Sprint("cannot create area"),
       http.StatusBadRequest,

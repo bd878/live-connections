@@ -166,7 +166,7 @@ type TitlesListMessage struct {
   Identity
 }
 
-func NewTitlesListMessage(user string, items [](*Record)) *TitlesListMessage {
+func NewTitlesListMessage(user string, items [](*TextRecord)) *TitlesListMessage {
   message := &TitlesListMessage{
     Typed{MessageType: titlesList},
     RecordsList{Items: items},
@@ -245,23 +245,23 @@ func (m *AddRecordMessage) Encode() []byte {
 type SelectRecordMessage struct {
   Typed
   Identity
-  CreatedAt int32 // TODO: change on id
+  ID int32
 }
 
-// totalSize + type + userSize + userBytes + createdAtBytes
+// totalSize + type + userSize + userBytes + idBytes
 func (m *SelectRecordMessage) Encode() []byte {
   typeBytes := m.Typed.Encode()
   userBytes := m.Identity.Encode()
-  timeBytes := encodeUnixTime(m.CreatedAt)
+  idBytes := encodeUnixTime(m.ID)
 
-  sizeBytes := encodeSize(len(typeBytes) + len(userBytes) + len(timeBytes))
+  sizeBytes := encodeSize(len(typeBytes) + len(userBytes) + len(idBytes))
 
   return bytes.Join(
     [][]byte{
       sizeBytes,
       typeBytes,
       userBytes,
-      timeBytes,
+      idBytes,
     },
     []byte{},
   )
@@ -417,7 +417,7 @@ func (m *List) Encode() []byte {
   )
 }
 
-func NewRecordsList(items [](*Record)) *RecordsList {
+func NewRecordsList(items [](*TextRecord)) *RecordsList {
   message := &RecordsList{
     Items: items,
   }
@@ -457,11 +457,10 @@ func (m *RecordsList) Encode() []byte {
   )
 }
 
-// TODO: add title
-// valueSize + valueBytes + idBytes + updatedAtBytes + createdAtBytes
-func (m *Record) Encode() []byte {
+// valueSize + valueBytes + titleSize + titleBytes + idBytes + updatedAtBytes + createdAtBytes
+func (m *TextRecord) Encode() []byte {
   valueBytes := new(bytes.Buffer)
-  if err := binary.Write(valueBytes, enc, []byte(m.Value)); err != nil {
+  if err := binary.Write(valueBytes, enc, []byte(m.Text.Value)); err != nil {
     meta.Log().Warn("error writing record value")
     return nil
   }
@@ -469,6 +468,18 @@ func (m *Record) Encode() []byte {
   valueSize := new(bytes.Buffer)
   if err := binary.Write(valueSize, enc, uint16(valueBytes.Len())); err != nil {
     meta.Log().Warn("error writing record value size =", err)
+    return nil
+  }
+
+  titleBytes := new(bytes.Buffer)
+  if err := binary.Write(titleBytes, enc, []byte(m.Title)); err != nil {
+    meta.Log().Warn("error writing record title")
+    return nil
+  }
+
+  titleSize := new(bytes.Buffer)
+  if err := binary.Write(titleSize, enc, uint16(titleBytes.Len())); err != nil {
+    meta.Log().Warn("error writing record title size =", err)
     return nil
   }
 
@@ -485,6 +496,8 @@ func (m *Record) Encode() []byte {
     [][]byte{
       valueSize.Bytes(),
       valueBytes.Bytes(),
+      titleSize.Bytes(),
+      titleBytes.Bytes(),
       idBytes.Bytes(),
       updatedAtBytes,
       createdAtBytes,

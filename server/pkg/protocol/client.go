@@ -54,7 +54,7 @@ func NewClient(conn Conn) *Client {
   square := &messages.Coords{}
   cursor := &messages.Coords{}
   records := &Records{
-    List: make([](*messages.Record), 0, 100),
+    List: make([](*messages.TextRecord), 0, 100),
     Selected: nil,
   }
 
@@ -108,14 +108,14 @@ func (c *Client) Text() string {
     return ""
   }
 
-  return c.SelectedRecord().Value
+  return c.SelectedRecord().Text.Value
 }
 
-func (c *Client) Records() [](*messages.Record) {
+func (c *Client) Records() [](*messages.TextRecord) {
   return c.records.List
 }
 
-func (c *Client) SelectedRecord() *messages.Record {
+func (c *Client) SelectedRecord() *messages.TextRecord {
   return c.records.Selected
 }
 
@@ -148,16 +148,16 @@ func (c *Client) Parent() Parent {
   return c.parent
 }
 
-func (c *Client) SelectRecord(r *messages.Record) {
+func (c *Client) SelectRecord(r *messages.TextRecord) {
   c.records.Selected = r
 }
 
-func (c *Client) SetRecords(rs [](*messages.Record)) {
+func (c *Client) SetRecords(rs [](*messages.TextRecord)) {
   c.records.List = rs
 }
 
-func (c *Client) FindRecord(recordID int32) *messages.Record {
-  var found *messages.Record
+func (c *Client) FindRecord(recordID int32) *messages.TextRecord {
+  var found *messages.TextRecord
   for i := 0; i < len(c.records.List) && found == nil; i++ {
     if c.records.List[i].ID == recordID {
       found = c.records.List[i]
@@ -186,13 +186,13 @@ func (c *Client) SetText(text string) {
   if c.SelectedRecord() != nil {
     c.Disk().WriteText(context.TODO(), c.ParentName(), c.Name(), c.SelectedRecord().ID, text)
     // TODO: get selected record
-    c.SelectedRecord().Value = text
+    c.SelectedRecord().Text.Value = text
   } else {
     meta.Log().Warn("record is not selected")
   }
 }
 
-func (c *Client) AddNewRecord() *messages.Record {
+func (c *Client) AddNewRecord() *messages.TextRecord {
   rec, err := c.Disk().AddTextRecord(context.TODO(), c.ParentName(), c.Name())
   if err != nil {
     meta.Log().Debug("failed to add text record")

@@ -30,16 +30,16 @@ type List struct {
   Items []string
 }
 
-// TODO: rename TextRecord, Text.Value, add Title string
-type Record struct {
-  Value string
+type TextRecord struct {
+  Text Text
+  Title string
   ID int32
   UpdatedAt int32
   CreatedAt int32
 }
 
 type RecordsList struct {
-  Items [](*Record)
+  Items [](*TextRecord)
 }
 
 type Identity struct {
