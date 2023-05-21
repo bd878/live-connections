@@ -114,6 +114,10 @@ interface Identifable {
   getUid(): Uid;
 }
 
+interface EventHandler {
+  handleEvent(event: any): void;
+}
+
 interface Containable {
   container: BaseContainer;
 

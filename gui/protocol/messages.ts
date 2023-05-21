@@ -37,9 +37,9 @@ async function makeTextInputMessage(text: string): Promise<ABuffer> {
   const typedText = new Uint8Array(textBuffer);
 
   const messageSize = (
-    C.TYPE_SIZE + // type
+    C.TYPE_SIZE        + // type
     C.SIZE_PREFIX_SIZE + // text size
-    textEncoded.size // text
+    textEncoded.size     // text
   );
 
   const buffer = new ArrayBuffer(C.SIZE_PREFIX_SIZE + messageSize);
@@ -66,7 +66,7 @@ async function makeTextInputMessage(text: string): Promise<ABuffer> {
 
 function makeCoordsMessage(x: number, y: number, messageType: number): ABuffer {
   const messageSize = (
-    C.TYPE_SIZE +  // type
+    C.TYPE_SIZE  + // type
     C.COORD_SIZE + // x-coord
     C.COORD_SIZE   // y-coord
   );
@@ -103,9 +103,9 @@ async function makeAuthUserMessage(area: AreaName, user: UserName): Promise<ABuf
   const messageSize = (
     C.TYPE_SIZE        + // type
     C.SIZE_PREFIX_SIZE + // area size
-    areaEncoded.size + // area bytes
+    areaEncoded.size   + // area bytes
     C.SIZE_PREFIX_SIZE + // user size
-    userEncoded.size   // user bytes
+    userEncoded.size     // user bytes
   );
 
   const buffer = new ArrayBuffer(
@@ -141,10 +141,38 @@ async function makeAuthUserMessage(area: AreaName, user: UserName): Promise<ABuf
   return buffer;
 }
 
+function makeSelectRecordMessage(recordId: number): ABuffer {
+  const messageSize = (
+    C.TYPE_SIZE + // type
+    C.ID_SIZE     // id size
+  );
+
+  const buffer = new ArrayBuffer(
+    C.SIZE_PREFIX_SIZE + // total size
+    messageSize
+  );
+
+  const dv: any = new DataView(buffer);
+
+  // message
+  let offset = 0;
+  dv.setUint16(offset, messageSize, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  dv.setInt8(offset, C.SELECT_RECORD_TYPE, C.ENDIANNE);
+  offset += C.TYPE_SIZE;
+
+  dv.setInt32(offset, recordId, C.ENDIANNE);
+  offset += C.COORD_SIZE;
+
+  return buffer;
+}
+
 export {
   makeMouseMoveMessage,
   makeAuthUserMessage,
   makeSquareMoveMessage,
   makeTextInputMessage,
   makeAddRecordMessage,
+  makeSelectRecordMessage,
 };

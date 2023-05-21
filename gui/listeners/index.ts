@@ -10,6 +10,7 @@ import {
   makeSquareMoveMessage,
   makeTextInputMessage,
   makeAddRecordMessage,
+  makeSelectRecordMessage,
 } from '../protocol/messages';
 
 const log = new Log("listeners");
@@ -92,6 +93,15 @@ const onAddRecord = debounce(async () => {
   socket.send(message);
 });
 
+const onSelectRecord = (recordId: number) => {
+  const message = makeSelectRecordMessage(recordId);
+  socket.send(message);
+};
+
+function trackSelectRecord(elem: Accessible & EventHandler) {
+  elem.get().addEventListener("click", elem);
+}
+
 function trackMouseMove() {
   document.addEventListener('mousemove', onMouseMove);
 }
@@ -114,4 +124,7 @@ export {
   trackMouseMove,
   trackMousePress,
   trackAddRecord,
+  trackSelectRecord,
+
+  onSelectRecord,
 };

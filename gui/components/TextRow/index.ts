@@ -6,6 +6,7 @@ import hasElem from '../../methods/hasElem';
 import getElem from '../../methods/getElem';
 import addElem from '../../methods/addElem';
 import getRecord from './getRecord';
+import handleEvent from './handleEvent';
 import redraw from './redraw';
 
 class TextRow implements
@@ -13,7 +14,8 @@ class TextRow implements
   Creatable,
   Accessible,
   Styleable,
-  Redrawable
+  Redrawable,
+  EventHandler
 {
   static cname: string = "TextRow";
 
@@ -30,6 +32,8 @@ class TextRow implements
   create = create;
   redraw = redraw;
   getRecord = getRecord;
+
+  handleEvent = handleEvent;
 
   hasElem = hasElem;
   getElem = getElem;

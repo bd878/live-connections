@@ -19,6 +19,7 @@ import getColorFromUserName from '../misc/getColorFromUserName';
 import {
   trackTextInput,
   trackAddRecord,
+  trackSelectRecord,
 } from '../listeners';
 import {
   isContainable,
@@ -198,6 +199,8 @@ function onListRecords(e: RecordsListEvent) {
               titlesList
                 .addChild(textRow)
                 .addElem(rUid, textRow);
+
+              trackSelectRecord(textRow);
             }
           }
         } else {
