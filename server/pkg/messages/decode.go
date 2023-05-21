@@ -150,7 +150,7 @@ func (m *RawMessage) decodeCoords() (Coords, error) {
   return result, nil
 }
 
-// textSize + text message
+// textSize + textBytes
 func (m *RawMessage) decodeText() (Encoder, error) {
   mr := bytes.NewReader(m.Data)
 
@@ -181,7 +181,17 @@ func (m *RawMessage) decodeAddRecord() (Encoder, error) {
   return &result, nil
 }
 
-// createdAtBytes
+// id
 func (m *RawMessage) decodeSelectRecord() (Encoder, error) {
-  return nil, nil
+  mr := bytes.NewReader(m.Data)
+
+  typed := Typed{MessageType: selectRecord}
+  result := SelectRecordMessage{Typed: typed}
+
+  if err := binary.Read(mr, enc, &result.ID); err != nil {
+    meta.Log().Warn("failed to read id =", err)
+    return nil, err
+  }
+
+  return &result, nil
 }

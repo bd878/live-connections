@@ -54,7 +54,7 @@ func NewClient(conn Conn) *Client {
   square := &messages.Coords{}
   cursor := &messages.Coords{}
   records := &Records{
-    List: make([](*messages.TextRecord), 0, 100),
+    List: make([]*messages.TextRecord, 0, 100),
     Selected: nil,
   }
 
@@ -156,10 +156,10 @@ func (c *Client) SetRecords(rs [](*messages.TextRecord)) {
   c.records.List = rs
 }
 
-func (c *Client) FindRecord(recordID int32) *messages.TextRecord {
+func (c *Client) FindRecord(recordId int32) *messages.TextRecord {
   var found *messages.TextRecord
   for i := 0; i < len(c.records.List) && found == nil; i++ {
-    if c.records.List[i].ID == recordID {
+    if c.records.List[i].ID == recordId {
       found = c.records.List[i]
     }
   }
@@ -288,10 +288,10 @@ func (c *Client) receiveLoop() {
       switch message := message.(type) {
       case *messages.AuthMessage:
         c.Restore()
-        c.parent.Join(c)
+        c.Parent().Join(c)
         defer func() {
           c.Save()
-          c.parent.Lose(c)
+          c.Parent().Lose(c)
         }()
 
       case *messages.TextMessage:
@@ -299,7 +299,7 @@ func (c *Client) receiveLoop() {
 
         c.SetText(message.Value)
 
-        c.parent.Broadcast() <- message.Encode()
+        c.Parent().Broadcast() <- message.Encode()
 
       case *messages.MouseMoveMessage:
         message.SetUser(c.Name())
@@ -307,7 +307,7 @@ func (c *Client) receiveLoop() {
         c.SetCursorX(message.XPos)
         c.SetCursorY(message.YPos)
 
-        c.parent.Broadcast() <- message.Encode()
+        c.Parent().Broadcast() <- message.Encode()
 
       case *messages.SquareMoveMessage:
         message.SetUser(c.Name())
@@ -315,17 +315,23 @@ func (c *Client) receiveLoop() {
         c.SetSquareX(message.XPos)
         c.SetSquareY(message.YPos)
 
-        c.parent.Broadcast() <- message.Encode()
+        c.Parent().Broadcast() <- message.Encode()
 
       case *messages.SelectRecordMessage:
-        // TODO: implement
+        message.SetUser(c.Name())
+
+        record := c.FindRecord(message.ID)
+        // TODO: record exists?
+        c.SelectRecord(record)
+
+        c.Parent().Broadcast() <- message.Encode()
 
       case *messages.AddRecordMessage:
         c.SelectRecord(c.AddNewRecord())
 
         responseMessage := messages.NewRecordsListMessage(c.Name(), c.Records())
 
-        c.parent.Broadcast() <- responseMessage.Encode()
+        c.Parent().Broadcast() <- responseMessage.Encode()
 
       default:
         meta.Log().Warn("unknown event")
