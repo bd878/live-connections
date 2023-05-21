@@ -31,6 +31,8 @@ const C: Record<string, any> = {
   RECORDS_LIST_TYPE: 10,
 
   ADD_RECORD_TYPE: 11,
+
+  SELECT_RECORD_TYPE: 12,
 };
 
 C.ENDIANNE = C.LITTLE_ENDIANNE;

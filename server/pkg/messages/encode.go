@@ -248,6 +248,15 @@ type SelectRecordMessage struct {
   ID int32
 }
 
+func NewSelectRecordMessage(user string, recordId int32) *SelectRecordMessage {
+  message := &SelectRecordMessage{
+    Typed{MessageType: selectRecord},
+    Identity{User: user},
+    recordId,
+  }
+  return message
+}
+
 // totalSize + type + userSize + userBytes + idBytes
 func (m *SelectRecordMessage) Encode() []byte {
   typeBytes := m.Typed.Encode()
@@ -324,7 +333,7 @@ func (m *Coords) Encode() []byte {
   return coordsBytes.Bytes()
 }
 
-// user size + user text
+// userSize + userBytes
 func (m *Identity) Encode() []byte {
   userBytes := new(bytes.Buffer)
   if err := binary.Write(userBytes, enc, []byte(m.User)); err != nil {
@@ -353,7 +362,7 @@ func NewText(value string) *Text {
   }
 }
 
-// text size + text
+// textSize + textBytes
 func (m *Text) Encode() []byte {
   textBytes := new(bytes.Buffer)
   if err := binary.Write(textBytes, enc, []byte(m.Value)); err != nil {

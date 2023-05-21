@@ -3,7 +3,7 @@ import C from './const';
 
 const log = new Log("parser");
 
-// userSize + userBytes + recordsCount + []{recordSize + valueSize + valueBytes + titleSize + titleBytes + id + updatedAt + createdAt}
+// userSize + userBytes + recordsCount + []{recordSize + valueSize + valueBytes + titleSize + titleBytes + idBytes + updatedAt + createdAt}
 async function parseRecordsListMessage(buf: any /* ArrayBuffer */): Promise<RecordsListEvent> {
   let offset = 0;
   const dv = new DataView(buf);
@@ -59,6 +59,29 @@ async function parseRecordsListMessage(buf: any /* ArrayBuffer */): Promise<Reco
   }
 
   return { name, records } as RecordsListEvent;
+}
+
+// userSize + userBytes + idBytes
+async function parseSelectRecordMessage(buf: any /* ArrayBuffer */): Promise<SelectRecordEvent> {
+  let offset = 0;
+  const dv = new DataView(buf);
+
+  let userSize = dv.getUint16(offset, C.ENDIANNE);
+  offset += C.SIZE_PREFIX_SIZE;
+
+  if (userSize === 0) {
+    throw new Error(`[parseSelectRecordMessage]: userSize is 0`);
+  }
+
+  const userBytes = new Uint8Array(buf, offset, userSize);
+  const blob = new Blob([userBytes]);
+  const name = await blob.text();
+  offset += userSize;
+
+  const id = dv.getInt32(offset, C.ENDIANNE);
+  offset += C.ID_SIZE;
+
+  return { name, id } as SelectRecordEvent;
 }
 
 async function parseCoordsMessage(buf: any /* ArrayBuffer */): Promise<CoordsEvent> {
@@ -151,4 +174,5 @@ export {
   parseUsersOnlineMessage,
   parseTextInputMessage,
   parseRecordsListMessage,
+  parseSelectRecordMessage,
 };

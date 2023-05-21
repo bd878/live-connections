@@ -214,6 +214,52 @@ function onListRecords(e: RecordsListEvent) {
   }
 }
 
+function onSelectRecord(e: SelectRecordEvent) {
+  log.Info("onSelectRecord", e);
+
+  const sUid = getUid(Square.cname, e.name);
+  if (area.hasElem(sUid)) {
+    const square = area.getElem(sUid);
+
+    if (square instanceof Square) {
+      const tUid = getUid(TitlesList.cname, e.name);
+      if (square.hasElem(tUid)) {
+        const titlesList = square.getElem(tUid);
+
+        if (titlesList instanceof TitlesList) {
+          const records = titlesList.listRecords();
+
+          let record: TextRecord | undefined;
+          for (let i = 0; i < records.length && !record; i++) {
+            if (records[i].id === e.id) {
+              record = records[i];
+            }
+          }
+
+          if (record) {
+            const textarea = square.getElem(getUid(TextArea.cname, e.name));
+            if (isRedrawable(textarea)) {
+              textarea.redraw(record.value);
+            } else {
+              log.Warn("textarea is not redrawable");
+            }
+          } else {
+            log.Warn("selected record not found", e.id);
+          }
+        } else {
+          log.Warn("not TitlesList instance");
+        }
+      } else {
+        log.Warn("square has no TitlesList instance", tUid);
+      }
+    } else {
+      log.Warn("not Square instance");
+    }
+  } else {
+    log.Warn("area has no square instance", sUid);
+  }
+}
+
 export {
   onAuthOk,
   onMouseMove,
@@ -222,4 +268,5 @@ export {
   onUsersOnline,
   onTextInput,
   onListRecords,
+  onSelectRecord,
 };

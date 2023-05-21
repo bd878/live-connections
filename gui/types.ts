@@ -65,6 +65,11 @@ type RecordsListEvent = {
   records: TextRecord[];
 };
 
+type SelectRecordEvent = {
+  name: string;
+  id: number; // int32
+};
+
 interface Appendable {
   append(I: Elem): void;
 }

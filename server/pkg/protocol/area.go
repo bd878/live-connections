@@ -145,6 +145,16 @@ func (a *Area) listTextRecords() map[string]([](*messages.TextRecord)) {
   return records
 }
 
+func (a *Area) listSelectedRecords() map[string]int32 {
+  records := make(map[string]int32, len(a.registry))
+
+  for name, c := range a.registry {
+    records[name] = c.SelectedRecord().ID
+  }
+
+  return records
+}
+
 func (a *Area) onLeave() {
   clientsOnlineMessage := messages.NewClientsOnlineMessage(a.List())
   a.Broadcast() <- clientsOnlineMessage.Encode()
@@ -170,5 +180,11 @@ func (a *Area) onJoin() {
   for name, text := range inputTexts {
     textMessage := messages.NewTextMessage(name, text.Value)
     a.Broadcast() <- textMessage.Encode()
+  }
+
+  selectedRecords := a.listSelectedRecords()
+  for name, recordId := range selectedRecords {
+    selectedRecordMessage := messages.NewSelectRecordMessage(name, recordId)
+    a.Broadcast() <- selectedRecordMessage.Encode()
   }
 }
